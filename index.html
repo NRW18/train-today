@@ -276,6 +276,15 @@
   .rest .barl { height: 4px; border-radius: 4px; background: rgba(255,255,255,.15); margin-top: 5px; overflow: hidden; }
   .rest .barl i { display: block; height: 100%; background: #6EA2F5; width: 0; transition: width .25s linear; }
 
+  /* install bar */
+  .install-bar { display: grid; grid-template-columns: 48px 1fr auto auto; gap: 12px; align-items: center; background: linear-gradient(135deg, var(--blue-bg), var(--card)); }
+  .install-bar img { border-radius: 12px; display: block; }
+  .ib-txt { line-height: 1.35; font-size: 0.9rem; }
+  .ib-txt strong { display: block; font-size: 1rem; }
+  .ib-txt span { color: var(--soft); }
+  .install-bar .x { align-self: start; }
+  .ios-share { display: inline-block; width: 16px; height: 16px; vertical-align: -3px; }
+
   /* onboarding */
   .onb { position: fixed; inset: 0; z-index: 20; background: rgba(8,10,14,.55); display: grid; place-items: end center; padding: 16px; }
   .onb .sheet { width: 100%; max-width: 520px; background: var(--card); border-radius: 26px; padding: 22px 20px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 20px 50px rgba(0,0,0,.3); animation: rise .25s ease-out; }
@@ -309,6 +318,12 @@
 
   <!-- TODAY -->
   <main id="v-today">
+    <section class="card install-bar" id="install-bar" hidden>
+      <img src="icon-192.png" alt="" width="48" height="48">
+      <div class="ib-txt"><strong>ติดตั้งเป็นแอป</strong><span id="ib-sub">เปิดจากหน้าจอได้ทันที ใช้ได้แม้ไม่มีเน็ต</span></div>
+      <button type="button" class="btn small-btn" id="ib-go">ติดตั้ง</button>
+      <button type="button" class="x" id="ib-close" aria-label="ปิด">×</button>
+    </section>
     <section class="card hintcard" id="scan-hint" hidden>
       <div><strong>ให้แอปรู้ว่ายิมคุณมีเครื่องอะไร</strong><br>ถ่ายรูปเครื่อง แล้ว AI จะเพิ่มท่าให้เอง</div>
       <button type="button" class="btn small-btn" id="go-scan">สแกน</button>
@@ -1742,17 +1757,43 @@
   } else {
     $("install-text").textContent = 'บน Android: เปิดใน Chrome กดเมนู ⋮ แล้วเลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"';
   }
+  // Install bar on the Today screen: one tap on Android, short how-to on iPhone,
+  // and a way out of LINE's in-app browser (which cannot install apps).
+  var inLine = /\bLine\//i.test(navigator.userAgent);
+  var ibClosed = false; try { ibClosed = localStorage.getItem("train-today-ib") === "closed"; } catch (e) {}
+  function externalUrl() { var u = new URL(location.href); u.searchParams.set("openExternalBrowser", "1"); return u.toString(); }
+  function showBar(sub, btnText, mode) {
+    if (standalone || ibClosed) return;
+    $("ib-sub").innerHTML = sub;
+    $("ib-go").textContent = btnText;
+    $("ib-go").hidden = !btnText;
+    $("ib-go").dataset.mode = mode || "";
+    $("install-bar").hidden = false;
+  }
+  function hideBar() { $("install-bar").hidden = true; }
+  if (!standalone) {
+    if (inLine) showBar("แอป LINE ติดตั้งไม่ได้ กดเปิดใน " + (ios ? "Safari" : "Chrome") + " ก่อน", "เปิด", "line");
+    else if (ios) showBar('กด <svg class="ios-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="ปุ่มแชร์"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> ด้านล่างของ Safari แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"', "", "");
+  }
   window.addEventListener("beforeinstallprompt", function (e) {
     e.preventDefault(); promptEv = e;
     $("install").hidden = false;
     $("install-text").textContent = "เพิ่มลงหน้าจอโทรศัพท์ เปิดเต็มจอ และใช้ได้แม้ไม่มีเน็ต";
+    showBar("เปิดจากหน้าจอได้ทันที ใช้ได้แม้ไม่มีเน็ต", "ติดตั้ง", "prompt");
   });
-  $("install").addEventListener("click", function () {
+  function runInstall() {
     if (!promptEv) return;
     promptEv.prompt();
-    promptEv.userChoice.then(function () { promptEv = null; $("install").hidden = true; });
+    promptEv.userChoice.then(function (c) { promptEv = null; $("install").hidden = true; if (c && c.outcome === "accepted") hideBar(); });
+  }
+  $("install").addEventListener("click", runInstall);
+  $("ib-go").addEventListener("click", function () {
+    var m = this.dataset.mode;
+    if (m === "prompt") runInstall();
+    else if (m === "line") location.href = externalUrl();
   });
-  window.addEventListener("appinstalled", function () { $("install").hidden = true; $("install-text").textContent = "ติดตั้งแล้ว ✓"; toast("ติดตั้งแอปแล้ว"); });
+  $("ib-close").addEventListener("click", function () { hideBar(); ibClosed = true; try { localStorage.setItem("train-today-ib", "closed"); } catch (e) {} });
+  window.addEventListener("appinstalled", function () { $("install").hidden = true; hideBar(); $("install-text").textContent = "ติดตั้งแล้ว ✓"; toast("ติดตั้งแอปแล้ว เปิดจากไอคอนบนหน้าจอได้เลย"); });
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }
