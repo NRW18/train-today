@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>วันนี้ฝึกอะไร</title>
+<meta name="description" content="โค้ชซ้อมรายวัน: บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ อาการเมื่อยหรือเจ็บ และผลการซ้อมครั้งก่อน โดย NRW">
+<meta name="theme-color" content="#1B2230">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ฝึกอะไรดี">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F2F3F6; --card: #FFFFFF; --ink: #1B2230; --soft: #586274; --line: #D8DDE5;
+    /* bumper-plate colours carry meaning: blue = plan, green = ready, yellow = sore, red = pain */
+    --blue: #2E6FD8; --blue-bg: #E3ECFB;
+    --green: #22884F; --green-bg: #DFF3E7;
+    --yellow: #B98400; --yellow-solid: #E8B422; --yellow-bg: #FBF0CF;
+    --red: #C93434; --red-bg: #FBE1E1;
+    --head: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  button, input { font: inherit; color: inherit; }
+  button:focus-visible, input:focus-visible, a:focus-visible, label:focus-within { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .app { max-width: 560px; margin: 0 auto; padding: 0 16px calc(96px + env(safe-area-inset-bottom)); }
+
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--head); font-weight: 700; font-size: 1.15rem; }
+  .plates { display: flex; align-items: center; gap: 2px; }
+  .plates i { display: block; width: 7px; border-radius: 2px; }
+  .plates i:nth-child(1) { height: 26px; background: var(--red); }
+  .plates i:nth-child(2) { height: 22px; background: var(--blue); }
+  .plates i:nth-child(3) { height: 18px; background: var(--yellow-solid); }
+  .plates i:nth-child(4) { height: 14px; background: var(--green); }
+  .date { color: var(--soft); font-size: 0.92rem; }
+
+  .card { background: var(--card); border-radius: 16px; padding: 16px; margin: 12px 0; border: 1px solid var(--line); }
+  h2 { font-family: var(--head); font-size: 1.1rem; margin: 0 0 10px; line-height: 1.35; }
+  .q { font-weight: 600; margin: 14px 0 8px; font-size: 0.97rem; }
+  .q:first-of-type { margin-top: 0; }
+  .hint { color: var(--soft); font-size: 0.88rem; margin: 4px 0 0; }
+
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; }
+  .seg button { border: 0; background: transparent; border-radius: 9px; padding: 9px 4px; font-weight: 600; font-size: 0.95rem; cursor: pointer; color: var(--soft); }
+  .seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(27,34,48,.18); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1.5px solid var(--line); background: var(--card); border-radius: 99px; padding: 6px 12px; font-size: 0.92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .chip .st { font-size: 0.78rem; font-weight: 600; border-radius: 99px; padding: 0 7px; }
+  .chip.sore { border-color: var(--yellow-solid); background: var(--yellow-bg); }
+  .chip.sore .st { background: var(--yellow-solid); color: #3A2A00; }
+  .chip.pain { border-color: var(--red); background: var(--red-bg); }
+  .chip.pain .st { background: var(--red); color: #fff; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 0.84rem; color: var(--soft); }
+  .legend b { font-weight: 600; }
+
+  /* plan */
+  .plan-head { display: flex; gap: 14px; align-items: stretch; }
+  .bar { width: 10px; border-radius: 6px; background: var(--blue); flex: none; }
+  .bar.rest { background: var(--green); }
+  .day-name { font-family: var(--head); font-weight: 700; font-size: 2.1rem; line-height: 1.1; letter-spacing: 0.01em; }
+  .day-sub { color: var(--soft); font-size: 0.95rem; }
+  .why { list-style: none; margin: 14px 0 0; padding: 12px 14px; background: var(--bg); border-radius: 12px; font-size: 0.92rem; display: grid; gap: 6px; }
+  .why li::before { content: "•"; color: var(--blue); font-weight: 700; margin-right: 8px; }
+  .alert { border-radius: 12px; padding: 12px 14px; margin-top: 12px; font-size: 0.93rem; }
+  .alert.red { background: var(--red-bg); color: #7A1D1D; }
+  .alert.yellow { background: var(--yellow-bg); color: #5C4300; }
+  .alert strong { display: block; margin-bottom: 2px; }
+
+  .ex { border-top: 1px solid var(--line); padding: 14px 0 6px; }
+  .ex:first-child { border-top: 0; }
+  .ex-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .ex-name { font-weight: 600; }
+  .ex-mus { color: var(--soft); font-size: 0.85rem; }
+  .ex-tip { font-size: 0.86rem; margin: 4px 0 8px; color: var(--blue); }
+  .ex-tip.keep { color: var(--soft); }
+  .sets { display: grid; gap: 6px; }
+  .set { display: grid; grid-template-columns: 2.2rem 1fr 1fr 2.6rem; gap: 8px; align-items: center; }
+  .set .n { font-family: var(--head); font-weight: 600; color: var(--soft); text-align: center; }
+  .field { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); overflow: hidden; }
+  .field input { width: 100%; border: 0; padding: 9px 4px 9px 10px; font-size: 1rem; font-family: var(--head); font-weight: 600; background: transparent; min-width: 0; }
+  .field input:focus { outline: none; }
+  .field:focus-within { border-color: var(--blue); }
+  .field span { padding: 0 10px 0 2px; color: var(--soft); font-size: 0.82rem; white-space: nowrap; }
+  .tick { width: 2.6rem; height: 2.6rem; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; display: grid; place-items: center; }
+  .tick[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+  .tick svg { width: 18px; height: 18px; }
+
+  .btn { display: block; width: 100%; border: 0; border-radius: 12px; padding: 14px; font-weight: 600; font-size: 1rem; cursor: pointer; background: var(--ink); color: #fff; margin-top: 14px; }
+  .btn:hover { background: #2B3446; }
+  .btn.line { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .btn.line:hover { background: var(--bg); }
+  .btn.danger { background: var(--card); color: var(--red); border: 1.5px solid var(--red); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row2 .btn { margin-top: 10px; }
+
+  .rest-list { margin: 12px 0 0; padding-left: 20px; }
+  .rest-list li { margin-bottom: 6px; }
+
+  /* history */
+  .sess { border-top: 1px solid var(--line); padding: 12px 0; }
+  .sess:first-of-type { border-top: 0; padding-top: 0; }
+  .sess-top { display: flex; justify-content: space-between; gap: 8px; }
+  .pill { font-family: var(--head); font-weight: 700; font-size: 0.8rem; padding: 1px 9px; border-radius: 6px; background: var(--blue-bg); color: var(--blue); }
+  .pill.legs { background: var(--yellow-bg); color: var(--yellow); }
+  .pill.pull { background: var(--green-bg); color: var(--green); }
+  .sess-ex { color: var(--soft); font-size: 0.88rem; margin-top: 4px; }
+  .prog { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; border-top: 1px solid var(--line); padding: 10px 0; }
+  .prog:first-of-type { border-top: 0; }
+  .prog .up { font-family: var(--head); font-weight: 700; color: var(--green); white-space: nowrap; }
+  .prog .flat { font-family: var(--head); font-weight: 600; color: var(--soft); white-space: nowrap; }
+  .prog svg { grid-column: 1 / -1; width: 100%; height: 34px; }
+  .empty { color: var(--soft); text-align: center; padding: 16px 0; }
+
+  .toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); cursor: pointer; }
+  .toggle:first-of-type { border-top: 0; }
+  .toggle input { width: 22px; height: 22px; accent-color: var(--blue); flex: none; }
+  .grp { font-family: var(--head); font-weight: 700; margin: 14px 0 2px; color: var(--soft); font-size: 0.9rem; }
+
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
+  nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  nav.tabs button { border: 0; background: transparent; border-radius: 10px; padding: 8px 4px; font-weight: 600; font-size: 0.92rem; color: var(--soft); cursor: pointer; display: grid; justify-items: center; gap: 2px; }
+  nav.tabs button svg { width: 22px; height: 22px; }
+  nav.tabs button[aria-current="page"] { color: var(--blue); background: var(--blue-bg); }
+
+  .toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 0.93rem; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: 90vw; }
+  .toast.show { opacity: 1; }
+  footer.note { color: var(--soft); font-size: 0.82rem; text-align: center; margin: 22px 0 0; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="plates" aria-hidden="true"><i></i><i></i><i></i><i></i></span>วันนี้ฝึกอะไร</div>
+    <div class="date" id="today-date"></div>
+  </header>
+
+  <!-- TODAY -->
+  <main id="v-today">
+    <section class="card" aria-labelledby="ci-h">
+      <h2 id="ci-h">เช็กอินวันนี้</h2>
+      <p class="q">ซ้อมช่วงไหน</p>
+      <div class="seg" id="slot" role="group" aria-label="ช่วงเวลา">
+        <button type="button" data-v="am">เช้า (ช่วงบน)</button>
+        <button type="button" data-v="pm">เย็น (ขา)</button>
+        <button type="button" data-v="any">ได้หมด</button>
+      </div>
+      <p class="q">แรงวันนี้</p>
+      <div class="seg" id="energy" role="group" aria-label="ระดับพลังงาน">
+        <button type="button" data-v="good">ดีมาก</button>
+        <button type="button" data-v="ok">ปกติ</button>
+        <button type="button" data-v="tired">เหนื่อย</button>
+      </div>
+      <p class="q">ตรงไหนเมื่อยหรือเจ็บ</p>
+      <div class="chips" id="muscles"></div>
+      <p class="q" style="margin-top:12px">ข้อต่อที่เจ็บ</p>
+      <div class="chips" id="joints"></div>
+      <div class="legend"><span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span><span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></div>
+    </section>
+
+    <section class="card" id="plan" aria-live="polite"></section>
+  </main>
+
+  <!-- HISTORY -->
+  <main id="v-history" hidden>
+    <section class="card">
+      <h2>น้ำหนักแต่ละท่า</h2>
+      <div id="progress"></div>
+    </section>
+    <section class="card">
+      <h2>การซ้อมที่ผ่านมา</h2>
+      <div id="sessions"></div>
+    </section>
+  </main>
+
+  <!-- SETTINGS -->
+  <main id="v-settings" hidden>
+    <section class="card" id="install-card">
+      <h2>ติดตั้งเป็นแอป</h2>
+      <p class="hint" style="margin:0" id="install-text">เพิ่มลงหน้าจอโทรศัพท์ เปิดเต็มจอ และใช้ได้แม้ไม่มีเน็ต</p>
+      <button class="btn" type="button" id="install" hidden>ติดตั้งแอป</button>
+    </section>
+    <section class="card">
+      <h2>เครื่องที่ยิมคุณมี</h2>
+      <p class="hint" style="margin:0 0 6px">ปิดท่าที่ไม่มีเครื่องหรือไม่อยากเล่น แอปจะไม่เลือกท่านั้นให้</p>
+      <div id="equip"></div>
+    </section>
+    <section class="card">
+      <h2>ข้อมูล</h2>
+      <p class="hint" style="margin:0">ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น สำรองไว้เป็นไฟล์ได้ เผื่อเปลี่ยนมือถือ</p>
+      <div class="row2">
+        <button class="btn line" type="button" id="export">สำรองข้อมูล</button>
+        <button class="btn line" type="button" id="import-btn">นำเข้าข้อมูล</button>
+      </div>
+      <input type="file" id="import" accept="application/json,.json" hidden>
+      <button class="btn line" type="button" id="sample">ลองด้วยข้อมูลตัวอย่าง 6 วัน</button>
+      <button class="btn danger" type="button" id="clear">ลบข้อมูลทั้งหมด</button>
+    </section>
+    <section class="card">
+      <h2>แอปนี้ตัดสินใจอย่างไร</h2>
+      <ul class="rest-list" style="margin-top:0">
+        <li>กล้ามเนื้อที่เพิ่งฝึกยังไม่ถึง 48 ชั่วโมง จะยังไม่ถูกเลือกเป็นหลัก</li>
+        <li>เลือกวันที่กล้ามพร้อมที่สุด ถ้าพร้อมเท่ากันจะเรียงต่อ Push → Pull → Legs</li>
+        <li>เมื่อย: ตัดท่าที่ใช้ส่วนนั้นเป็นหลัก ส่วนท่าที่ใช้เป็นตัวช่วยจะลดเซ็ต</li>
+        <li>เจ็บ: ตัดทุกท่าที่โดนส่วนนั้นหรือข้อต่อนั้น และแสดงคำเตือน</li>
+        <li>น้ำหนัก: ทำครบ 12 ครั้งทุกเซ็ต ครั้งหน้าเพิ่ม 2.5 กก. ถ้าเหนื่อยจะไม่เพิ่ม</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="note">ไม่ใช่คำแนะนำทางการแพทย์ ถ้าเจ็บมากหรือเจ็บไม่หายให้พบแพทย์ · Made by NRW</footer>
+</div>
+
+<nav class="tabs" aria-label="เมนู">
+  <div class="in">
+    <button type="button" data-tab="today" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>วันนี้</button>
+    <button type="button" data-tab="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/></svg>ประวัติ</button>
+    <button type="button" data-tab="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>ตั้งค่า</button>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- knowledge ---------- */
+  var MUSCLES = { chest: "อก", shoulders: "ไหล่", triceps: "หลังแขน", back: "หลัง", biceps: "หน้าแขน", core: "หน้าท้อง", quads: "ต้นขาหน้า", hamstrings: "ต้นขาหลัง", glutes: "ก้น", calves: "น่อง" };
+  var JOINTS = { shoulder: "ข้อไหล่", elbow: "ข้อศอก", wrist: "ข้อมือ", lowback: "หลังล่าง", knee: "เข่า", ankle: "ข้อเท้า" };
+  var DAYS = {
+    push: { name: "PUSH", th: "อก ไหล่ หลังแขน", main: ["chest", "shoulders", "triceps"], slot: "am" },
+    pull: { name: "PULL", th: "หลัง หน้าแขน", main: ["back", "biceps"], slot: "am" },
+    legs: { name: "LEGS", th: "ต้นขา ก้น น่อง", main: ["quads", "hamstrings", "glutes", "calves"], slot: "pm" }
+  };
+  var ORDER = ["push", "pull", "legs"];
+  // m: muscles (first = main target), j: joints it loads, t: kg | reps | sec
+  var EX = [
+    { id: "chest_press", name: "เชสต์เพรส (เครื่อง)", day: "push", m: ["chest", "shoulders", "triceps"], j: ["shoulder", "elbow", "wrist"], t: "kg" },
+    { id: "shoulder_press", name: "ชอลเดอร์เพรส (เครื่อง)", day: "push", m: ["shoulders", "triceps"], j: ["shoulder", "elbow"], t: "kg" },
+    { id: "pec_deck", name: "เพ็คเด็ค (เครื่องบีบอก)", day: "push", m: ["chest", "shoulders"], j: ["shoulder"], t: "kg" },
+    { id: "lateral_raise", name: "ยกดัมเบลด้านข้าง", day: "push", m: ["shoulders"], j: ["shoulder"], t: "kg" },
+    { id: "triceps_pushdown", name: "ไตรเซ็ปส์พุชดาวน์ (เคเบิล)", day: "push", m: ["triceps"], j: ["elbow"], t: "kg" },
+    { id: "pushup", name: "วิดพื้น (ทำที่บ้านได้)", day: "push", m: ["chest", "triceps", "shoulders", "core"], j: ["shoulder", "wrist"], t: "reps" },
+    { id: "lat_pulldown", name: "แลตพูลดาวน์", day: "pull", m: ["back", "biceps"], j: ["shoulder", "elbow"], t: "kg" },
+    { id: "seated_row", name: "ซีทเต็ดโรว์ (เครื่อง)", day: "pull", m: ["back", "biceps"], j: ["shoulder", "elbow", "lowback"], t: "kg" },
+    { id: "rear_delt", name: "รีเวิร์สเพ็คเด็ค (ไหล่หลัง)", day: "pull", m: ["shoulders", "back"], j: ["shoulder"], t: "kg" },
+    { id: "db_curl", name: "ดัมเบลเคิร์ล", day: "pull", m: ["biceps"], j: ["elbow", "wrist"], t: "kg" },
+    { id: "plank", name: "แพลงก์", day: "pull", m: ["core"], j: ["shoulder", "lowback"], t: "sec" },
+    { id: "leg_press", name: "เลกเพรส", day: "legs", m: ["quads", "glutes", "hamstrings"], j: ["knee", "lowback"], t: "kg" },
+    { id: "leg_extension", name: "เลกเอ็กซ์เทนชัน", day: "legs", m: ["quads"], j: ["knee"], t: "kg" },
+    { id: "leg_curl", name: "ซีทเต็ดเลกเคิร์ล", day: "legs", m: ["hamstrings"], j: ["knee"], t: "kg" },
+    { id: "calf_raise", name: "คาล์ฟเรส (เครื่อง)", day: "legs", m: ["calves"], j: ["ankle"], t: "kg" }
+  ];
+  var EXBY = {}; EX.forEach(function (e) { EXBY[e.id] = e; });
+  var RECOVER_H = 48, LO = 8, HI = 12, STEP = 2.5;
+
+  /* ---------- state ---------- */
+  var KEY = "train-today-v1";
+  var S = { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {} };
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (d && Array.isArray(d.log)) {
+        S.log = d.log; S.off = Array.isArray(d.off) ? d.off : [];
+        if (d.slot) S.slot = d.slot; if (d.energy) S.energy = d.energy;
+        if (d.body && d.bodyDay === dayKey(Date.now())) S.body = d.body; // soreness resets each day
+      }
+    } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify({ log: S.log, off: S.off, slot: S.slot, energy: S.energy, body: S.body, bodyDay: dayKey(Date.now()) })); } catch (e) {}
+  }
+  function dayKey(ts) { var d = new Date(ts); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+
+  /* ---------- helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function fmtH(h) { if (h < 1) return "ไม่ถึงชั่วโมง"; if (h < 48) return Math.round(h) + " ชม."; return Math.floor(h / 24) + " วัน"; }
+  function fmtDate(ts) { return new Date(ts).toLocaleDateString("th-TH", { weekday: "short", day: "numeric", month: "short" }); }
+  function fmtTime(ts) { return new Date(ts).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }); }
+  function num(v) { var n = parseFloat(v); return isFinite(n) && n >= 0 ? n : null; }
+  function unit(e) { return e.t === "kg" ? "กก." : e.t === "sec" ? "วิ" : ""; }
+  function names(list, dict) { return list.map(function (k) { return dict[k]; }).join(" "); }
+
+  function lastTrained() { // muscle -> latest timestamp
+    var out = {};
+    S.log.forEach(function (s) {
+      s.entries.forEach(function (en) {
+        var e = EXBY[en.ex]; if (!e || !en.sets.length) return;
+        e.m.forEach(function (m) { if (!out[m] || s.ts > out[m]) out[m] = s.ts; });
+      });
+    });
+    return out;
+  }
+  function hoursSince(ts) { return (Date.now() - ts) / 36e5; }
+  function lastEntry(exId) {
+    for (var i = S.log.length - 1; i >= 0; i--) {
+      var s = S.log[i];
+      for (var k = 0; k < s.entries.length; k++) if (s.entries[k].ex === exId && s.entries[k].sets.length) return s.entries[k];
+    }
+    return null;
+  }
+
+  /* ---------- the decision ---------- */
+  function bodyState(kind, key) { return S.body[kind + ":" + key] || null; }
+  function exStatus(e) {
+    // returns {out: reason} or {light: reason} or {}
+    for (var i = 0; i < e.m.length; i++) if (bodyState("m", e.m[i]) === "pain") return { out: "เจ็บ" + MUSCLES[e.m[i]] };
+    for (var j = 0; j < e.j.length; j++) if (bodyState("j", e.j[j]) === "pain") return { out: "เจ็บ" + JOINTS[e.j[j]] };
+    if (bodyState("m", e.m[0]) === "sore") return { out: MUSCLES[e.m[0]] + "เมื่อย" };
+    for (var k = 1; k < e.m.length; k++) if (bodyState("m", e.m[k]) === "sore") return { light: MUSCLES[e.m[k]] + "เมื่อย ลด 1 เซ็ต" };
+    return {};
+  }
+
+  function plan() {
+    var lt = lastTrained(), why = [], skipped = [];
+    var lastDay = S.log.length ? S.log[S.log.length - 1].day : null;
+    var startIdx = lastDay ? (ORDER.indexOf(lastDay) + 1) % 3 : 0;
+    var allowed = S.slot === "am" ? ["push", "pull"] : S.slot === "pm" ? ["legs"] : ORDER;
+
+    var cands = allowed.map(function (d) {
+      var D = DAYS[d];
+      var notReady = D.main.filter(function (m) { return lt[m] && hoursSince(lt[m]) < RECOVER_H; });
+      var hurt = D.main.filter(function (m) { return bodyState("m", m); });
+      var avail = EX.filter(function (e) { return e.day === d && S.off.indexOf(e.id) < 0 && !exStatus(e).out; });
+      var blocked = hurt.length * 2 >= D.main.length || avail.length < 2;
+      var rot = (ORDER.indexOf(d) - startIdx + 3) % 3;
+      return { d: d, notReady: notReady, hurt: hurt, avail: avail, blocked: blocked, score: notReady.length * 10 + hurt.length * 5 + rot };
+    });
+    var open = cands.filter(function (c) { return !c.blocked; }).sort(function (a, b) { return a.score - b.score; });
+
+    cands.forEach(function (c) {
+      if (!c.blocked) return;
+      if (c.hurt.length) { skipped.push(DAYS[c.d].name + ": " + names(c.hurt, MUSCLES) + "ยังเมื่อยหรือเจ็บ"); return; }
+      var why = {};
+      EX.forEach(function (e) { if (e.day === c.d && S.off.indexOf(e.id) < 0) { var st = exStatus(e); if (st.out) why[st.out] = 1; } });
+      var r = Object.keys(why);
+      skipped.push(DAYS[c.d].name + ": " + (r.length ? r.join(" ") + " ตัดท่าออกจนเหลือไม่ถึง 2 ท่า" : "เปิดท่าไว้ไม่ถึง 2 ท่า (ดูที่ตั้งค่า)"));
+    });
+
+    var pick = open[0];
+    if (!pick || pick.notReady.length === DAYS[pick.d].main.length) {
+      if (pick) why.push(DAYS[pick.d].name + " ยังฟื้นไม่ครบ " + RECOVER_H + " ชม. (" + names(pick.notReady, MUSCLES) + ")");
+      return { rest: true, why: why.concat(skipped) };
+    }
+
+    var D = DAYS[pick.d], tired = S.energy === "tired";
+    if (!lastDay) why.push("ยังไม่มีประวัติ เริ่มจาก " + D.name);
+    D.main.forEach(function (m) {
+      if (pick.notReady.indexOf(m) >= 0) why.push(MUSCLES[m] + " ฝึกไป " + fmtH(hoursSince(lt[m])) + " ที่แล้ว ยังไม่ครบ " + RECOVER_H + " ชม. จึงลดเซ็ต");
+      else if (lt[m]) why.push(MUSCLES[m] + " พักมา " + fmtH(hoursSince(lt[m])) + " พร้อมแล้ว");
+    });
+    cands.forEach(function (c) {
+      if (c === pick || c.blocked) return;
+      if (c.notReady.length) why.push(DAYS[c.d].name + " ยังไม่ฟื้น: " + names(c.notReady, MUSCLES) + " เพิ่งฝึก");
+    });
+    why = why.concat(skipped);
+    if (S.slot !== "any") why.push(S.slot === "am" ? "ช่วงเช้าเลือกเฉพาะช่วงบน" : "ช่วงเย็นเลือกเฉพาะขา");
+    if (tired) why.push("วันนี้เหนื่อย: เหลือ 2 เซ็ต และไม่เพิ่มน้ำหนัก");
+
+    var cut = [];
+    EX.forEach(function (e) { if (e.day === pick.d && S.off.indexOf(e.id) < 0) { var st = exStatus(e); if (st.out) cut.push(e.name + " (" + st.out + ")"); } });
+
+    var items = pick.avail.map(function (e) {
+      var st = exStatus(e);
+      var sets = 3;
+      if (tired) sets = 2;
+      if (st.light) sets = Math.max(2, sets - 1);
+      if (e.m.some(function (m) { return pick.notReady.indexOf(m) >= 0; })) sets = Math.max(2, sets - 1);
+      return { e: e, sets: sets, light: st.light || null, sug: suggest(e, tired) };
+    });
+    return { rest: false, day: pick.d, items: items, why: why, cut: cut };
+  }
+
+  function suggest(e, tired) {
+    var last = lastEntry(e.id);
+    if (!last) {
+      if (e.t === "kg") return { kg: "", reps: HI, tip: "ครั้งแรก: เลือกน้ำหนักที่ทำได้ " + HI + " ครั้งแบบยังเหลือแรงอีก 2 ครั้ง" };
+      if (e.t === "sec") return { kg: "", reps: 30, tip: "เริ่มที่ 30 วินาที ลำตัวตรง" };
+      return { kg: "", reps: 10, tip: "เริ่มที่ 10 ครั้ง ลงให้อกเกือบแตะพื้น" };
+    }
+    var reps = last.sets.map(function (s) { return s.reps || 0; });
+    var minR = Math.min.apply(null, reps), maxR = Math.max.apply(null, reps);
+    if (e.t !== "kg") {
+      var add = e.t === "sec" ? 5 : 1;
+      if (tired) return { kg: "", reps: maxR, tip: "เหนื่อย: เท่าครั้งก่อน (" + maxR + unit(e) + ")", keep: true };
+      return { kg: "", reps: maxR + add, tip: "ครั้งก่อน " + maxR + (e.t === "sec" ? " วิ" : " ครั้ง") + " ลองเพิ่มเป็น " + (maxR + add) };
+    }
+    var kg = Math.max.apply(null, last.sets.map(function (s) { return s.kg || 0; }));
+    if (minR >= HI && !tired) return { kg: kg + STEP, reps: LO, tip: "ครั้งก่อนครบ " + HI + " ครั้งทุกเซ็ตที่ " + kg + " กก. เพิ่มเป็น " + (kg + STEP) + " กก." };
+    if (minR >= HI && tired) return { kg: kg, reps: HI, tip: "ครบแล้วแต่วันนี้เหนื่อย คงไว้ที่ " + kg + " กก.", keep: true };
+    if (minR < LO) return { kg: kg, reps: LO, tip: "ครั้งก่อนบางเซ็ตไม่ถึง " + LO + " ครั้ง คงไว้ที่ " + kg + " กก. ให้ถึง " + LO + " ก่อน", keep: true };
+    return { kg: kg, reps: Math.min(HI, minR + 1), tip: "คงไว้ที่ " + kg + " กก. พยายามเพิ่มครั้งละ 1 จนครบ " + HI, keep: true };
+  }
+
+  /* ---------- render: today ---------- */
+  var current = null;
+  function renderCheckin() {
+    [["slot", S.slot], ["energy", S.energy]].forEach(function (p) {
+      Array.prototype.forEach.call($(p[0]).querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", b.dataset.v === p[1] ? "true" : "false"); });
+    });
+    $("muscles").innerHTML = Object.keys(MUSCLES).map(function (k) { return chip("m", k, MUSCLES[k]); }).join("");
+    $("joints").innerHTML = Object.keys(JOINTS).map(function (k) { return chip("j", k, JOINTS[k]); }).join("");
+  }
+  function chip(kind, key, label) {
+    var st = bodyState(kind, key);
+    var tag = st === "sore" ? '<span class="st">เมื่อย</span>' : st === "pain" ? '<span class="st">เจ็บ</span>' : "";
+    var desc = label + (st === "sore" ? " เมื่อย" : st === "pain" ? " เจ็บ" : " ปกติ");
+    return '<button type="button" class="chip ' + (st || "") + '" data-kind="' + kind + '" data-key="' + key + '" aria-label="' + desc + '">' + label + tag + "</button>";
+  }
+
+  function renderPlan() {
+    current = plan();
+    var el = $("plan"), h = "";
+    var painKeys = Object.keys(S.body).filter(function (k) { return S.body[k] === "pain"; });
+
+    if (painKeys.length) {
+      h += '<div class="alert red" style="margin-top:0;margin-bottom:12px"><strong>เจ็บ: ' + painKeys.map(function (k) { var p = k.split(":"); return (p[0] === "m" ? MUSCLES : JOINTS)[p[1]]; }).join(" ") + "</strong>" +
+        "ตัดทุกท่าที่โดนส่วนนี้ออกแล้ว ถ้าเจ็บแปลบ บวม ช้ำ หรือเจ็บที่ข้อต่อ ให้พักส่วนนั้น ประคบเย็นได้ ถ้าไม่ดีขึ้นใน 2–3 วัน เจ็บมากขึ้น หรือขยับไม่ได้ ควรพบแพทย์</div>";
+    }
+
+    if (current.rest) {
+      h += '<div class="plan-head"><div class="bar rest"></div><div><div class="day-name">พักฟื้น</div><div class="day-sub">วันนี้ให้ร่างกายซ่อมกล้าม</div></div></div>';
+      var legsHurt = ["quads", "hamstrings", "calves"].some(function (m) { return bodyState("m", m) === "pain"; }) || bodyState("j", "knee") || bodyState("j", "ankle");
+      h += '<ul class="rest-list">' +
+        (legsHurt ? "<li>ถ้าเดินแล้วไม่เจ็บ เดินเบา ๆ 15–20 นาที ถ้าเจ็บให้พักขา</li>" : "<li>เดินหรือวิ่งเบา ๆ 20–30 นาที พูดได้ไม่หอบ</li>") +
+        "<li>ยืดเหยียดส่วนที่เมื่อย 10 นาที</li><li>กินโปรตีนให้ครบทุกมื้อ และนอนให้พอ</li></ul>";
+      if (S.slot !== "any") h += '<p class="hint">ช่วงนี้ฝึกได้เฉพาะ' + (S.slot === "am" ? "ช่วงบน" : "ขา") + ' ถ้าอยากฝึกส่วนอื่น เลือก "ได้หมด"</p>';
+      if (current.why.length) h += '<ul class="why">' + current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>";
+      el.innerHTML = h; return;
+    }
+
+    var D = DAYS[current.day];
+    h += '<div class="plan-head"><div class="bar"></div><div><div class="day-name">' + D.name + '</div><div class="day-sub">' + D.th + " · " + current.items.length + " ท่า</div></div></div>";
+    h += '<ul class="why" aria-label="เหตุผล">' + current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>";
+    if (current.cut.length) h += '<div class="alert yellow"><strong>ตัดออกวันนี้</strong>' + current.cut.map(esc).join(", ") + "</div>";
+
+    h += '<div style="margin-top:6px">';
+    current.items.forEach(function (it) {
+      var e = it.e;
+      if (!S.draft[e.id] || S.draft[e.id].length !== it.sets) {
+        var prev = S.draft[e.id] || [];
+        S.draft[e.id] = [];
+        for (var i = 0; i < it.sets; i++) S.draft[e.id].push(prev[i] || { kg: it.sug.kg, reps: it.sug.reps, done: false });
+      }
+      // keep untouched sets in step with the latest suggestion (e.g. after changing energy)
+      S.draft[e.id].forEach(function (s) { if (!s.done && !s.ed) { s.kg = it.sug.kg; s.reps = it.sug.reps; } });
+      h += '<div class="ex"><div class="ex-top"><span class="ex-name">' + esc(e.name) + '</span><span class="ex-mus">' + names(e.m.slice(0, 2), MUSCLES) + "</span></div>";
+      h += '<div class="ex-tip' + (it.sug.keep ? " keep" : "") + '">' + esc(it.sug.tip) + (it.light ? " · " + esc(it.light) : "") + "</div><div class=\"sets\">";
+      S.draft[e.id].forEach(function (s, i) {
+        h += '<div class="set"><span class="n">' + (i + 1) + "</span>";
+        if (e.t === "kg") h += '<label class="field"><input inputmode="decimal" data-ex="' + e.id + '" data-i="' + i + '" data-f="kg" value="' + esc(s.kg) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + ' น้ำหนัก"><span>กก.</span></label>';
+        else h += "<span></span>";
+        h += '<label class="field"><input inputmode="numeric" data-ex="' + e.id + '" data-i="' + i + '" data-f="reps" value="' + esc(s.reps) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + (e.t === "sec" ? " วินาที" : " จำนวนครั้ง") + '"><span>' + (e.t === "sec" ? "วิ" : "ครั้ง") + "</span></label>";
+        h += '<button type="button" class="tick" data-ex="' + e.id + '" data-i="' + i + '" aria-pressed="' + (s.done ? "true" : "false") + '" aria-label="เสร็จเซ็ต ' + (i + 1) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></button></div>';
+      });
+      h += "</div></div>";
+    });
+    h += '</div><button class="btn" type="button" id="finish">บันทึกการซ้อม</button><p class="hint">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>';
+    el.innerHTML = h;
+  }
+
+  function finish() {
+    if (!current || current.rest) return;
+    var entries = [];
+    current.items.forEach(function (it) {
+      var sets = (S.draft[it.e.id] || []).filter(function (s) { return s.done && num(s.reps); }).map(function (s) {
+        return it.e.t === "kg" ? { kg: num(s.kg) || 0, reps: num(s.reps) } : { reps: num(s.reps) };
+      });
+      if (sets.length) entries.push({ ex: it.e.id, sets: sets });
+    });
+    if (!entries.length) { toast("ยังไม่มีเซ็ตที่ติ๊ก กดปุ่ม ✓ หลังทำแต่ละเซ็ต"); return; }
+    S.log.push({ ts: Date.now(), day: current.day, energy: S.energy, entries: entries });
+    S.draft = {};
+    save();
+    toast("บันทึก " + DAYS[current.day].name + " แล้ว " + entries.length + " ท่า");
+    renderPlan();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ---------- render: history ---------- */
+  function renderHistory() {
+    if (!S.log.length) {
+      $("sessions").innerHTML = '<p class="empty">ยังไม่มีการซ้อม บันทึกครั้งแรกจากหน้า "วันนี้"</p>';
+      $("progress").innerHTML = '<p class="empty">กราฟจะขึ้นหลังซ้อมท่าเดิม 2 ครั้ง</p>';
+      return;
+    }
+    $("sessions").innerHTML = S.log.slice().reverse().slice(0, 30).map(function (s) {
+      var vol = 0;
+      s.entries.forEach(function (en) { en.sets.forEach(function (x) { vol += (x.kg || 0) * (x.reps || 0); }); });
+      return '<div class="sess"><div class="sess-top"><span><span class="pill ' + s.day + '">' + DAYS[s.day].name + "</span> " + fmtDate(s.ts) + " " + fmtTime(s.ts) + "</span><span>" + (vol ? Math.round(vol).toLocaleString("th-TH") + " กก. รวม" : "") + "</span></div>" +
+        '<div class="sess-ex">' + s.entries.map(function (en) { var e = EXBY[en.ex]; return e ? esc(e.name) + " " + en.sets.length + " เซ็ต" : ""; }).join(" · ") + "</div></div>";
+    }).join("");
+
+    var rows = EX.filter(function (e) { return e.t === "kg"; }).map(function (e) {
+      var pts = [];
+      S.log.forEach(function (s) { s.entries.forEach(function (en) { if (en.ex === e.id && en.sets.length) pts.push(Math.max.apply(null, en.sets.map(function (x) { return x.kg || 0; }))); }); });
+      if (!pts.length) return "";
+      var diff = pts[pts.length - 1] - pts[0];
+      var lab = diff > 0 ? '<span class="up">+' + diff + " กก.</span>" : '<span class="flat">' + pts[pts.length - 1] + " กก.</span>";
+      return '<div class="prog"><span>' + esc(e.name) + " <span class=\"ex-mus\">ล่าสุด " + pts[pts.length - 1] + " กก.</span></span>" + lab + spark(pts) + "</div>";
+    }).join("");
+    $("progress").innerHTML = rows || '<p class="empty">ยังไม่มีท่าที่ใช้น้ำหนัก</p>';
+  }
+  function spark(pts) {
+    if (pts.length < 2) return "";
+    var w = 300, h = 34, lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), r = hi - lo || 1;
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + (4 + i * (w - 8) / (pts.length - 1)).toFixed(1) + " " + (h - 4 - (p - lo) / r * (h - 8)).toFixed(1); }).join(" ");
+    var lx = (w - 4).toFixed(1), ly = (h - 4 - (pts[pts.length - 1] - lo) / r * (h - 8)).toFixed(1);
+    return '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + '" fill="none" stroke="#2E6FD8" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><circle cx="' + lx + '" cy="' + ly + '" r="3.5" fill="#2E6FD8"/></svg>';
+  }
+
+  /* ---------- render: settings ---------- */
+  function renderSettings() {
+    var h = "";
+    ORDER.forEach(function (d) {
+      h += '<div class="grp">' + DAYS[d].name + "</div>";
+      EX.filter(function (e) { return e.day === d; }).forEach(function (e) {
+        h += '<label class="toggle"><span>' + esc(e.name) + '</span><input type="checkbox" data-ex="' + e.id + '"' + (S.off.indexOf(e.id) < 0 ? " checked" : "") + "></label>";
+      });
+    });
+    $("equip").innerHTML = h;
+  }
+
+  /* ---------- sample data ---------- */
+  function sample() {
+    var now = Date.now(), H = 36e5, log = [];
+    var base = { chest_press: 25, shoulder_press: 15, pec_deck: 20, lateral_raise: 4, triceps_pushdown: 12.5, lat_pulldown: 30, seated_row: 27.5, rear_delt: 15, db_curl: 6, leg_press: 60, leg_extension: 23, leg_curl: 23, calf_raise: 30 };
+    var plan6 = ["push", "legs", "pull", "push", "legs", "pull"];
+    plan6.forEach(function (d, i) {
+      var round = i >= 3 ? 1 : 0;
+      var entries = EX.filter(function (e) { return e.day === d; }).map(function (e) {
+        var sets = [0, 1, 2].map(function (k) {
+          if (e.t === "kg") return { kg: base[e.id] + round * STEP, reps: round ? 10 - k : 12 };
+          if (e.t === "sec") return { reps: 30 + round * 5 };
+          return { reps: 12 + round * 2 - k };
+        });
+        return { ex: e.id, sets: sets };
+      });
+      log.push({ ts: now - (6 - i) * 24 * H - 2 * H, day: d, energy: "ok", entries: entries, sample: true });
+    });
+    return log;
+  }
+
+  /* ---------- events ---------- */
+  function seg(id, key) {
+    $(id).addEventListener("click", function (ev) {
+      var b = ev.target.closest("button"); if (!b) return;
+      S[key] = b.dataset.v; save(); renderCheckin(); renderPlan();
+    });
+  }
+  seg("slot", "slot"); seg("energy", "energy");
+
+  function bodyClick(ev) {
+    var b = ev.target.closest(".chip"); if (!b) return;
+    var k = b.dataset.kind + ":" + b.dataset.key, cur = S.body[k];
+    var next = b.dataset.kind === "j" ? (cur ? null : "pain") : (!cur ? "sore" : cur === "sore" ? "pain" : null);
+    if (next) S.body[k] = next; else delete S.body[k];
+    save(); renderCheckin(); renderPlan();
+    var again = document.querySelector('.chip[data-kind="' + b.dataset.kind + '"][data-key="' + b.dataset.key + '"]');
+    if (again) again.focus();
+  }
+  $("muscles").addEventListener("click", bodyClick);
+  $("joints").addEventListener("click", bodyClick);
+
+  $("plan").addEventListener("input", function (ev) {
+    var t = ev.target; if (!t.dataset.ex) return;
+    var s = S.draft[t.dataset.ex][+t.dataset.i];
+    s[t.dataset.f] = t.value; s.ed = true;
+  });
+  $("plan").addEventListener("click", function (ev) {
+    if (ev.target.closest("#finish")) { finish(); return; }
+    var b = ev.target.closest(".tick"); if (!b) return;
+    var s = S.draft[b.dataset.ex][+b.dataset.i];
+    s.done = !s.done; b.setAttribute("aria-pressed", s.done ? "true" : "false");
+  });
+
+  $("equip").addEventListener("change", function (ev) {
+    var id = ev.target.dataset.ex; if (!id) return;
+    S.off = S.off.filter(function (x) { return x !== id; });
+    if (!ev.target.checked) S.off.push(id);
+    save(); renderPlan();
+  });
+
+  $("export").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify({ app: "train-today", v: 1, log: S.log, off: S.off }, null, 1)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "train-today-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  $("import-btn").addEventListener("click", function () { $("import").click(); });
+  $("import").addEventListener("change", function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        var d = JSON.parse(r.result);
+        if (!d || !Array.isArray(d.log)) throw 0;
+        S.log = d.log.filter(function (s) { return s && DAYS[s.day] && Array.isArray(s.entries) && isFinite(s.ts); });
+        S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
+        S.draft = {}; save(); renderAll(); toast("นำเข้า " + S.log.length + " ครั้งแล้ว");
+      } catch (e) { toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป"); }
+    };
+    r.readAsText(f); this.value = "";
+  });
+  $("sample").addEventListener("click", function () {
+    if (S.log.length && !confirm("แทนที่ข้อมูลเดิมด้วยข้อมูลตัวอย่าง?")) return;
+    S.log = sample(); S.draft = {}; save(); renderAll(); toast("ใส่ข้อมูลตัวอย่าง 6 วันแล้ว");
+  });
+  $("clear").addEventListener("click", function () {
+    if (!confirm("ลบประวัติการซ้อมทั้งหมดในเครื่องนี้? กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้")) return;
+    S.log = []; S.draft = {}; S.body = {}; save(); renderAll(); toast("ลบข้อมูลแล้ว");
+  });
+
+  var tabs = document.querySelectorAll("nav.tabs button");
+  Array.prototype.forEach.call(tabs, function (b) {
+    b.addEventListener("click", function () {
+      Array.prototype.forEach.call(tabs, function (x) { x.removeAttribute("aria-current"); });
+      b.setAttribute("aria-current", "page");
+      ["today", "history", "settings"].forEach(function (v) { $("v-" + v).hidden = v !== b.dataset.tab; });
+      if (b.dataset.tab === "history") renderHistory();
+      if (b.dataset.tab === "settings") renderSettings();
+      if (b.dataset.tab === "today") renderPlan();
+      window.scrollTo(0, 0);
+    });
+  });
+
+  var tt;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("show"); }, 2600); }
+
+  function renderAll() { renderCheckin(); renderPlan(); renderHistory(); renderSettings(); }
+
+  /* ---------- install as an app ---------- */
+  var promptEv = null;
+  var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (standalone) {
+    $("install-text").textContent = "ติดตั้งแล้ว ✓ เปิดจากไอคอนบนหน้าจอได้เลย";
+  } else if (ios) {
+    $("install-text").textContent = 'บน iPhone: เปิดใน Safari กดปุ่มแชร์ (สี่เหลี่ยมมีลูกศรขึ้น) แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"';
+  } else {
+    $("install-text").textContent = 'บน Android: เปิดใน Chrome กดเมนู ⋮ แล้วเลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"';
+  }
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault(); promptEv = e;
+    $("install").hidden = false;
+    $("install-text").textContent = "เพิ่มลงหน้าจอโทรศัพท์ เปิดเต็มจอ และใช้ได้แม้ไม่มีเน็ต";
+  });
+  $("install").addEventListener("click", function () {
+    if (!promptEv) return;
+    promptEv.prompt();
+    promptEv.userChoice.then(function () { promptEv = null; $("install").hidden = true; });
+  });
+  window.addEventListener("appinstalled", function () { $("install").hidden = true; $("install-text").textContent = "ติดตั้งแล้ว ✓"; toast("ติดตั้งแอปแล้ว"); });
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
+
+  $("today-date").textContent = new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "short" });
+  load();
+  renderAll();
+})();
+</script>
+</body>
+</html>
