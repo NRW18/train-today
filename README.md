@@ -25,8 +25,11 @@
 - **การเลือกโปรแกรมและน้ำหนัก:** เป็นกฎจากหลักการฝึกความแข็งแรง เพื่อให้คาดเดาได้และอธิบายเหตุผลได้ทุกครั้ง
 - **ข้อมูลการซ้อม:** เก็บในเครื่องของผู้ใช้เท่านั้น
 
+## ตัวกลาง AI (proxy/worker.js)
+Cloudflare Worker ที่เก็บ Gemini key เป็น secret ผู้ใช้จึงใช้ AI ได้ทันทีโดยไม่ต้องใส่คีย์ รับเฉพาะคำขอจากแอปนี้ ตรวจรูปแบบคำขอ และจำกัดคนละ 40 ครั้งต่อวันผ่าน Workers KV ไม่ส่งรายละเอียด error ของ Google กลับไปที่แอป
+
 ## เทคโนโลยี
-HTML, CSS, JavaScript ล้วน (ไม่มี framework), Gemini API (รับรูปภาพ, ตอบเป็น JSON), Service Worker สำหรับใช้ออฟไลน์, GitHub Pages
+HTML, CSS, JavaScript ล้วน (ไม่มี framework), Gemini API (รับรูปภาพ, ตอบเป็น JSON), Service Worker สำหรับใช้ออฟไลน์, Cloudflare Workers + KV (ตัวกลาง AI), GitHub Pages
 
 > ไม่ใช่คำแนะนำทางการแพทย์
 

@@ -424,7 +424,7 @@
         </label>
         <p class="hint">ถ่ายให้เห็นทั้งเครื่อง เลี่ยงไม่ให้มีคนในภาพ รูปจะถูกส่งไปให้ Google Gemini วิเคราะห์ (แผนฟรี Google อาจนำไปปรับปรุงบริการ)</p>
         <div id="scan-results" aria-live="polite"></div>
-        <p class="hint" style="margin-top:12px">คีย์บันทึกแล้ว <span id="key-mask"></span> · <button type="button" class="linkbtn" id="key-remove">ลบคีย์</button></p>
+        <p class="hint" style="margin-top:12px" id="key-status"></p>
       </div>
     </section>
 
@@ -650,7 +650,11 @@
       localStorage.setItem(KEY, JSON.stringify(o));
     } catch (e) { toast("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า"); }
   }
+  // The app's own AI proxy (proxy/worker.js on Cloudflare). It holds the Gemini key, so users need no key.
+  // A user who saves their own key still goes direct to Gemini.
+  var PROXY_URL = "";
   function getKey() { try { return localStorage.getItem(AIKEY) || ""; } catch (e) { return ""; } }
+  function hasAI() { return !!getKey() || !!PROXY_URL; }
   function setKey(k) { try { if (k) localStorage.setItem(AIKEY, k); else localStorage.removeItem(AIKEY); } catch (e) {} }
   function dayKey(ts) { var d = new Date(ts); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
 
@@ -961,7 +965,7 @@
     }
     if (e.ai) {
       return '<details class="guide" data-g="' + e.id + '"' + open + '><summary>วิธีเล่น</summary><div class="guide-body">ท่านี้ AI เพิ่มเข้ามา ยังไม่มีคำอธิบาย' +
-        (getKey() ? '<button class="btn line" type="button" data-explain="' + e.id + '" style="margin-top:8px">ให้ AI อธิบายท่านี้</button>' : " (ใส่ Gemini key ที่แท็บเครื่อง แล้วให้ AI อธิบายได้)") +
+        (hasAI() ? '<button class="btn line" type="button" data-explain="' + e.id + '" style="margin-top:8px">ให้ AI อธิบายท่านี้</button>' : " (ใส่ Gemini key ที่แท็บเครื่อง แล้วให้ AI อธิบายได้)") +
         "</div></details>";
     }
     return "";
@@ -1092,9 +1096,10 @@
     $("equip").innerHTML = h;
     $("only-seen").hidden = !S.seen.length;
     var k = getKey();
-    $("key-setup").hidden = !!k;
-    $("key-ready").hidden = !k;
-    $("key-mask").textContent = k ? "(…" + k.slice(-4) + ")" : "";
+    $("key-setup").hidden = hasAI() && !ownKeyOpen;
+    $("key-ready").hidden = !hasAI();
+    $("key-status").innerHTML = k ? 'ใช้คีย์ของคุณ (…' + esc(k.slice(-4)) + ') · <button type="button" class="linkbtn" data-key="remove">ลบคีย์</button>' :
+      PROXY_URL ? 'ใช้ AI ของแอป ไม่ต้องใส่คีย์ (คนละ 40 ครั้งต่อวัน) · <button type="button" class="linkbtn" data-key="own" style="color:var(--blue)">ใช้คีย์ของตัวเองแทน</button>' : "";
     $("scan-hint").hidden = S.scanned;
   }
 
@@ -1137,10 +1142,25 @@
   }
 
   // One place that talks to Gemini; always asks for JSON back.
+  function parseGemini(j) {
+    var txt = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts &&
+      j.candidates[0].content.parts.map(function (p) { return p.text || ""; }).join("");
+    if (!txt) throw new Error("empty");
+    return JSON.parse(txt.replace(/^```(json)?|```$/g, "").trim());
+  }
   function callGemini(parts, i) {
     i = i || 0;
-    if (!getKey()) { var nk = new Error("nokey"); return Promise.reject(nk); }
     if (!navigator.onLine) return Promise.reject(new Error("offline"));
+    if (!getKey()) {
+      if (!PROXY_URL) return Promise.reject(new Error("nokey"));
+      return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (j) {
+            if (!res.ok) { var pe = new Error("proxy"); pe.status = res.status; pe.proxy = true; pe.limit = j && j.error === "limit"; pe.scope = j && j.scope; throw pe; }
+            return parseGemini(j);
+          });
+        });
+    }
     var body = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } };
     return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + MODELS[i] + ":generateContent", {
       method: "POST",
@@ -1149,12 +1169,7 @@
     }).then(function (res) {
       if (res.status === 404 && i + 1 < MODELS.length) return callGemini(parts, i + 1);
       if (!res.ok) { var err = new Error("http"); err.status = res.status; throw err; }
-      return res.json().then(function (j) {
-        var txt = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts &&
-          j.candidates[0].content.parts.map(function (p) { return p.text || ""; }).join("");
-        if (!txt) throw new Error("empty");
-        return JSON.parse(txt.replace(/^```(json)?|```$/g, "").trim());
-      });
+      return res.json().then(parseGemini);
     });
   }
 
@@ -1184,6 +1199,12 @@
   function errText(e) {
     if (e && e.message === "nokey") return "ยังไม่ได้ใส่ Gemini key (ใส่ที่แท็บเครื่อง)";
     if (!navigator.onLine || (e && e.message === "offline")) return "ไม่มีอินเทอร์เน็ต ส่วนที่ใช้ AI ต้องต่อเน็ต (ส่วนอื่นของแอปใช้ออฟไลน์ได้)";
+    if (e && e.proxy) {
+      if (e.limit && e.scope === "app") return "วันนี้ AI ของแอปถูกใช้ครบโควตารวมแล้ว พรุ่งนี้ใช้ได้ใหม่ (หรือใส่คีย์ของตัวเองที่แท็บเครื่อง)";
+      if (e.limit) return "วันนี้คุณใช้ AI ครบ 40 ครั้งแล้ว พรุ่งนี้ใช้ได้ใหม่ (หรือใส่คีย์ของตัวเองที่แท็บเครื่อง)";
+      if (e.status === 429) return "AI ไม่ว่างชั่วคราว รอสักครู่แล้วลองใหม่";
+      return "ระบบ AI ของแอปมีปัญหาชั่วคราว ลองใหม่ภายหลัง";
+    }
     if (e && (e.status === 400 || e.status === 401 || e.status === 403)) return "คีย์ใช้ไม่ได้ ลองลบคีย์แล้วใส่ใหม่";
     if (e && e.status === 429) return "ใช้โควตาฟรีครบชั่วคราว รอสักครู่แล้วลองใหม่";
     if (e && e.message === "read") return "เปิดรูปนี้ไม่ได้ ลองถ่ายใหม่";
@@ -1271,8 +1292,8 @@
     $("meals").innerHTML = today.length ? today.slice().reverse().map(function (f) {
       return '<div class="meal"><span class="t">' + fmtTime(f.ts) + "</span><span>" + esc(f.name) + '</span><span class="n">' + Math.round(f.kcal) + " kcal · " + Math.round(f.p) + 'g</span><button type="button" class="x" data-delfood="' + f.ts + '" aria-label="ลบ ' + esc(f.name) + '">×</button></div>';
     }).join("") : '<p class="empty" style="padding:8px 0">ยังไม่ได้จดอาหารวันนี้</p>';
-    $("food-nokey").hidden = !!getKey();
-    $("food-label").style.display = getKey() ? "" : "none";
+    $("food-nokey").hidden = hasAI();
+    $("food-label").style.display = hasAI() ? "" : "none";
 
     var w = latestWeight();
     $("bw-now").innerHTML = w ? '<div class="big-n">' + w + ' กก.</div><p class="hint" style="margin:0">ชั่งล่าสุด ' + fmtDate(S.weights[S.weights.length - 1].ts) +
@@ -1400,7 +1421,7 @@
     if (w.liftsUp.length) h += '<p class="hint" style="margin-top:10px">' + w.liftsUp.map(function (u) { return esc(u.name) + " " + u.from + "→" + u.to + " กก."; }).join(" · ") + "</p>";
     if (w.foodDays && w.foodDays < 3) h += '<p class="hint">จดอาหารแค่ ' + w.foodDays + " วัน ค่าเฉลี่ยอาจยังไม่ตรง (ไม่นับวันนี้ที่ยังกินไม่ครบ)</p>";
     $("week-stats").innerHTML = h;
-    $("week-ai").hidden = !getKey();
+    $("week-ai").hidden = !hasAI();
     var o = S.summary;
     $("week-out").innerHTML = o ? '<div class="ai-out"><span class="ai-tag">AI</span> <span class="hint">' + fmtDate(o.ts) + "</span><p style=\"margin:6px 0 0\">" + esc(o.text) + "</p>" +
       (o.tips && o.tips.length ? "<ul>" + o.tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>" : "") + "</div>" : "";
@@ -1534,10 +1555,13 @@
   $("key-save").addEventListener("click", function () {
     var k = $("key-input").value.trim();
     if (k.length < 20 || /\s/.test(k)) { toast("คีย์ดูไม่ถูกต้อง ลองคัดลอกใหม่"); return; }
-    setKey(k); $("key-input").value = ""; renderGym(); toast("บันทึกคีย์แล้ว ลองถ่ายรูปเครื่องได้เลย");
+    setKey(k); $("key-input").value = ""; ownKeyOpen = false; renderGym(); toast("บันทึกคีย์แล้ว ลองถ่ายรูปเครื่องได้เลย");
   });
-  $("key-remove").addEventListener("click", function () {
-    if (!confirm("ลบคีย์ออกจากเครื่องนี้?")) return;
+  var ownKeyOpen = false;
+  $("key-status").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-key]"); if (!b) return;
+    if (b.dataset.key === "own") { ownKeyOpen = true; renderGym(); $("key-input").focus(); return; }
+    if (!confirm("ลบคีย์ออกจากเครื่องนี้?" + (PROXY_URL ? " แอปจะกลับไปใช้ AI ของแอปแทน" : ""))) return;
     setKey(""); renderGym();
   });
   $("scan-input").addEventListener("change", function () {
@@ -1680,7 +1704,7 @@
   var STEPS = [
     { i: "check", t: "เช็กอินแล้วได้โปรแกรมทันที", p: "บอกแอปว่าซ้อมช่วงไหน แรงวันนี้เป็นยังไง และเมื่อยหรือเจ็บตรงไหน", b: ["แอปเลือก PUSH / PULL / LEGS หรือวันพัก จากการฟื้นตัวของกล้าม", "บอกเครื่อง เซ็ต ครั้ง และน้ำหนัก พร้อมเหตุผล", "ข้ามท่าที่ไม่อยากเล่น หรือเพิ่มท่าจากคำแนะนำได้"] },
     { i: "timer", t: "ระหว่างเล่น กด ✓ ทีละเซ็ต", p: "ตัวจับเวลาพักเริ่มเอง ครบแล้วมือถือสั่น", b: ["ใส่น้ำหนักกับจำนวนครั้งที่ทำได้จริง", "กด \"วิธีเล่น\" ดูท่าที่ถูกต้อง", "จบแล้วกด \"บันทึกการซ้อม\" ครั้งหน้าน้ำหนักจะปรับให้เอง"] },
-    { i: "scan", t: "สแกนเครื่องในยิมด้วย AI", p: "แท็บ \"เครื่อง\" ถ่ายรูปเครื่อง แล้ว AI บอกว่าเล่นท่าไหนได้", b: ["ใส่ Gemini API key ฟรีครั้งเดียว", "ปิดท่าที่ยิมไม่มีเครื่องได้"] },
+    { i: "scan", t: "สแกนเครื่องในยิมด้วย AI", p: "แท็บ \"เครื่อง\" ถ่ายรูปเครื่อง แล้ว AI บอกว่าเล่นท่าไหนได้", b: [PROXY_URL ? "ใช้ได้เลย ไม่ต้องตั้งค่าอะไร" : "ใส่ Gemini API key ฟรีครั้งเดียว", "ปิดท่าที่ยิมไม่มีเครื่องได้"] },
     { i: "food", t: "กินให้ถึงเป้า", p: "แท็บ \"กิน\" ถ่ายรูปอาหาร AI ประเมินแคลอรี่และโปรตีน", b: ["บันทึกน้ำหนักตัว แอปบอกว่าขึ้นตามเป้าไหม", "วิ่งแล้วบันทึกท้ายหน้า \"วันนี้\""] },
     { i: "chart", t: "ดูความก้าวหน้า", p: "แท็บ \"ประวัติ\" มีกราฟน้ำหนักแต่ละท่า และสรุป 7 วันพร้อมคำแนะนำจาก AI", b: ["สำรองข้อมูลที่ \"ตั้งค่า\" สัปดาห์ละครั้ง"] }
   ];
