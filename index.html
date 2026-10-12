@@ -652,7 +652,7 @@
   }
   // The app's own AI proxy (proxy/worker.js on Cloudflare). It holds the Gemini key, so users need no key.
   // A user who saves their own key still goes direct to Gemini.
-  var PROXY_URL = "";
+  var PROXY_URL = "https://train-today-ai.nnrwachr.workers.dev/";
   function getKey() { try { return localStorage.getItem(AIKEY) || ""; } catch (e) { return ""; } }
   function hasAI() { return !!getKey() || !!PROXY_URL; }
   function setKey(k) { try { if (k) localStorage.setItem(AIKEY, k); else localStorage.removeItem(AIKEY); } catch (e) {} }
