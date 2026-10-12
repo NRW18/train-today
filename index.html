@@ -174,6 +174,24 @@
   .trend { margin-top: 8px; font-size: 0.93rem; }
   .wchart svg { width: 100%; height: 60px; display: block; margin-top: 8px; }
 
+  /* skip / add for today */
+  .todo .kg { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .mini { border: 1.5px solid var(--line); background: var(--card); color: var(--soft); border-radius: 8px; padding: 2px 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex: none; }
+  .mini:hover { border-color: var(--soft); color: var(--ink); }
+  .addtag { font-size: 0.75rem; font-weight: 700; background: var(--green-bg); color: var(--green); border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+  .skipped { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: 0.88rem; color: var(--soft); }
+  .skipped button { border: 1.5px dashed var(--line); background: transparent; border-radius: 99px; padding: 3px 10px; font-size: 0.85rem; color: var(--soft); cursor: pointer; text-decoration: line-through; }
+  .skipped button:hover { color: var(--ink); text-decoration: none; }
+  .add-btn { display: block; width: 100%; margin-top: 12px; border: 1.5px dashed var(--blue); background: var(--blue-bg); color: var(--blue); border-radius: 12px; padding: 11px; font-weight: 600; cursor: pointer; }
+  .picker { margin-top: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px 12px; }
+  .picker .grp { margin-top: 10px; }
+  .pick-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .pick-row button { border: 1.5px solid var(--line); background: var(--card); border-radius: 99px; padding: 6px 12px; font-size: 0.9rem; cursor: pointer; text-align: left; }
+  .pick-row button:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+  .pick-row button:disabled { opacity: .5; cursor: not-allowed; }
+  .pick-row small { color: var(--yellow); font-weight: 600; margin-left: 4px; }
+  .pick-row button:disabled small { color: var(--red); }
+
   /* weekly */
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
@@ -507,7 +525,8 @@
   /* ---------- state ---------- */
   var KEY = "train-today-v1", AIKEY = "train-today-gemini-key";
   var S = { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
-    food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null }, summary: null };
+    food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null }, summary: null,
+    today: { skip: [], add: [] }, picker: false };
   function strList(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, n).map(function (x) { return x.slice(0, 140); }); }
   function cleanGuide(g) { return g && typeof g === "object" ? { how: strList(g.how, 4), miss: strList(g.miss, 3) } : null; }
   function cleanCustom(list) {
@@ -546,6 +565,9 @@
         S.food = cleanFood(d.food); S.weights = cleanW(d.weights); S.runs = cleanRuns(d.runs);
         S.prefs = cleanPrefs(d.prefs);
         if (d.summary && typeof d.summary.text === "string") S.summary = d.summary;
+        if (d.today && d.today.day === dayKey(Date.now())) { // skip/add choices only last for today
+          S.today = { skip: strList(d.today.skip, 40), add: strList(d.today.add, 20) };
+        }
       }
     } catch (e) {}
     rebuildEx();
@@ -557,6 +579,7 @@
     try {
       var o = snapshot();
       o.slot = S.slot; o.energy = S.energy; o.body = S.body; o.bodyDay = dayKey(Date.now()); o.scanned = S.scanned; o.summary = S.summary;
+      o.today = { day: dayKey(Date.now()), skip: S.today.skip, add: S.today.add };
       localStorage.setItem(KEY, JSON.stringify(o));
     } catch (e) { toast("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า"); }
   }
@@ -633,6 +656,11 @@
     var pick = open[0];
     if (!pick || pick.notReady.length === DAYS[pick.d].main.length) {
       if (pick) why.push(DAYS[pick.d].name + " ยังฟื้นไม่ครบ " + RECOVER_H + " ชม. (" + names(pick.notReady, MUSCLES) + ")");
+      var extra = extraItems([], S.energy === "tired");
+      if (extra.length) {
+        why.unshift("แอปแนะนำให้พักวันนี้ แต่คุณเพิ่มท่าเอง เล่นเบา ๆ และหยุดถ้ารู้สึกผิดปกติ");
+        return { rest: false, restAdvice: true, day: extra[0].e.day, items: extra, why: why.concat(skipped), cut: [], skipped: skippedToday() };
+      }
       return { rest: true, why: why.concat(skipped) };
     }
 
@@ -668,9 +696,23 @@
       if (e.m.some(function (m) { return pick.notReady.indexOf(m) >= 0; })) sets = Math.max(2, sets - 1);
       if (runTired) sets = Math.max(2, sets - 1);
       return { e: e, sets: sets, light: st.light || null, sug: suggest(e, tired) };
-    });
-    return { rest: false, day: pick.d, items: items, why: why, cut: cut };
+    }).filter(function (it) { return S.today.skip.indexOf(it.e.id) < 0; });
+    items = items.concat(extraItems(items, tired));
+    return { rest: false, day: pick.d, items: items, why: why, cut: cut, skipped: skippedToday() };
   }
+
+  // exercises the user added for today only (never ones that hit a painful spot)
+  function extraItems(have, tired) {
+    var ids = have.map(function (it) { return it.e.id; });
+    return S.today.add.filter(function (id) { return EXBY[id] && ids.indexOf(id) < 0 && !isPainful(EXBY[id]); }).map(function (id) {
+      var e = EXBY[id], st = exStatus(e);
+      return { e: e, sets: tired ? 2 : 3, light: st.out || st.light ? "เมื่อยอยู่ เล่นเบา ๆ" : null, sug: suggest(e, tired), added: true };
+    });
+  }
+  function isPainful(e) {
+    return e.m.some(function (m) { return bodyState("m", m) === "pain"; }) || e.j.some(function (j) { return bodyState("j", j) === "pain"; });
+  }
+  function skippedToday() { return S.today.skip.filter(function (id) { return EXBY[id]; }); }
 
   function suggest(e, tired) {
     var last = lastEntry(e.id);
@@ -727,11 +769,17 @@
         "<li>ยืดเหยียดส่วนที่เมื่อย 10 นาที</li><li>กินโปรตีนให้ครบทุกมื้อ และนอนให้พอ</li></ul>";
       if (S.slot !== "any") h += '<p class="hint">ช่วงนี้ฝึกได้เฉพาะ' + (S.slot === "am" ? "ช่วงบน" : "ขา") + ' ถ้าอยากฝึกส่วนอื่น เลือก "ได้หมด"</p>';
       if (current.why.length) h += '<ul class="why">' + current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>";
+      h += addBlock([]);
       el.innerHTML = h; return;
     }
 
     var D = DAYS[current.day];
-    h += '<div class="plan-head"><div class="bar"></div><div><div class="day-name">' + D.name + '</div><div class="day-sub">' + D.th + " · " + current.items.length + " ท่า</div></div></div>";
+    h += '<div class="plan-head"><div class="bar' + (current.restAdvice ? " rest" : "") + '"></div><div><div class="day-name">' + (current.restAdvice ? "พักฟื้น + ท่าที่เพิ่ม" : D.name) +
+      '</div><div class="day-sub">' + (current.restAdvice ? "เล่นเบา ๆ" : D.th) + " · " + current.items.length + " ท่า</div></div></div>";
+    if (!current.items.length) {
+      h += '<p class="empty">ข้ามทุกท่าแล้ว วันนี้พักได้ หรือกดเพิ่มท่าที่อยากเล่น</p>' + skippedBlock() + addBlock([]);
+      el.innerHTML = h; return;
+    }
     h += '<ol class="todo" aria-label="โปรแกรมวันนี้">' + current.items.map(function (it) {
       var e = it.e, s = it.sug, dose, kg;
       if (e.t === "kg") {
@@ -739,8 +787,11 @@
         kg = s.kg !== "" && s.kg != null ? s.kg + " กก." : "เลือกน้ำหนักที่ทำได้ " + HI + " ครั้งแบบยังเหลือแรง";
       } else if (e.t === "sec") { dose = it.sets + " × " + s.reps + " วิ"; kg = "น้ำหนักตัว"; }
       else { dose = it.sets + " × " + s.reps + " ครั้ง"; kg = "น้ำหนักตัว"; }
-      return '<li><span class="nm">' + esc(e.name) + (e.ai ? ' <span class="ai-tag">AI</span>' : "") + '</span><span class="dose">' + dose + '</span><span class="kg">' + esc(kg) + "</span></li>";
+      var act = it.added ? '<button type="button" class="mini" data-unadd="' + e.id + '">เอาออก</button>' : '<button type="button" class="mini" data-skip="' + e.id + '" aria-label="ข้าม ' + esc(e.name) + ' วันนี้">ข้าม</button>';
+      return '<li><span class="nm">' + esc(e.name) + (e.ai ? ' <span class="ai-tag">AI</span>' : "") + (it.added ? ' <span class="addtag">เพิ่มเอง</span>' : "") +
+        '</span><span class="dose">' + dose + '</span><span class="kg"><span>' + esc(kg) + (it.added && it.light ? " · " + esc(it.light) : "") + "</span>" + act + "</span></li>";
     }).join("") + "</ol>";
+    h += skippedBlock() + addBlock(current.items.map(function (it) { return it.e.id; }));
     h += '<p class="sec-h">ทำไมวันนี้เป็นแบบนี้</p>';
     h += '<ul class="why" style="margin-top:6px" aria-label="เหตุผล">' + current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>";
     if (current.cut.length) h += '<div class="alert yellow"><strong>ตัดออกวันนี้</strong>' + current.cut.map(esc).join(", ") + "</div>";
@@ -769,6 +820,30 @@
     });
     h += '</div><button class="btn" type="button" id="finish">บันทึกการซ้อม</button><p class="hint">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>';
     el.innerHTML = h;
+  }
+
+  function skippedBlock() {
+    var sk = (current && current.skipped) || [];
+    if (!sk.length) return "";
+    return '<div class="skipped"><span>ข้ามวันนี้:</span>' + sk.map(function (id) {
+      return '<button type="button" data-unskip="' + id + '" title="กดเพื่อเอากลับมา">' + esc(EXBY[id].name) + "</button>";
+    }).join("") + '<span class="hint" style="margin:0">(กดเพื่อเอากลับ)</span></div>';
+  }
+  function addBlock(inPlan) {
+    var h = '<button type="button" class="add-btn" id="add-toggle" aria-expanded="' + (S.picker ? "true" : "false") + '">' + (S.picker ? "ปิดรายการท่า" : "+ เพิ่มท่าวันนี้") + "</button>";
+    if (!S.picker) return h;
+    h += '<div class="picker">';
+    ORDER.forEach(function (d) {
+      var list = EX.filter(function (e) { return e.day === d && S.off.indexOf(e.id) < 0 && inPlan.indexOf(e.id) < 0; });
+      if (!list.length) return;
+      h += '<div class="grp">' + DAYS[d].name + '</div><div class="pick-row">' + list.map(function (e) {
+        var pain = isPainful(e), st = exStatus(e);
+        var note = pain ? "<small>เจ็บ</small>" : st.out || st.light ? "<small>เมื่อย</small>" : "";
+        return '<button type="button" data-addex="' + e.id + '"' + (pain ? " disabled" : "") + ">" + esc(e.name) + note + "</button>";
+      }).join("") + "</div>";
+    });
+    h += '<p class="hint">ท่าที่โดนส่วนที่กดว่า "เจ็บ" เพิ่มไม่ได้ ท่าที่โดนส่วนที่เมื่อยเพิ่มได้ แต่ควรเล่นเบา ๆ</p></div>';
+    return h;
   }
 
   var openGuides = {};
@@ -854,7 +929,7 @@
     });
     if (!entries.length) { toast("ยังไม่มีเซ็ตที่ติ๊ก กดปุ่ม ✓ หลังทำแต่ละเซ็ต"); return; }
     S.log.push({ ts: Date.now(), day: current.day, energy: S.energy, entries: entries });
-    S.draft = {};
+    S.draft = {}; S.today = { skip: [], add: [] }; S.picker = false; stopRest();
     save();
     toast("บันทึก " + DAYS[current.day].name + " แล้ว " + entries.length + " ท่า");
     renderPlan();
@@ -1292,6 +1367,22 @@
   });
   $("plan").addEventListener("click", function (ev) {
     if (ev.target.closest("#finish")) { finish(); return; }
+    if (ev.target.closest("#add-toggle")) { S.picker = !S.picker; renderPlan(); return; }
+    var t = ev.target.closest("[data-skip],[data-unskip],[data-addex],[data-unadd]");
+    if (t) {
+      var d = t.dataset, nm;
+      if (d.skip) { S.today.skip.push(d.skip); nm = EXBY[d.skip].name; toast("ข้าม " + nm + " วันนี้"); }
+      if (d.unskip) S.today.skip = S.today.skip.filter(function (x) { return x !== d.unskip; });
+      if (d.unadd) S.today.add = S.today.add.filter(function (x) { return x !== d.unadd; });
+      if (d.addex) {
+        var e = EXBY[d.addex], st = exStatus(e);
+        if ((st.out || st.light) && !confirm(e.name + " โดนส่วนที่เมื่อยอยู่ เพิ่มไหม? ถ้าเพิ่มควรเล่นเบา ๆ")) return;
+        S.today.skip = S.today.skip.filter(function (x) { return x !== d.addex; });
+        if (S.today.add.indexOf(d.addex) < 0) S.today.add.push(d.addex);
+        S.picker = false; toast("เพิ่ม " + e.name + " แล้ว");
+      }
+      save(); renderPlan(); return;
+    }
     var ex = ev.target.closest("[data-explain]");
     if (ex) { explain(ex.dataset.explain, ex); return; }
     var b = ev.target.closest(".tick"); if (!b) return;
