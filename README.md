@@ -30,4 +30,4 @@ HTML, CSS, JavaScript ล้วน (ไม่มี framework), Gemini API (ร�
 
 > ไม่ใช่คำแนะนำทางการแพทย์
 
-Made by NRW
+Made by Norrawat Nakphut
