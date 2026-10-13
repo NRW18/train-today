@@ -1,0 +1,58 @@
+// Android wrapper (Trusted Web Activity) around the วันนี้ฝึกอะไร web app.
+// Built by .github/workflows/android.yml. Signing comes from environment variables:
+//   KS_PATH, KS_PASS (store + key password), KS_ALIAS (default "upload").
+plugins {
+    id 'com.android.application'
+}
+
+def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int
+
+android {
+    namespace 'io.github.nrw18.traintoday'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'io.github.nrw18.traintoday'
+        minSdk 21
+        targetSdk 35
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+        manifestPlaceholders = [
+            hostName  : 'nrw18.github.io',
+            defaultUrl: 'https://nrw18.github.io/train-today/'
+        ]
+    }
+
+    signingConfigs {
+        release {
+            def ks = System.getenv('KS_PATH')
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv('KS_PASS')
+                keyAlias System.getenv('KS_ALIAS') ?: 'upload'
+                keyPassword System.getenv('KS_PASS')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}
