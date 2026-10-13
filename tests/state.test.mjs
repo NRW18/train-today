@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
-const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs",
+const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
   "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
@@ -22,6 +22,7 @@ export function app(storage = fakeStorage()) {
     S: freshS(), localStorage: storage, KEY: "train-today-v1", DRAFT_TTL: 12 * 36e5,
     DAYS: { push: {}, pull: {}, legs: {} }, MUSCLES: { chest: 1, back: 1, quads: 1 }, JOINTS: { shoulder: 1, knee: 1 },
     BASE_EX: [{ id: "chest_press", m: ["chest"], t: "kg" }, { id: "leg_press", m: ["quads"], t: "kg" }], EX: [], EXBY: {},
+    RUN_TYPES: { easy: 1, tempo: 1, long: 1, race: 1 }, SHOE_USE: { daily: 1, cushion: 1, speed: 1, race: 1, trail: 1 },
     toast: (t) => toasts.push(t)
   });
   ctx.toasts = toasts;

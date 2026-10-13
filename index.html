@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>วันนี้ฝึกอะไร</title>
-<meta name="description" content="โค้ชซ้อมรายวัน: บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ อาการเมื่อยหรือเจ็บ และผลการซ้อมครั้งก่อน โดย Norrawat Nakphut">
+<title>KRYVOS</title>
+<meta name="description" content="KRYVOS โค้ชซ้อมรายวัน: บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ อาการเมื่อยหรือเจ็บ บันทึกวิ่ง หารองเท้าวิ่ง และนับแคลอรี่ โดย Norrawat Nakphut">
 <meta name="theme-color" content="#EDF0F4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0C0F14" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.json">
@@ -12,17 +12,17 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="ฝึกอะไรดี">
+<meta name="apple-mobile-web-app-title" content="KRYVOS">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ---------- design tokens: bumper-plate colours carry meaning (blue plan, green ready, yellow sore, red pain) ---------- */
+  /* ---------- design tokens: navy and blue come from the KRYVOS logo; green ready/done, yellow sore, red pain ---------- */
   :root {
     --bg: #EDF0F4; --card: #FFFFFF; --sunk: #F3F5F8; --ink: #12161F; --soft: #5B6577; --line: #E1E5EC;
-    --hero: #141A24; --hero-ink: #FFFFFF; --hero-soft: #A9B3C4;
-    --blue: #2E6FD8; --blue-bg: #E4EDFC;
+    --hero: #071A30; --hero-ink: #FFFFFF; --hero-soft: #A8C1DA; --brand-ink: #0B2545;
+    --blue: #1F6FB8; --blue-bg: #E2EEF9;
     --green: #1F8A4E; --green-bg: #DDF3E6;
     --yellow: #A87700; --yellow-solid: #E8B422; --yellow-bg: #FBF1D3;
     --red: #C93434; --red-bg: #FCE3E3; --red-ink: #7A1D1D; --yellow-ink: #5C4300;
@@ -36,8 +36,8 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --line: #262D38;
-      --hero: #1F2733; --hero-ink: #FFFFFF; --hero-soft: #A9B3C4;
-      --blue: #6EA2F5; --blue-bg: #1B2A44;
+      --hero: #0A2240; --hero-ink: #FFFFFF; --hero-soft: #A8C1DA; --brand-ink: #8FF5F5;
+      --blue: #6FB3EC; --blue-bg: #14304D;
       --green: #4CC283; --green-bg: #143224;
       --yellow: #F0C24A; --yellow-solid: #E8B422; --yellow-bg: #3A2F12;
       --red: #F07070; --red-bg: #3A1B1D; --red-ink: #FFC9C9; --yellow-ink: #FBE3A1;
@@ -59,13 +59,8 @@
 
   /* header */
   header.top { display: flex; align-items: flex-end; justify-content: space-between; padding: 22px 2px 6px; gap: 12px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--head); font-weight: 700; font-size: 1.2rem; letter-spacing: .01em; }
-  .plates { display: flex; align-items: center; gap: 2px; }
-  .plates i { display: block; width: 7px; border-radius: 2px; }
-  .plates i:nth-child(1) { height: 26px; background: var(--red); }
-  .plates i:nth-child(2) { height: 22px; background: #2E6FD8; }
-  .plates i:nth-child(3) { height: 18px; background: var(--yellow-solid); }
-  .plates i:nth-child(4) { height: 14px; background: #1F8A4E; }
+  .brand { margin: 0; line-height: 0; color: var(--brand-ink); }
+  .wordmark { height: 21px; width: auto; display: block; }
   .date { color: var(--soft); font-size: 0.9rem; text-align: right; line-height: 1.3; }
   .date b { display: block; color: var(--ink); font-family: var(--head); font-size: 1rem; }
 
@@ -93,9 +88,10 @@
 
   /* plan hero */
   .plan { padding-top: 0; overflow: hidden; }
-  .hero { margin: 0 -18px 16px; padding: 20px 20px 18px 26px; background: var(--hero); color: var(--hero-ink); position: relative; }
-  .hero::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(var(--red) 0 25%, #2E6FD8 25% 50%, var(--yellow-solid) 50% 75%, #1F8A4E 75%); }
-  .hero.rest::before { background: #1F8A4E; }
+  /* the plan card wears the logo's night-blue sweep */
+  .hero { margin: 0 -18px 16px; padding: 20px 20px 18px; color: var(--hero-ink); position: relative;
+    background: radial-gradient(120% 90% at 100% 0%, #2F7FC0 0%, rgba(47,127,192,0) 55%), linear-gradient(160deg, #020812 0%, var(--hero) 45%, #10406A 100%); }
+  .hero.rest { background: radial-gradient(120% 90% at 100% 0%, #1F8A4E 0%, rgba(31,138,78,0) 55%), linear-gradient(160deg, #020812 0%, var(--hero) 60%); }
   .hero .eyebrow { font-size: 0.85rem; color: var(--hero-soft); }
   .day-name { font-family: var(--head); font-weight: 700; font-size: 2.6rem; line-height: 1.05; letter-spacing: .02em; margin: 2px 0 2px; }
   .day-sub { color: var(--hero-soft); font-size: 0.95rem; }
@@ -141,6 +137,47 @@
   .row2 .btn { margin-top: 10px; }
   .rest-list { margin: 12px 0 0; padding-left: 20px; }
   .rest-list li { margin-bottom: 6px; }
+
+  /* run tab */
+  .run-type { margin-top: 10px; }
+  .chip[aria-pressed="true"], .chip.on { background: var(--blue-bg); color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); font-weight: 600; }
+  .seg-wrap { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); }
+  .kmbars { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; height: 150px; align-items: end; }
+  .kb { display: grid; grid-template-rows: auto 1fr auto; height: 100%; text-align: center; gap: 4px; }
+  .kb i { align-self: end; display: block; background: var(--line); border-radius: 6px 6px 3px 3px; min-height: 3px; }
+  .kb.now i { background: var(--blue); }
+  .kb .v { font-family: var(--head); font-weight: 700; font-size: .78rem; min-height: 1.2em; }
+  .kb .l { font-size: .68rem; color: var(--soft); line-height: 1.2; }
+  .shoe-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .shoe-top small { font-size: .9rem; color: var(--soft); }
+  .wear { height: 10px; background: var(--sunk); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .wear i { display: block; height: 100%; background: var(--green); border-radius: 99px; }
+  .wear i.warn { background: var(--yellow-solid); }
+  .wear i.bad { background: var(--red); }
+  .shoe { background: var(--sunk); border-radius: 16px; padding: 14px; margin-top: 10px; }
+  .shoe.top { background: var(--card); box-shadow: inset 0 0 0 2px var(--blue); }
+  .shoe-h { display: flex; justify-content: space-between; align-items: start; gap: 10px; font-family: var(--head); font-weight: 700; font-size: 1.08rem; line-height: 1.3; }
+  .shoe-h small { display: block; font-family: var(--body); font-weight: 600; font-size: .8rem; color: var(--soft); }
+  .shoe-h b { white-space: nowrap; }
+  .shoe-d { margin: 6px 0 0; font-size: .92rem; }
+  .shoe-why { margin: 6px 0 0; padding-left: 18px; font-size: .86rem; color: var(--soft); }
+  .shoe-warn { margin: 6px 0 0; font-size: .84rem; color: var(--yellow-ink); background: var(--yellow-bg); border-radius: 10px; padding: 6px 10px; }
+  .shoe-link { display: inline-block; margin-top: 8px; font-weight: 600; font-size: .88rem; }
+
+  /* food quick-add and goal */
+  .quick { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .quick-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-family: var(--head); font-weight: 700; }
+  .mini-seg { padding: 3px; border-radius: 11px; }
+  .mini-seg button { padding: 4px 12px; font-size: .86rem; border-radius: 9px; }
+  .quick .q { margin: 12px 0 6px; font-size: .86rem; }
+  .qrow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .qf { border: 0; background: var(--sunk); border-radius: 12px; padding: 6px 11px; font-size: .88rem; cursor: pointer; text-align: left; line-height: 1.3; }
+  .qf small { display: block; color: var(--soft); font-size: .74rem; }
+  .qf:hover { background: var(--line); }
+  .calc { margin-top: 10px; }
+  .calc > summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: .92rem; }
+  .ring .lf.over { color: var(--red); font-weight: 600; }
+  .onb .cover { width: calc(100% + 40px); height: auto; margin: -22px -20px 14px; aspect-ratio: 16 / 10; object-fit: cover; object-position: 50% 52%; display: block; border-radius: 26px 26px 0 0; }
 
   /* today: one list, each exercise carries its own sets */
   .exl { list-style: none; margin: 0; padding: 0; }
@@ -304,7 +341,7 @@
 
   /* floating tab bar */
   nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; padding: 0 12px calc(10px + env(safe-area-inset-bottom)); z-index: 6; pointer-events: none; }
-  nav.tabs .in { pointer-events: auto; max-width: 536px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 6px; border-radius: 22px; background: var(--nav); -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6); box-shadow: 0 8px 28px rgba(18,22,31,.16), inset 0 0 0 1px var(--line); }
+  nav.tabs .in { pointer-events: auto; max-width: 536px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 6px; border-radius: 22px; background: var(--nav); -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6); box-shadow: 0 8px 28px rgba(18,22,31,.16), inset 0 0 0 1px var(--line); }
   nav.tabs button { border: 0; background: transparent; border-radius: 16px; padding: 7px 2px; font-weight: 600; font-size: 0.78rem; color: var(--soft); cursor: pointer; display: grid; justify-items: center; gap: 2px; transition: background .15s, color .15s; }
   nav.tabs button svg { width: 22px; height: 22px; }
   nav.tabs button[aria-current="page"] { color: var(--blue); background: var(--blue-bg); }
@@ -355,7 +392,7 @@
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><span class="plates" aria-hidden="true"><i></i><i></i><i></i><i></i></span>วันนี้ฝึกอะไร</div>
+    <h1 class="brand"><svg class="wordmark" viewBox="100 250 1720 215" role="img" aria-label="KRYVOS"><path fill="currentColor" fill-rule="evenodd" d="M 207.7 259.3 L 107.1 415.6 L 160.3 415.6 L 262.6 259.3 Z M 381.2 259.3 L 229.8 340.7 L 310.8 415.6 L 424.2 459.9 L 298.4 333.7 L 437 259.3 Z M 599.1 362.4 C 609.2 361.9 631 359.2 651.8 343.8 C 657.8 339.4 678.3 323.9 684.6 297.8 C 686.1 291.6 687.1 286.8 685.5 281.4 C 681 267.2 660.6 258.3 633.6 257.9 L 487.1 259.3 L 469.8 267.7 L 460.5 286.3 L 633.2 287.4 L 633.2 325.7 L 497.3 325.7 L 601.3 417.8 L 661.5 417.8 L 599.1 362.4 M 723.1 259.3 L 794.8 341.2 L 765.2 417.8 L 814.3 417.8 L 853.3 320.8 L 960.4 259.3 L 916.6 259.3 L 838.7 303.5 L 793.5 257.9 Z M 983.5 257.9 L 1054.3 417.8 L 1083.1 417.8 L 1258 260.1 L 1197.8 257.9 L 1087.1 374.4 L 1039.7 257.9 Z M 1289 257.9 L 1208.9 417.8 L 1453.7 417.8 L 1527.7 257.9 Z M 1316.5 289.8 L 1271.3 384.6 L 1418.3 384.6 L 1464.8 289.8 Z M 1812.9 257.9 L 1567.5 257.9 L 1527.7 353.6 L 1707.9 355.8 L 1692.4 384.6 L 1542.7 384.6 L 1489.6 417.8 L 1693.3 417.8 L 1738 396.5 L 1772.6 320.8 L 1592.3 317.3 L 1606.5 289.8 L 1760.2 289.8 Z"/></svg></h1>
     <div class="date" id="today-date"></div>
   </header>
 
@@ -396,15 +433,76 @@
 
     <section class="card plan" id="plan" aria-live="polite"></section>
 
+  </main>
+
+  <!-- RUN: log, weekly distance, shoe mileage, shoe finder -->
+  <main id="v-run" hidden>
     <section class="card" aria-labelledby="run-h">
       <h2 id="run-h">บันทึกการวิ่ง</h2>
       <div class="grid2">
         <label class="field"><input inputmode="decimal" id="run-km" placeholder="0" aria-label="ระยะทาง กิโลเมตร"><span>กม.</span></label>
         <label class="field"><input inputmode="decimal" id="run-min" placeholder="0" aria-label="เวลา นาที"><span>นาที</span></label>
       </div>
+      <div class="chips run-type" id="run-type" role="group" aria-label="แบบการวิ่ง">
+        <button type="button" class="chip" data-v="easy">วิ่งเบา</button>
+        <button type="button" class="chip" data-v="tempo">วิ่งเร็ว</button>
+        <button type="button" class="chip" data-v="long">วิ่งยาว</button>
+        <button type="button" class="chip" data-v="race">แข่ง</button>
+      </div>
       <p class="hint" id="run-pace">ใส่ระยะกับเวลา แล้วแอปคำนวณ pace ให้</p>
-      <button class="btn line" type="button" id="run-save">บันทึกการวิ่ง</button>
+      <button class="btn" type="button" id="run-save">บันทึกการวิ่ง</button>
       <p class="hint">วิ่งตั้งแต่ 5 กม. ภายใน 24 ชม. แอปจะลดเซ็ตวันขาให้ 1 เซ็ต</p>
+    </section>
+
+    <section class="card" aria-labelledby="rw-h">
+      <h2 id="rw-h">ระยะวิ่ง 8 สัปดาห์</h2>
+      <div id="run-week"></div>
+    </section>
+
+    <section class="card" aria-labelledby="shoe-h">
+      <h2 id="shoe-h">รองเท้าที่ใช้อยู่</h2>
+      <div id="shoe-now"></div>
+    </section>
+
+    <section class="card" aria-labelledby="sf-h">
+      <h2 id="sf-h">หารองเท้าวิ่งที่เหมาะกับคุณ</h2>
+      <p class="q">ใช้วิ่งแบบไหน</p>
+      <div class="seg seg-wrap" id="sf-use" role="group" aria-label="แบบการใช้">
+        <button type="button" data-v="daily">ซ้อมทั่วไป</button>
+        <button type="button" data-v="cushion">นุ่ม วิ่งยาว</button>
+        <button type="button" data-v="speed">ซ้อมเร็ว</button>
+        <button type="button" data-v="race">แข่ง</button>
+        <button type="button" data-v="trail">เทรล</button>
+      </div>
+      <p class="q">รุ่น</p>
+      <div class="seg" id="sf-sex" role="group" aria-label="รุ่นผู้ชายหรือผู้หญิง">
+        <button type="button" data-v="m">ผู้ชาย</button>
+        <button type="button" data-v="f">ผู้หญิง</button>
+      </div>
+      <p class="q">หน้าเท้า</p>
+      <div class="seg" id="sf-width" role="group" aria-label="ความกว้างหน้าเท้า">
+        <button type="button" data-v="narrow">แคบ</button>
+        <button type="button" data-v="normal">ปกติ</button>
+        <button type="button" data-v="wide">กว้าง</button>
+      </div>
+      <p class="q">อุ้งเท้า</p>
+      <div class="seg" id="sf-arch" role="group" aria-label="อุ้งเท้า">
+        <button type="button" data-v="normal">ปกติ</button>
+        <button type="button" data-v="flat">แบน / ข้อเท้าล้มเข้า</button>
+        <button type="button" data-v="unsure">ไม่แน่ใจ</button>
+      </div>
+      <p class="hint">ไม่แน่ใจให้ลองเท้าเปียกแล้วเหยียบกระดาษ ถ้ารอยเต็มทั้งฝ่าเท้าแทบไม่เว้าตรงกลาง คืออุ้งเท้าแบน</p>
+      <p class="q">งบไม่เกิน</p>
+      <div class="grid2" style="grid-template-columns:1fr auto">
+        <label class="field"><input inputmode="numeric" id="sf-budget" aria-label="งบสูงสุด บาท"><span>บาท</span></label>
+      </div>
+      <div class="chips" id="sf-budget-q" style="margin-top:8px">
+        <button type="button" class="chip" data-v="3000">3,000</button>
+        <button type="button" class="chip" data-v="5000">5,000</button>
+        <button type="button" class="chip" data-v="6500">6,500</button>
+        <button type="button" class="chip" data-v="10000">10,000</button>
+      </div>
+      <div id="sf-out" aria-live="polite"></div>
     </section>
   </main>
 
@@ -422,6 +520,7 @@
         </label>
         <button class="btn line" type="button" id="manual-toggle">เพิ่มเอง</button>
       </div>
+      <div class="quick" id="quick"></div>
       <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
       <div id="food-ai" aria-live="polite"></div>
       <div id="manual" hidden>
@@ -448,12 +547,37 @@
 
     <section class="card" aria-labelledby="goal-h">
       <h2 id="goal-h">เป้าหมาย</h2>
-      <div class="grid3" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="seg" id="goal" role="group" aria-label="เป้าหมายน้ำหนัก">
+        <button type="button" data-v="gain">เพิ่มกล้าม</button>
+        <button type="button" data-v="keep">คงน้ำหนัก</button>
+        <button type="button" data-v="lose">ลดน้ำหนัก</button>
+      </div>
+      <p class="hint" id="goal-note"></p>
+      <details class="calc" id="calc">
+        <summary>คำนวณเป้าแคลอรี่จากร่างกาย</summary>
+        <div class="seg" id="pf-sex" role="group" aria-label="เพศ" style="margin-top:10px">
+          <button type="button" data-v="m">ชาย</button>
+          <button type="button" data-v="f">หญิง</button>
+        </div>
+        <div class="grid2" style="margin-top:10px">
+          <label class="field"><input inputmode="numeric" id="pf-age" placeholder="อายุ" aria-label="อายุ ปี"><span>ปี</span></label>
+          <label class="field"><input inputmode="numeric" id="pf-h" placeholder="ส่วนสูง" aria-label="ส่วนสูง เซนติเมตร"><span>ซม.</span></label>
+        </div>
+        <p class="q" style="margin-top:12px">ออกกำลังกายต่อสัปดาห์</p>
+        <div class="seg" id="pf-act" role="group" aria-label="ระดับการออกกำลังกาย">
+          <button type="button" data-v="1.375">1–3 วัน</button>
+          <button type="button" data-v="1.55">3–5 วัน</button>
+          <button type="button" data-v="1.725">6–7 วัน</button>
+        </div>
+        <button class="btn line" type="button" id="pf-go">คำนวณแล้วใส่เป็นเป้า</button>
+        <p class="hint" id="pf-out"></p>
+      </details>
+      <div class="grid3" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px">
         <label class="field"><input inputmode="numeric" id="g-kcal" aria-label="เป้าแคลอรี่ต่อวัน"><span>kcal</span></label>
         <label class="field"><input inputmode="numeric" id="g-p" aria-label="เป้าโปรตีนต่อวัน กรัม"><span>g</span></label>
         <label class="field"><input inputmode="decimal" id="g-kg" aria-label="น้ำหนักเป้าหมาย กิโลกรัม"><span>กก.</span></label>
       </div>
-      <p class="hint">แคลอรี่ต่อวัน · โปรตีนต่อวัน · น้ำหนักเป้าหมาย (ไม่ใส่ก็ได้) โปรตีนสำหรับสร้างกล้ามมักแนะนำราว 1.6–2.2 กรัมต่อน้ำหนักตัว 1 กก.</p>
+      <p class="hint">แคลอรี่ต่อวัน · โปรตีนต่อวัน · น้ำหนักเป้าหมาย (ไม่ใส่ก็ได้)</p>
       <button class="btn line" type="button" id="g-save">บันทึกเป้าหมาย</button>
     </section>
   </main>
@@ -556,7 +680,10 @@
         <li>เจ็บ: ตัดทุกท่าที่โดนส่วนนั้นหรือข้อต่อนั้น และแสดงคำเตือน</li>
         <li>น้ำหนัก: ทำครบ 12 ครั้งทุกเซ็ต ครั้งหน้าเพิ่ม 2.5 กก. ถ้าเหนื่อยจะไม่เพิ่ม</li>
         <li>วิ่ง: วิ่งรวมตั้งแต่ 5 กม. ใน 24 ชม. ลดเซ็ตวันขา 1 เซ็ต</li>
-        <li>น้ำหนักตัว: ดูแนวโน้ม 4 สัปดาห์ ถ้าขึ้นน้อยกว่า 0.1 กก./สัปดาห์ แนะนำให้กินเพิ่ม ถ้าเกิน 0.6 แนะนำให้ลดลงเล็กน้อย</li>
+        <li>น้ำหนักตัว: ดูแนวโน้ม 4 สัปดาห์ตามเป้า เพิ่มกล้ามควรขึ้นราว 0.25–0.5 กก./สัปดาห์ ลดน้ำหนักควรลง 0.5–1% ของน้ำหนักตัวต่อสัปดาห์ คงน้ำหนักควรเปลี่ยนไม่เกิน 0.2 กก.</li>
+        <li>เป้าแคลอรี่: สูตร Mifflin-St Jeor คูณระดับการออกกำลังกาย เพิ่มกล้าม +300 ลดน้ำหนัก −500 แต่ไม่ต่ำกว่าพลังงานขณะพัก หรือ 1,500 (ชาย) / 1,200 (หญิง) kcal</li>
+        <li>วิ่ง: เตือนเมื่อระยะสัปดาห์นี้เพิ่มเกินราว 10% จากสัปดาห์ก่อน รองเท้าเตือนที่ 600 และ 800 กม.</li>
+        <li>รองเท้าวิ่ง: ให้คะแนนตามแบบการใช้ อุ้งเท้า หน้าเท้า และน้ำหนักตัว ไม่แนะนำรุ่นที่เกินงบ ราคาจากเว็บทางการในไทย</li>
         <li>AI (Gemini) ใช้ 4 อย่าง: จำเครื่องจากรูป, ประเมินอาหารจากรูป, อธิบายท่าที่ AI เพิ่มเข้ามา และสรุปรายสัปดาห์ แอปตรวจคำตอบก่อนใช้ และให้คุณยืนยันหรือแก้ก่อนบันทึกเสมอ</li>
       </ul>
     </section>
@@ -571,6 +698,8 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>วันนี้</button>
     <button type="button" data-tab="gym">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.5"/></svg>เครื่อง</button>
+    <button type="button" data-tab="run">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/></svg>วิ่ง</button>
     <button type="button" data-tab="food">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0zM8 7c0-1.5 1-1.5 1-3M12 7c0-1.5 1-1.5 1-3M16 7c0-1.5 1-1.5 1-3"/></svg>กิน</button>
     <button type="button" data-tab="history">
@@ -647,10 +776,70 @@
   }
   var RECOVER_H = 48, LO = 8, HI = 12, STEP = 2.5;
 
+  /* ---------- knowledge: running shoes ----------
+     Prices are list prices in baht from the brands' official Thai web stores, checked October 2026.
+     Shops often discount, and models change every year: update this list (TASKS.md).
+     c: what it is for (first = main use). w: a wide version is sold. st: stability (for flat feet / ankles rolling in).
+     cu: cushioning 1 light, 2 medium, 3 max.
+     r: how well reviewed and proven the model is, 0-3 (the team's judgement from 2026 reviews), so the best fit wins over the cheapest. */
+  var SHOE_DATE = "ต.ค. 2026";
+  var SHOE_USE = { daily: "ซ้อมทั่วไป", cushion: "นุ่ม วิ่งยาว", speed: "ซ้อมเร็ว", race: "แข่ง", trail: "เทรล" };
+  var SHOES = [
+    { b: "Nike", n: "Pegasus 42", r: 3, p: 5200, c: ["daily", "cushion"], w: 1, cu: 2, d: "ทนทาน ใช้ได้แทบทุกแบบ เหมาะเป็นคู่แรก" },
+    { b: "ASICS", n: "Gel-Cumulus 28", r: 3, p: 5200, c: ["daily", "cushion"], w: 1, cu: 2, d: "นุ่มกำลังดี ใส่สบาย วิ่งได้ทุกวัน" },
+    { b: "ASICS", n: "Novablast 6", r: 3, p: 5500, c: ["daily", "speed"], w: 1, cu: 2, d: "เด้ง สนุก วิ่งเบาก็ได้ เร่งเร็วขึ้นก็ดี" },
+    { b: "adidas", n: "Supernova Rise 3", r: 2, p: 4700, c: ["daily", "cushion"], cu: 2, d: "นุ่มสบาย ราคาย่อมเยากว่ารุ่นท็อป" },
+    { b: "Nike", n: "Winflo 12", r: 2, p: 3800, c: ["daily"], cu: 2, d: "รุ่นประหยัด ใช้ซ้อมทั่วไปได้ดี" },
+    { b: "adidas", n: "Ultrarun 5", r: 1, p: 3000, c: ["daily"], cu: 2, d: "ราคาประหยัด นุ่มพอสำหรับวิ่งสั้นถึงกลาง" },
+    { b: "ASICS", n: "Versablast 4", r: 1, p: 2900, c: ["daily"], cu: 1, d: "ราคาประหยัด เบา เหมาะเริ่มวิ่ง" },
+    { b: "adidas", n: "Duramo SL 2", r: 1, p: 2500, c: ["daily"], cu: 1, d: "ราคาประหยัด เบา ใช้วิ่งระยะสั้นถึงกลาง" },
+    { b: "adidas", n: "Galaxy 8", r: 0, p: 1900, c: ["daily"], cu: 1, d: "ราคาเริ่มต้น เหมาะวิ่งระยะสั้นหรือออกกำลังทั่วไป" },
+    { b: "ASICS", n: "Gel-Nimbus 28", r: 3, p: 6500, c: ["cushion", "daily"], w: 1, cu: 3, d: "นุ่มมาก รับแรงกระแทกดี วิ่งยาวหรือคนตัวใหญ่" },
+    { b: "Nike", n: "Vomero 18", r: 3, p: 5500, c: ["cushion", "daily"], cu: 3, d: "พื้นหนา นุ่ม เหมาะวิ่งยาวและวันวิ่งเบา" },
+    { b: "Nike", n: "Vomero Plus", r: 2, p: 6100, c: ["cushion", "daily"], cu: 3, d: "นุ่มและเด้งกว่า Vomero 18" },
+    { b: "ASICS", n: "Glideride Max 2", r: 2, p: 6500, c: ["cushion"], w: 1, cu: 3, d: "พื้นโค้งช่วยส่งเท้าไปข้างหน้า สบายในวิ่งยาว" },
+    { b: "ASICS", n: "Gel-Kayano 33", r: 3, p: 6500, c: ["daily", "cushion"], st: 1, w: 1, cu: 3, d: "ซัพพอร์ตเต็ม นุ่ม มีรุ่นหน้ากว้างและกว้างพิเศษ" },
+    { b: "ASICS", n: "GT-2000 15", r: 3, p: 5500, c: ["daily"], st: 1, cu: 2, d: "ซัพพอร์ตปานกลาง เบากว่า Kayano" },
+    { b: "Nike", n: "Structure 26", r: 2, p: 5200, c: ["daily"], st: 1, cu: 2, d: "ช่วยประคองเท้าที่ล้มเข้าด้านใน" },
+    { b: "Nike", n: "Structure Plus", r: 2, p: 6000, c: ["daily", "cushion"], st: 1, cu: 3, d: "ซัพพอร์ตพร้อมพื้นที่นุ่มกว่า Structure 26" },
+    { b: "adidas", n: "Adizero Evo SL", r: 3, p: 5800, c: ["speed", "daily"], cu: 2, d: "เบาและเด้ง ใช้ซ้อมเร็ว ไม่มีแผ่นคาร์บอน" },
+    { b: "adidas", n: "Adizero SL 2", r: 2, p: 4500, c: ["speed", "daily"], cu: 2, d: "เบา ราคาย่อมเยา สำหรับซ้อมเร็ว" },
+    { b: "adidas", n: "Adizero Boston 13", r: 3, p: 5800, c: ["speed", "race"], cu: 2, d: "มีแกนเสริม เหมาะเทมโป้และวิ่งยาวแบบเร็ว" },
+    { b: "Nike", n: "Pegasus Plus 2", r: 2, p: 6100, c: ["speed", "daily"], cu: 2, d: "เบาและเด้งกว่า Pegasus ใช้ทั้งซ้อมทั่วไปและเร็ว" },
+    { b: "ASICS", n: "Magic Speed 4", r: 2, p: 6200, c: ["speed", "race"], cu: 2, d: "มีแผ่นคาร์บอน ใช้ซ้อมเร็วหรือแข่งแบบงบจำกัด" },
+    { b: "ASICS", n: "Sonicblast 2", r: 2, p: 6900, c: ["speed", "daily"], cu: 3, d: "เด้งมาก ใช้ซ้อมเร็วและวิ่งยาวแบบเร็ว" },
+    { b: "Nike", n: "Zoom Fly 6", r: 2, p: 6300, c: ["race", "speed"], cu: 2, d: "มีแผ่นคาร์บอน ซ้อมเร็วและแข่ง ราคาต่ำกว่ารุ่นท็อป" },
+    { b: "adidas", n: "Adizero Adios 9", r: 2, p: 5300, c: ["race", "speed"], cu: 1, d: "พื้นบาง เบา สำหรับแข่ง 5–10 กม. ไม่มีแผ่น" },
+    { b: "adidas", n: "Adizero Takumi Sen 11", r: 2, p: 6700, c: ["race"], cu: 1, d: "รองเท้าแข่งระยะสั้น 5–10 กม." },
+    { b: "adidas", n: "Adizero Adios Pro 4", r: 3, p: 8000, c: ["race"], cu: 3, d: "รองเท้าแข่งระยะไกล มีแกนคาร์บอน" },
+    { b: "Nike", n: "Vaporfly 4", r: 3, p: 8500, c: ["race"], cu: 3, d: "รองเท้าแข่งแผ่นคาร์บอน เบา 10 กม. ถึงมาราธอน" },
+    { b: "adidas", n: "Adizero Adios Pro 5", r: 3, p: 9200, c: ["race"], cu: 3, d: "รองเท้าแข่งระยะไกลรุ่นใหม่ล่าสุดของ adidas" },
+    { b: "Nike", n: "Alphafly 4", r: 3, p: 9400, c: ["race"], cu: 3, d: "รองเท้าแข่งมาราธอน พื้นหนา แผ่นคาร์บอน" },
+    { b: "Nike", n: "ACG Pegasus Trail", r: 2, p: 5400, c: ["trail", "daily"], cu: 2, d: "ใส่ได้ทั้งถนนและทางดินเรียบ" },
+    { b: "Nike", n: "ACG Zegama Trail", r: 3, p: 6300, c: ["trail"], cu: 3, d: "พื้นหนา นุ่ม สำหรับเทรลระยะไกล" },
+    { b: "adidas", n: "Terrex Agravic GTX 2", r: 2, p: 6500, c: ["trail"], cu: 2, d: "กันน้ำ (GORE-TEX) เหมาะเทรลเปียกหรือฝนตก" },
+    { b: "adidas", n: "Terrex Agravic Speed Ultra 2", r: 2, p: 8500, c: ["trail", "race"], cu: 3, d: "เบา สำหรับเทรลระยะไกลและแข่ง" }
+  ];
+
+  /* ---------- knowledge: common Thai dishes, one usual serving ----------
+     kcal from Wongnai's calorie roundup (wongnai.com/articles/carolies-per-meal); protein is a rough estimate.
+     Milk, whey and banana follow typical labels. All are starting points the user can edit. */
+  var FOODS = [
+    { n: "ข้าวมันไก่ต้ม", k: 585, p: 25 }, { n: "ข้าวมันไก่ทอด", k: 695, p: 25 }, { n: "ข้าวขาหมู", k: 690, p: 25 },
+    { n: "ข้าวกะเพราไก่", k: 554, p: 25 }, { n: "ข้าวกะเพราหมูกรอบ", k: 650, p: 18 }, { n: "ข้าวผัดหมูใส่ไข่", k: 660, p: 20 },
+    { n: "ข้าวผัดคะน้าหมูกรอบ", k: 670, p: 18 }, { n: "ข้าวกุ้งทอดกระเทียม", k: 495, p: 22 }, { n: "บะหมี่กรอบราดหน้าไก่", k: 660, p: 22 },
+    { n: "ขนมจีนแกงเขียวหวานไก่", k: 594, p: 20 }, { n: "ต้มเลือดหมู + ข้าว", k: 330, p: 15 }, { n: "โจ๊กหมูสับ", k: 210, p: 10 },
+    { n: "ข้าวเหนียวหมูปิ้ง 3 ไม้", k: 447, p: 20 }, { n: "ไก่ทอด 1 น่อง", k: 345, p: 22 }, { n: "อกไก่ 100 กรัม", k: 172, p: 31 },
+    { n: "แซลมอน 100 กรัม", k: 208, p: 20 }, { n: "ไข่ต้ม 1 ฟอง", k: 76, p: 6 }, { n: "ไข่ดาว 1 ฟอง", k: 165, p: 6 },
+    { n: "ยำวุ้นเส้นหมูสับ", k: 120, p: 8 }, { n: "นมจืด 1 กล่อง", k: 130, p: 7 }, { n: "เวย์โปรตีน 1 สกู๊ป", k: 120, p: 24 },
+    { n: "กล้วยหอม 1 ลูก", k: 105, p: 1 }
+  ];
+
   /* ---------- state ---------- */
   var KEY = "train-today-v1", AIKEY = "train-today-gemini-key";
   var S = { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
-    food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null }, summary: null,
+    food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" }, summary: null,
+    profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 },
     today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
   function strList(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, n).map(function (x) { return x.slice(0, 140); }); }
   function cleanGuide(g) { return g && typeof g === "object" ? { how: strList(g.how, 4), miss: strList(g.miss, 3) } : null; }
@@ -679,9 +868,33 @@
     return out;
   }
   function okTs(x) { return x && isFinite(x.ts) && x.ts > 0; }
-  function cleanFood(a) { return (Array.isArray(a) ? a : []).filter(okTs).map(function (f) { return { ts: f.ts, name: String(f.name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, +f.kcal || 0)), p: Math.max(0, Math.min(300, +f.p || 0)) }; }); }
+  function cleanFood(a) { return (Array.isArray(a) ? a : []).filter(okTs).map(function (f) { var o = { ts: f.ts, name: String(f.name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, +f.kcal || 0)), p: Math.max(0, Math.min(300, +f.p || 0)) }; if ([0.5, 1.5, 2].indexOf(+f.x) >= 0) o.x = +f.x; return o; }); }
   function cleanW(a) { return (Array.isArray(a) ? a : []).filter(function (w) { return okTs(w) && +w.kg > 20 && +w.kg < 300; }).map(function (w) { return { ts: w.ts, kg: +w.kg }; }); }
-  function cleanRuns(a) { return (Array.isArray(a) ? a : []).filter(function (r) { return okTs(r) && +r.km > 0 && +r.km < 100 && +r.min > 0; }).map(function (r) { return { ts: r.ts, km: +r.km, min: +r.min }; }); }
+  var RUN_TYPES = { easy: "วิ่งเบา", tempo: "วิ่งเร็ว", long: "วิ่งยาว", race: "แข่ง" };
+  function cleanRuns(a) { return (Array.isArray(a) ? a : []).filter(function (r) { return okTs(r) && +r.km > 0 && +r.km < 100 && +r.min > 0; }).map(function (r) { var o = { ts: r.ts, km: +r.km, min: +r.min }; if (RUN_TYPES[r.t]) o.t = r.t; return o; }); }
+  function cleanProfile(p) {
+    var d = { sex: null, age: null, h: null, act: 1.55 };
+    if (!p || typeof p !== "object") return d;
+    if (p.sex === "m" || p.sex === "f") d.sex = p.sex;
+    if (+p.age >= 13 && +p.age <= 90) d.age = Math.round(+p.age);
+    if (+p.h >= 120 && +p.h <= 230) d.h = Math.round(+p.h);
+    if ([1.375, 1.55, 1.725].indexOf(+p.act) >= 0) d.act = +p.act;
+    return d;
+  }
+  function cleanShoe(x) {
+    if (!x || typeof x.name !== "string" || !x.name.trim() || !okTs(x)) return null;
+    return { name: x.name.trim().slice(0, 40), ts: x.ts, base: Math.max(0, Math.min(3000, +x.base || 0)) };
+  }
+  function cleanShoeQ(q) {
+    var d = { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 };
+    if (!q || typeof q !== "object") return d;
+    if (SHOE_USE[q.use]) d.use = q.use;
+    if (q.sex === "m" || q.sex === "f") d.sex = q.sex;
+    if (["narrow", "normal", "wide"].indexOf(q.width) >= 0) d.width = q.width;
+    if (["normal", "flat", "unsure"].indexOf(q.arch) >= 0) d.arch = q.arch;
+    if (+q.budget >= 500 && +q.budget <= 30000) d.budget = Math.round(+q.budget);
+    return d;
+  }
   // Workout history: drop anything the rest of the app would crash on (a broken import used to brick the app).
   // Sessions the app wrote itself pass through unchanged.
   function cleanLog(a) {
@@ -697,8 +910,9 @@
     }).sort(function (x, y) { return x.ts - y.ts; });
   }
   function cleanPrefs(p) {
-    var d = { rest: 90, kcal: 2800, protein: null, goalKg: null };
+    var d = { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" };
     if (!p || typeof p !== "object") return d;
+    if (p.goal === "lose" || p.goal === "keep") d.goal = p.goal;
     if ([60, 90, 120, 180].indexOf(+p.rest) >= 0) d.rest = +p.rest;
     if (+p.kcal >= 1000 && +p.kcal <= 6000) d.kcal = Math.round(+p.kcal);
     if (+p.protein >= 30 && +p.protein <= 400) d.protein = Math.round(+p.protein);
@@ -716,7 +930,7 @@
         S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return typeof x === "string"; }) : [];
         S.scanned = !!d.scanned;
         S.food = cleanFood(d.food); S.weights = cleanW(d.weights); S.runs = cleanRuns(d.runs);
-        S.prefs = cleanPrefs(d.prefs);
+        S.prefs = cleanPrefs(d.prefs); S.profile = cleanProfile(d.profile); S.shoe = cleanShoe(d.shoe); S.shoeQ = cleanShoeQ(d.shoeQ);
         if (d.summary && typeof d.summary.text === "string") S.summary = d.summary;
         S.onboarded = !!d.onboarded;
         S.draft = cleanDraft(d.draft, d.draftTs);
@@ -729,7 +943,7 @@
     rebuildEx();
   }
   function snapshot() {
-    return { log: S.log, off: S.off, custom: S.custom, seen: S.seen, food: S.food, weights: S.weights, runs: S.runs, prefs: S.prefs };
+    return { log: S.log, off: S.off, custom: S.custom, seen: S.seen, food: S.food, weights: S.weights, runs: S.runs, prefs: S.prefs, profile: S.profile, shoe: S.shoe, shoeQ: S.shoeQ };
   }
   function save() {
     try {
@@ -1217,7 +1431,7 @@
       return { ts: s.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill ' + s.day + '">' + DAYS[s.day].name + "</span> " + fmtDate(s.ts) + " " + fmtTime(s.ts) + "</span><span>" + (vol ? Math.round(vol).toLocaleString("th-TH") + " กก. รวม" : "") + "</span></div>" +
         '<div class="sess-ex">' + s.entries.map(function (en) { var e = EXBY[en.ex]; return e ? esc(e.name) + " " + en.sets.length + " เซ็ต" : ""; }).filter(Boolean).join(" · ") + "</div></div>" };
     }).concat(S.runs.map(function (r) {
-      return { ts: r.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill run">RUN</span> ' + fmtDate(r.ts) + " " + fmtTime(r.ts) + "</span><span>" + r.km + " กม. · " + Math.round(r.min) + " นาที</span></div>" +
+      return { ts: r.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill run">RUN</span> ' + (r.t ? RUN_TYPES[r.t] + " " : "") + fmtDate(r.ts) + " " + fmtTime(r.ts) + "</span><span>" + r.km + " กม. · " + Math.round(r.min) + " นาที</span></div>" +
         '<div class="sess-ex">pace ' + pace(r.km, r.min) + ' <button type="button" class="del" data-delrun="' + r.ts + '">ลบ</button></div></div>' };
     })).sort(function (a, b) { return b.ts - a.ts; });
     if (!rows.length) {
@@ -1447,23 +1661,39 @@
   /* ---------- food + body weight ---------- */
   function sameDay(ts, ref) { return dayKey(ts) === dayKey(ref || Date.now()); }
   function latestWeight() { return S.weights.length ? S.weights[S.weights.length - 1].kg : null; }
-  function proteinTarget() { var w = latestWeight(); return S.prefs.protein || (w ? Math.round(w * 1.8) : 120); }
+  // grams of protein per kg of body weight: more when cutting, to keep muscle while eating less
+  var PROTEIN_PER_KG = { gain: 1.8, keep: 1.6, lose: 2.0 };
+  function proteinTarget() { var w = latestWeight(); return S.prefs.protein || (w ? Math.round(w * PROTEIN_PER_KG[S.prefs.goal]) : 120); }
+  // Daily energy from the Mifflin-St Jeor formula times activity, then the goal's surplus or deficit.
+  // A deficit never goes below resting energy or 1,500 / 1,200 kcal, so the app never suggests a crash diet.
+  var GOAL_KCAL = { gain: 300, keep: 0, lose: -500 };
+  function energyPlan(pf, w, goal) {
+    if (!pf || !pf.sex || !pf.age || !pf.h || !w) return null;
+    var bmr = 10 * w + 6.25 * pf.h - 5 * pf.age + (pf.sex === "m" ? 5 : -161);
+    var tdee = bmr * pf.act;
+    var floor = Math.max(bmr, pf.sex === "m" ? 1500 : 1200);
+    var kcal = Math.max(goal === "lose" ? floor : 0, tdee + GOAL_KCAL[goal]);
+    return { bmr: Math.round(bmr), tdee: Math.round(tdee / 10) * 10, kcal: Math.round(kcal / 10) * 10, p: Math.round(w * PROTEIN_PER_KG[goal]) };
+  }
   function r1(n) { return Math.round(n * 10) / 10; }
 
-  function ring(label, val, target, unitTxt, color) {
-    var r = 46, c = 2 * Math.PI * r, pct = target ? Math.min(1, val / target) : 0, done = val >= target;
+  // cap: the target is a ceiling (calories while losing weight), so going over is a warning, not a win
+  function ring(label, val, target, unitTxt, color, cap) {
+    var r = 46, c = 2 * Math.PI * r, pct = target ? Math.min(1, val / target) : 0, done = !cap && val >= target, over = cap && val > target;
     var left = Math.max(0, Math.round(target - val));
+    if (over) color = "var(--red)";
     return '<div class="ring' + (done ? " done" : "") + '"><svg viewBox="0 0 112 112" role="img" aria-label="' + label + " " + Math.round(val) + " จาก " + Math.round(target) + " " + unitTxt + '">' +
       '<circle class="trk" cx="56" cy="56" r="' + r + '" fill="none" stroke-width="10"/>' +
       '<circle cx="56" cy="56" r="' + r + '" fill="none" stroke="' + (done ? "var(--green)" : color) + '" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + (c * pct).toFixed(1) + " " + c.toFixed(1) + '" transform="rotate(-90 56 56)"/>' +
       '<text class="val" x="56" y="58" text-anchor="middle">' + Math.round(val).toLocaleString("th-TH") + '</text><text class="of" x="56" y="76" text-anchor="middle">/ ' + Math.round(target).toLocaleString("th-TH") + " " + unitTxt + "</text></svg>" +
-      '<div class="lb">' + label + '</div><div class="lf">' + (done ? "ถึงเป้าแล้ว ✓" : "ขาดอีก " + left.toLocaleString("th-TH") + " " + unitTxt) + "</div></div>";
+      '<div class="lb">' + label + '</div><div class="lf' + (over ? " over" : "") + '">' + (done ? "ถึงเป้าแล้ว ✓" : over ? "เกินเป้า " + Math.round(val - target).toLocaleString("th-TH") + " " + unitTxt : (cap ? "กินได้อีก " : "ขาดอีก ") + left.toLocaleString("th-TH") + " " + unitTxt) + "</div></div>";
   }
 
   function renderFood() {
     var today = S.food.filter(function (f) { return sameDay(f.ts); });
     var kc = 0, pr = 0; today.forEach(function (f) { kc += f.kcal; pr += f.p; });
-    $("meters").innerHTML = '<div class="rings">' + ring("แคลอรี่", kc, S.prefs.kcal, "kcal", "var(--yellow-solid)") + ring("โปรตีน", pr, proteinTarget(), "g", "var(--blue)") + "</div>";
+    $("meters").innerHTML = '<div class="rings">' + ring("แคลอรี่", kc, S.prefs.kcal, "kcal", "var(--yellow-solid)", S.prefs.goal === "lose") + ring("โปรตีน", pr, proteinTarget(), "g", "var(--blue)") + "</div>";
+    $("quick").innerHTML = quickHtml();
     $("meals").innerHTML = today.length ? today.slice().reverse().map(function (f) {
       return '<div class="meal"><span class="t">' + fmtTime(f.ts) + "</span><span>" + esc(f.name) + '</span><span class="n">' + Math.round(f.kcal) + " kcal · " + Math.round(f.p) + 'g</span><button type="button" class="x" data-delfood="' + f.ts + '" aria-label="ลบ ' + esc(f.name) + '">×</button></div>';
     }).join("") : '<p class="empty" style="padding:8px 0">ยังไม่ได้จดอาหารวันนี้</p>';
@@ -1472,13 +1702,51 @@
 
     var w = latestWeight();
     $("bw-now").innerHTML = w ? '<div class="big-n">' + w + ' กก.</div><p class="hint" style="margin:0">ชั่งล่าสุด ' + fmtDate(S.weights[S.weights.length - 1].ts) +
-      (S.prefs.goalKg ? " · เป้า " + S.prefs.goalKg + " กก. (" + (S.prefs.goalKg - w > 0 ? "อีก " + r1(S.prefs.goalKg - w) + " กก." : "ถึงแล้ว ✓") + ")" : "") + "</p>" : "";
+      (S.prefs.goalKg ? " · เป้า " + S.prefs.goalKg + " กก. (" + (goalReached(w) ? "ถึงแล้ว ✓" : "อีก " + r1(Math.abs(S.prefs.goalKg - w)) + " กก.") + ")" : "") + "</p>" : "";
     var pts = S.weights.slice(-16).map(function (x) { return x.kg; });
     $("bw-chart").innerHTML = pts.length >= 2 ? spark(pts, 60) : "";
     $("bw-trend").innerHTML = esc(weightTrend());
 
     $("g-kcal").value = S.prefs.kcal; $("g-p").value = S.prefs.protein || ""; $("g-p").placeholder = String(proteinTarget());
     $("g-kg").value = S.prefs.goalKg || "";
+    pressed("goal", S.prefs.goal); pressed("pf-sex", S.profile.sex); pressed("pf-act", String(S.profile.act));
+    $("goal-note").textContent = GOAL_NOTE[S.prefs.goal];
+    if (document.activeElement !== $("pf-age")) $("pf-age").value = S.profile.age || "";
+    if (document.activeElement !== $("pf-h")) $("pf-h").value = S.profile.h || "";
+  }
+  var GOAL_NOTE = {
+    gain: "กินเกินที่ใช้เล็กน้อย ยกเวทตามโปรแกรม ให้น้ำหนักขึ้นช้า ๆ",
+    keep: "กินเท่าที่ใช้ ยกเวทตามโปรแกรมเพื่อเพิ่มแรงโดยน้ำหนักไม่เปลี่ยน",
+    lose: "กินน้อยกว่าที่ใช้วันละราว 500 kcal ยังยกเวทตามโปรแกรม และกินโปรตีนให้ถึงเป้า เพื่อรักษากล้ามไว้"
+  };
+  // aria-pressed on a segmented control's buttons
+  function pressed(id, v) { Array.prototype.forEach.call($(id).querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", b.dataset.v === v ? "true" : "false"); }); }
+  function goalReached(w) {
+    if (!S.prefs.goalKg) return false;
+    return S.prefs.goal === "lose" ? w <= S.prefs.goalKg : S.prefs.goal === "gain" ? w >= S.prefs.goalKg : Math.abs(w - S.prefs.goalKg) <= 0.5;
+  }
+
+  // Food quick-add: the user's recent meals first, then common Thai dishes. One tap logs it at the chosen portion.
+  var portion = 1;
+  function recentMeals() {
+    var seen = {}, out = [];
+    for (var i = S.food.length - 1; i >= 0 && out.length < 6; i--) {
+      var f = S.food[i], base = f.name.replace(/ ×[\d.½]+$/, "");
+      if (seen[base] || Date.now() - f.ts > 30 * 864e5) continue;
+      seen[base] = 1; out.push({ n: base, k: Math.round(f.kcal / (f.x || 1)), p: Math.round(f.p / (f.x || 1)) });
+    }
+    return out;
+  }
+  function quickHtml() {
+    var rec = recentMeals(), recN = rec.map(function (x) { return x.n; });
+    var common = FOODS.filter(function (x) { return recN.indexOf(x.n) < 0; });
+    function chips(list, src) {
+      return list.map(function (x, i) { return '<button type="button" class="qf" data-src="' + src + '" data-i="' + i + '">' + esc(x.n) + "<small>" + x.k + " kcal</small></button>"; }).join("");
+    }
+    return '<div class="quick-h"><span>เพิ่มเร็ว</span><div class="seg mini-seg" id="portion" role="group" aria-label="ขนาดที่กิน">' +
+      [[0.5, "½"], [1, "1"], [1.5, "1½"], [2, "2"]].map(function (o) { return '<button type="button" data-v="' + o[0] + '" aria-pressed="' + (portion === o[0] ? "true" : "false") + '">' + o[1] + "</button>"; }).join("") + "</div></div>" +
+      (rec.length ? '<p class="q">ที่กินบ่อย</p><div class="qrow">' + chips(rec, "r") + "</div>" : "") +
+      '<p class="q">เมนูทั่วไป (ต่อ 1 จานหรือที่ระบุ)</p><div class="qrow">' + chips(common, "c") + "</div>";
   }
 
   // kg per week from a least-squares line over the last 4 weeks
@@ -1493,19 +1761,34 @@
     return den ? num2 / den * 7 : null;
   }
   function weightTrend() {
-    if (!S.weights.length) return "ชั่งครั้งแรกแล้วบันทึก แอปจะบอกว่าน้ำหนักขึ้นตามเป้าไหม";
+    var goal = S.prefs.goal;
+    if (!S.weights.length) return "ชั่งครั้งแรกแล้วบันทึก แอปจะบอกว่าน้ำหนัก" + (goal === "lose" ? "ลง" : goal === "keep" ? "คงที่" : "ขึ้น") + "ตามเป้าไหม";
     var w = latestWeight();
-    if (S.prefs.goalKg && w >= S.prefs.goalKg) return "ถึงน้ำหนักเป้าหมายแล้ว ตั้งเป้าใหม่ได้ที่การ์ดเป้าหมาย";
+    if (goal !== "keep" && goalReached(w)) return "ถึงน้ำหนักเป้าหมายแล้ว ตั้งเป้าใหม่ได้ที่การ์ดเป้าหมาย";
     var rate = weightRate();
     if (rate === null) return "ชั่งต่อเนื่องให้ครบอย่างน้อย 1 สัปดาห์ แอปจะเริ่มบอกแนวโน้มได้";
     var r = (rate >= 0 ? "+" : "") + r1(rate) + " กก./สัปดาห์";
+    if (goal === "lose") {
+      // 0.5-1% of body weight a week is the usual safe range for losing fat while keeping muscle
+      var lo = r1(w * 0.005), hi = r1(w * 0.01);
+      if (rate > 0.1) return "น้ำหนักยังขึ้น (" + r + ") ลองลดอาหารวันละประมาณ 300 kcal หรือเดินเพิ่มวันละ 30 นาที";
+      if (rate > -lo / 2) return "น้ำหนักแทบไม่ลง (" + r + ") ลองลดอาหารวันละประมาณ 200–300 kcal";
+      if (rate >= -hi) return "ลงกำลังดี (" + r + ") ช่วงที่มักแนะนำคือ " + lo + "–" + hi + " กก./สัปดาห์ (0.5–1% ของน้ำหนักตัว)";
+      return "ลงเร็วเกินไป (" + r + ") เสี่ยงเสียกล้าม ลองกินเพิ่มวันละประมาณ 200 kcal และกินโปรตีนให้ถึงเป้า";
+    }
+    if (goal === "keep") {
+      if (Math.abs(rate) <= 0.2) return "น้ำหนักคงที่ดี (" + r + ")";
+      return rate > 0 ? "น้ำหนักขึ้น (" + r + ") ลองลดอาหารวันละประมาณ 200 kcal" : "น้ำหนักลง (" + r + ") ลองกินเพิ่มวันละประมาณ 200 kcal";
+    }
     if (rate < 0.1) return "น้ำหนักแทบไม่ขึ้น (" + r + ") ถ้าอยากเพิ่มกล้าม ลองกินเพิ่มวันละประมาณ 200–300 kcal";
     if (rate <= 0.6) return "ขึ้นกำลังดี (" + r + ") ช่วงที่มักแนะนำสำหรับเพิ่มกล้ามคือราว 0.25–0.5 กก./สัปดาห์";
     return "ขึ้นค่อนข้างเร็ว (" + r + ") อาจเป็นไขมันมากกว่ากล้าม ลองลดลงวันละประมาณ 200 kcal";
   }
 
-  function addFood(name, kcal, p) {
-    S.food.push({ ts: Date.now(), name: String(name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, kcal || 0)), p: Math.max(0, Math.min(300, p || 0)) });
+  function addFood(name, kcal, p, x) {
+    var f = { ts: Date.now(), name: String(name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, kcal || 0)), p: Math.max(0, Math.min(300, p || 0)) };
+    if (x && x !== 1) f.x = x;
+    S.food.push(f);
     save(); renderFood();
   }
 
@@ -1550,6 +1833,117 @@
     }).catch(function (e) {
       out.querySelector(".shot div").innerHTML = '<div class="err">' + esc(errText(e)) + "</div>";
     }).then(function () { $("food-label").classList.remove("busy"); });
+  }
+
+  /* ---------- running: weekly distance, shoe mileage, shoe finder ---------- */
+  var runType = null;
+  function weekStart(ts) { var d = new Date(ts); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); } // Monday
+  // km per week for the last n weeks, oldest first; the last entry is this week so far
+  function weeklyKm(n) {
+    var now = weekStart(Date.now()), out = [];
+    for (var i = n - 1; i >= 0; i--) {
+      var from = now - i * 7 * 864e5, to = from + 7 * 864e5, km = 0;
+      S.runs.forEach(function (r) { if (r.ts >= from && r.ts < to) km += r.km; });
+      out.push({ from: from, km: r1(km) });
+    }
+    return out;
+  }
+  // A common rule of thumb: raise weekly distance by no more than about 10% at a time.
+  function weekAdvice(w) {
+    var cur = w[w.length - 1].km, prev = w[w.length - 2].km;
+    if (!prev && !cur) return "ยังไม่มีการวิ่งใน 2 สัปดาห์นี้ เริ่มเบา ๆ 2–3 ครั้งต่อสัปดาห์ก็พอ";
+    if (!prev) return "สัปดาห์ก่อนไม่ได้วิ่ง สัปดาห์นี้ค่อย ๆ กลับมา อย่าเพิ่งวิ่งไกล";
+    var cap = r1(prev * 1.1);
+    if (cur > cap) return "สัปดาห์นี้วิ่งไป " + cur + " กม. เกิน 10% จากสัปดาห์ก่อน (" + prev + " กม.) ระวังบาดเจ็บ วันที่เหลือวิ่งเบา ๆ หรือพัก";
+    return "สัปดาห์นี้วิ่งได้ถึงราว " + cap + " กม. (เพิ่มไม่เกิน 10% จาก " + prev + " กม.) ตอนนี้ " + cur + " กม.";
+  }
+  function shoeKm() {
+    if (!S.shoe) return 0;
+    var km = S.shoe.base;
+    S.runs.forEach(function (r) { if (r.ts >= S.shoe.ts) km += r.km; });
+    return r1(km);
+  }
+  // Most road running shoes are worn out somewhere around 500-800 km.
+  function shoeHtml() {
+    if (!S.shoe) {
+      return '<p class="hint" style="margin:0">ใส่ชื่อรุ่นที่ใช้อยู่ แอปจะนับระยะจากการวิ่งที่บันทึก และเตือนเมื่อถึงเวลาเปลี่ยน</p>' +
+        '<div class="grid3" style="grid-template-columns:1.6fr 1fr"><label class="field txt"><input id="shoe-name" placeholder="เช่น Pegasus 42" aria-label="รุ่นรองเท้า"></label>' +
+        '<label class="field"><input inputmode="numeric" id="shoe-base" placeholder="0" aria-label="ระยะที่ใช้มาแล้ว กิโลเมตร"><span>กม.</span></label></div>' +
+        '<p class="hint">ช่องขวา: ระยะที่ใช้มาแล้วก่อนเริ่มนับ (ถ้าเป็นคู่ใหม่ใส่ 0)</p><button class="btn line" type="button" id="shoe-set">เริ่มนับระยะ</button>';
+    }
+    var km = shoeKm(), pct = Math.min(100, km / 800 * 100);
+    var msg = km >= 800 ? "ใช้มาเกิน 800 กม. พื้นน่าจะยุบแล้ว ควรเปลี่ยนคู่ใหม่" : km >= 600 ? "ใกล้หมดสภาพ ถ้าเริ่มรู้สึกแข็งหรือเจ็บเข่า ให้หาคู่ใหม่" : "ยังใช้ได้อีกราว " + Math.round(Math.max(0, 600 - km)) + "–" + Math.round(800 - km) + " กม.";
+    return '<div class="shoe-top"><strong>' + esc(S.shoe.name) + '</strong><span class="big-n" style="font-size:1.6rem">' + km + ' <small>กม.</small></span></div>' +
+      '<div class="wear"><i style="width:' + pct.toFixed(1) + '%" class="' + (km >= 800 ? "bad" : km >= 600 ? "warn" : "") + '"></i></div>' +
+      '<p class="hint">' + msg + ' (รองเท้าวิ่งส่วนใหญ่ใช้ได้ราว 500–800 กม.)</p><button class="btn line" type="button" id="shoe-clear">เปลี่ยนคู่ใหม่</button>';
+  }
+
+  // Score every shoe for what the runner asked for. Over budget is never shown as a pick.
+  function pickShoes(q, ctx) {
+    ctx = ctx || {};
+    var scored = SHOES.map(function (sh) {
+      var sc = 0, why = [], warn = [];
+      var main = sh.c[0] === q.use, fits = sh.c.indexOf(q.use) >= 0;
+      if (main) sc += 10; else if (fits) sc += 6; else if (q.use === "daily" && sh.c.indexOf("cushion") >= 0) sc += 4; else sc -= 20;
+      if (main) why.push("ออกแบบมาเพื่อ" + SHOE_USE[q.use]); else if (fits) why.push("ใช้" + SHOE_USE[q.use] + "ได้ดี");
+      if (q.arch === "flat") {
+        if (sh.st) { sc += 7; why.push("มีซัพพอร์ต ช่วยเท้าแบนหรือข้อเท้าที่ล้มเข้า"); }
+        else if (q.use === "daily" || q.use === "cushion") sc -= 3;
+      } else if (q.arch === "normal" && sh.st) sc -= 2;
+      if (q.width === "wide") {
+        if (sh.w) { sc += 4; why.push("มีรุ่นหน้ากว้าง (Wide)"); } else { sc -= 4; warn.push("ไม่มีรุ่นหน้ากว้าง ลองใส่จริงก่อนซื้อ"); }
+      }
+      if (q.width === "narrow" && sh.cu === 3) warn.push("ทรงค่อนข้างหนา คนเท้าแคบควรลองผูกเชือกให้กระชับ");
+      if (ctx.kg >= 85 && sh.cu === 3) { sc += 2; why.push("พื้นหนา รับน้ำหนักตัวได้ดี"); }
+      if (ctx.kg >= 85 && sh.cu === 1) sc -= 2;
+      if (q.use === "race" && ctx.runs < 5 && sh.p >= 8000) { sc -= 3; warn.push("ถ้ายังวิ่งไม่บ่อย รุ่นแข่งราคาสูงอาจยังไม่จำเป็น"); }
+      sc += sh.r * 1.5 - sh.p / q.budget * 0.5; // proven models first; cheaper wins a tie
+      return { s: sh, sc: sc, why: why, warn: warn };
+    }).filter(function (x) { return x.sc > 0; }).sort(function (a, b) { return b.sc - a.sc; });
+    var inBudget = scored.filter(function (x) { return x.s.p <= q.budget; });
+    var over = scored.filter(function (x) { return x.s.p > q.budget; }).sort(function (a, b) { return a.s.p - b.s.p; });
+    return { picks: inBudget.slice(0, 3), nearest: inBudget.length ? null : over[0] || null };
+  }
+  function baht(n) { return "฿" + n.toLocaleString("th-TH"); }
+  function shoeCard(x, q, rank) {
+    var sh = x.s, url = "https://www.google.com/search?q=" + encodeURIComponent(sh.b + " " + sh.n + (q.sex === "f" ? " women" : " men") + " ราคา");
+    return '<div class="shoe' + (rank === 0 ? " top" : "") + '"><div class="shoe-h"><span><small>' + esc(sh.b) + "</small>" + esc(sh.n) + '</span><b>' + baht(sh.p) + "</b></div>" +
+      '<p class="shoe-d">' + esc(sh.d) + "</p>" +
+      (x.why.length ? '<ul class="shoe-why">' + x.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>" : "") +
+      (x.warn.length ? '<p class="shoe-warn">' + x.warn.map(esc).join(" ") + "</p>" : "") +
+      '<a class="shoe-link" href="' + url + '" target="_blank" rel="noopener">ค้นหาราคาและร้าน</a></div>';
+  }
+  function finderHtml() {
+    var q = S.shoeQ, r = pickShoes(q, { kg: latestWeight() || 0, runs: S.runs.length });
+    var h = "";
+    if (r.picks.length) h += '<p class="q" style="margin-top:16px">แนะนำสำหรับ' + SHOE_USE[q.use] + " (รุ่น" + (q.sex === "f" ? "ผู้หญิง" : "ผู้ชาย") + ") งบไม่เกิน " + baht(q.budget) + "</p>" + r.picks.map(function (x, i) { return shoeCard(x, q, i); }).join("");
+    else if (r.nearest) h += '<p class="empty">ในงบ ' + baht(q.budget) + " ยังไม่มีรุ่นที่เหมาะในรายการ</p><p class=\"q\">ใกล้งบที่สุด</p>" + shoeCard(r.nearest, q, 1);
+    else h += '<p class="empty">ยังไม่มีรุ่นที่ตรงเงื่อนไข ลองเปลี่ยนแบบการใช้หรือเพิ่มงบ</p>';
+    if (q.arch === "flat") h += '<p class="hint">ถ้าเจ็บอุ้งเท้าหรือเข่าเวลาวิ่งบ่อย ๆ ควรให้นักกายภาพหรือร้านที่วิเคราะห์การวิ่งดูก่อน</p>';
+    h += '<p class="hint">ราคาป้ายจากเว็บไซต์ทางการในไทย (ASICS, Nike, adidas) ' + SHOE_DATE + " ร้านอาจลดราคา " +
+      (q.sex === "f" ? "รุ่นผู้หญิงใช้ชื่อเดียวกันแต่ทรงและไซซ์ต่างจากรุ่นผู้ชาย " : "") + "ลองใส่จริงตอนเย็นที่เท้าขยายแล้ว เผื่อปลายเท้าราวครึ่งนิ้ว</p>";
+    return h;
+  }
+  function renderRun() {
+    Array.prototype.forEach.call($("run-type").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", b.dataset.v === runType ? "true" : "false"); });
+    var w = weeklyKm(8), max = Math.max.apply(null, w.map(function (x) { return x.km; }).concat([1]));
+    var month = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    var recent = S.runs.filter(function (r) { return r.ts >= Date.now() - 28 * 864e5; });
+    var longest = recent.reduce(function (m, r) { return Math.max(m, r.km); }, 0);
+    var fast = recent.filter(function (r) { return r.km >= 3; }).map(function (r) { return r.min / r.km; }).sort(function (a, b) { return a - b; })[0];
+    $("run-week").innerHTML = '<div class="kmbars" role="img" aria-label="ระยะวิ่งรายสัปดาห์ 8 สัปดาห์ สัปดาห์นี้ ' + w[7].km + ' กม.">' + w.map(function (x, i) {
+      var d = new Date(x.from);
+      return '<div class="kb' + (i === 7 ? " now" : "") + '"><span class="v">' + (x.km || "") + '</span><i style="height:' + (x.km / max * 100).toFixed(1) + '%"></i><span class="l">' + (i === 7 ? "สัปดาห์นี้" : d.getDate() + " " + month[d.getMonth()]) + "</span></div>";
+    }).join("") + "</div>" +
+      '<div class="stats" style="margin-top:12px"><div class="stat"><div class="v">' + recent.length + ' ครั้ง</div><div class="k">วิ่งใน 4 สัปดาห์</div></div><div class="stat"><div class="v">' + (longest || 0) + ' กม.</div><div class="k">ไกลสุดใน 4 สัปดาห์</div></div>' +
+      '<div class="stat"><div class="v">' + (fast ? pace(1, fast) : "–") + '</div><div class="k">pace ดีสุด (3 กม.ขึ้นไป)</div></div><div class="stat"><div class="v">' + r1(w.reduce(function (a, x) { return a + x.km; }, 0) / 8) + ' กม.</div><div class="k">เฉลี่ยต่อสัปดาห์</div></div></div>' +
+      '<p class="trend" style="margin-top:12px">' + esc(weekAdvice(w)) + "</p>";
+    $("shoe-now").innerHTML = shoeHtml();
+    var q = S.shoeQ;
+    pressed("sf-use", q.use); pressed("sf-sex", q.sex); pressed("sf-width", q.width); pressed("sf-arch", q.arch);
+    if (document.activeElement !== $("sf-budget")) $("sf-budget").value = q.budget;
+    Array.prototype.forEach.call($("sf-budget-q").querySelectorAll("button"), function (b) { b.classList.toggle("on", +b.dataset.v === q.budget); });
+    $("sf-out").innerHTML = finderHtml();
   }
 
   /* ---------- settings ---------- */
@@ -1775,18 +2169,50 @@
       $("run-pace").textContent = r.km && r.min ? "pace " + pace(r.km, r.min) : "ใส่ระยะกับเวลา แล้วแอปคำนวณ pace ให้";
     });
   });
+  $("run-type").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    runType = runType === b.dataset.v ? null : b.dataset.v; renderRun();
+  });
   $("run-save").addEventListener("click", function () {
     var r = runInputs();
     if (!r.km || !r.min || r.km > 100) { toast("ใส่ระยะ (กม.) และเวลา (นาที) ให้ครบก่อน"); return; }
-    S.runs.push({ ts: Date.now(), km: r1(r.km), min: r.min });
+    var run = { ts: Date.now(), km: r1(r.km), min: r.min };
+    if (runType) run.t = runType;
+    S.runs.push(run); runType = null;
     $("run-km").value = ""; $("run-min").value = ""; $("run-pace").textContent = "ใส่ระยะกับเวลา แล้วแอปคำนวณ pace ให้";
-    save(); renderPlan(); toast("บันทึกวิ่ง " + r1(r.km) + " กม. แล้ว");
+    save(); renderRun(); renderPlan(); toast("บันทึกวิ่ง " + r1(r.km) + " กม. แล้ว");
+  });
+  $("shoe-now").addEventListener("click", function (ev) {
+    if (ev.target.closest("#shoe-set")) {
+      var n = $("shoe-name").value.trim();
+      if (!n) { toast("ใส่ชื่อรุ่นรองเท้าก่อน"); $("shoe-name").focus(); return; }
+      S.shoe = cleanShoe({ name: n, ts: Date.now(), base: num($("shoe-base").value) || 0 });
+      save(); renderRun(); toast("เริ่มนับระยะ " + n + " แล้ว");
+    } else if (ev.target.closest("#shoe-clear")) {
+      if (!confirm("เริ่มนับคู่ใหม่? ระยะของคู่เดิมจะไม่ถูกนับต่อ (การวิ่งที่บันทึกไว้ยังอยู่ครบ)")) return;
+      S.shoe = null; save(); renderRun();
+    }
+  });
+  [["sf-use", "use"], ["sf-sex", "sex"], ["sf-width", "width"], ["sf-arch", "arch"]].forEach(function (p) {
+    $(p[0]).addEventListener("click", function (ev) {
+      var b = ev.target.closest("button"); if (!b) return;
+      S.shoeQ[p[1]] = b.dataset.v; save(); renderRun();
+    });
+  });
+  $("sf-budget-q").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    S.shoeQ.budget = +b.dataset.v; save(); renderRun();
+  });
+  $("sf-budget").addEventListener("change", function () {
+    var v = num(this.value);
+    if (v >= 500 && v <= 30000) { S.shoeQ.budget = Math.round(v); save(); }
+    renderRun();
   });
   $("sessions").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-delrun]"); if (!b) return;
     if (!confirm("ลบการวิ่งครั้งนี้?")) return;
     S.runs = S.runs.filter(function (r) { return String(r.ts) !== b.dataset.delrun; });
-    save(); renderHistory(); renderPlan();
+    save(); renderHistory(); renderPlan(); renderRun();
   });
 
   // food
@@ -1796,6 +2222,38 @@
       addFood($("fa-name").value, num($("fa-kcal").value), num($("fa-p").value));
       $("food-ai").innerHTML = ""; foodPending = null; toast("บันทึกมื้อนี้แล้ว");
     } else if (ev.target.closest("#fa-cancel")) { $("food-ai").innerHTML = ""; foodPending = null; }
+  });
+  $("quick").addEventListener("click", function (ev) {
+    var pb = ev.target.closest("#portion button");
+    if (pb) { portion = +pb.dataset.v; $("quick").innerHTML = quickHtml(); return; }
+    var b = ev.target.closest(".qf"); if (!b) return;
+    var list = b.dataset.src === "r" ? recentMeals() : FOODS.filter(function (x) { return recentMeals().map(function (r) { return r.n; }).indexOf(x.n) < 0; });
+    var f = list[+b.dataset.i]; if (!f) return;
+    var lab = { 0.5: "½", 1.5: "1½", 2: "2" }[portion];
+    addFood(f.n + (lab ? " ×" + lab : ""), Math.round(f.k * portion), Math.round(f.p * portion), portion);
+    toast("เพิ่ม " + f.n + (lab ? " ×" + lab : "") + " " + Math.round(f.k * portion) + " kcal แล้ว");
+    portion = 1; $("quick").innerHTML = quickHtml();
+  });
+  $("goal").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    S.prefs.goal = b.dataset.v; save(); renderFood();
+  });
+  $("pf-sex").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; S.profile.sex = b.dataset.v; save(); renderFood(); });
+  $("pf-act").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; S.profile.act = +b.dataset.v; save(); renderFood(); });
+  // keep typed age and height in state, so tapping sex or activity (which redraws the card) does not wipe them
+  [["pf-age", "age"], ["pf-h", "h"]].forEach(function (p) {
+    $(p[0]).addEventListener("input", function () { var v = num(this.value); S.profile[p[1]] = v || null; });
+    $(p[0]).addEventListener("change", function () { S.profile = cleanProfile(S.profile); save(); });
+  });
+  $("pf-go").addEventListener("click", function () {
+    S.profile = cleanProfile({ sex: S.profile.sex, age: num($("pf-age").value), h: num($("pf-h").value), act: S.profile.act });
+    var w = latestWeight();
+    if (!S.profile.sex || !S.profile.age || !S.profile.h) { toast("เลือกเพศ ใส่อายุและส่วนสูงให้ครบก่อน"); return; }
+    if (!w) { toast("บันทึกน้ำหนักตัวที่การ์ดด้านบนก่อน"); $("bw-input").focus(); return; }
+    var e = energyPlan(S.profile, w, S.prefs.goal);
+    S.prefs.kcal = e.kcal; S.prefs.protein = e.p; save(); renderFood();
+    $("pf-out").textContent = "ร่างกายใช้พลังงานราว " + e.tdee.toLocaleString("th-TH") + " kcal ต่อวัน เป้า" + { gain: "เพิ่มกล้าม +300", keep: "คงน้ำหนัก", lose: "ลดน้ำหนัก −500" }[S.prefs.goal] +
+      " = " + e.kcal.toLocaleString("th-TH") + " kcal และโปรตีน " + e.p + " g ต่อวัน (ค่าประมาณ ปรับตามน้ำหนักจริงทุก 2–3 สัปดาห์)";
   });
   $("manual-toggle").addEventListener("click", function () { $("manual").hidden = !$("manual").hidden; if (!$("manual").hidden) $("m-name").focus(); });
   $("m-add").addEventListener("click", function () {
@@ -1883,7 +2341,7 @@
   }
   $("clear").addEventListener("click", function () {
     if (!confirm("ลบข้อมูลทั้งหมดในเครื่องนี้ (การซ้อม วิ่ง อาหาร น้ำหนักตัว)? กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้")) return;
-    S.log = []; S.draft = {}; S.body = {}; S.food = []; S.weights = []; S.runs = []; S.summary = null;
+    S.log = []; S.draft = {}; S.body = {}; S.food = []; S.weights = []; S.runs = []; S.summary = null; S.shoe = null;
     save(); renderAll(); toast("ลบข้อมูลแล้ว");
   });
 
@@ -1892,10 +2350,11 @@
     b.addEventListener("click", function () {
       Array.prototype.forEach.call(tabs, function (x) { x.removeAttribute("aria-current"); });
       b.setAttribute("aria-current", "page");
-      ["today", "gym", "food", "history", "settings"].forEach(function (v) { $("v-" + v).hidden = v !== b.dataset.tab; });
+      ["today", "gym", "run", "food", "history", "settings"].forEach(function (v) { $("v-" + v).hidden = v !== b.dataset.tab; });
       if (b.dataset.tab === "history") renderHistory();
       if (b.dataset.tab === "gym") renderGym();
       if (b.dataset.tab === "food") renderFood();
+      if (b.dataset.tab === "run") renderRun();
       if (b.dataset.tab === "settings") renderSettings();
       if (b.dataset.tab === "today") renderPlan();
       window.scrollTo(0, 0);
@@ -1905,7 +2364,7 @@
   var tt;
   function toast(msg) { var t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("show"); }, 2600); }
 
-  function renderAll() { renderCheckin(); renderPlan(); renderHistory(); renderGym(); renderFood(); renderSettings(); }
+  function renderAll() { renderCheckin(); renderPlan(); renderHistory(); renderGym(); renderRun(); renderFood(); renderSettings(); }
 
   /* ---------- onboarding ---------- */
   var ICO = {
@@ -1913,13 +2372,16 @@
     timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',
     scan: '<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.5"/>',
     food: '<path d="M3 11h18a9 9 0 0 1-18 0zM8 7c0-1.5 1-1.5 1-3M12 7c0-1.5 1-1.5 1-3M16 7c0-1.5 1-1.5 1-3"/>',
-    chart: '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>'
+    chart: '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>',
+    run: '<circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>'
   };
   var STEPS = [
+    { img: "cover.jpg", t: "ยินดีต้อนรับสู่ KRYVOS", p: "โค้ชซ้อมรายวัน ยกเวท วิ่ง และการกิน อยู่ในแอปเดียว", b: ["บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ", "ข้อมูลทั้งหมดเก็บไว้ในเครื่องคุณเท่านั้น"] },
     { i: "check", t: "เช็กอินแล้วได้โปรแกรมทันที", p: "บอกแอปว่าซ้อมช่วงไหน แรงวันนี้เป็นยังไง และเมื่อยหรือเจ็บตรงไหน", b: ["แอปเลือก PUSH / PULL / LEGS หรือวันพัก จากการฟื้นตัวของกล้าม", "บอกเครื่อง เซ็ต ครั้ง และน้ำหนัก พร้อมเหตุผล", "ข้ามท่าที่ไม่อยากเล่น หรือเพิ่มท่าจากคำแนะนำได้"] },
     { i: "timer", t: "ระหว่างเล่น กด ✓ ทีละเซ็ต", p: "ตัวจับเวลาพักเริ่มเอง ครบแล้วมือถือสั่น", b: ["ใส่น้ำหนักกับจำนวนครั้งที่ทำได้จริง", "กด \"วิธีเล่น\" ดูท่าที่ถูกต้อง", "จบแล้วกด \"บันทึกการซ้อม\" ครั้งหน้าน้ำหนักจะปรับให้เอง"] },
     { i: "scan", t: "สแกนเครื่องในยิมด้วย AI", p: "แท็บ \"เครื่อง\" ถ่ายรูปเครื่อง แล้ว AI บอกว่าเล่นท่าไหนได้", b: [PROXY_URL ? "ใช้ได้เลย ไม่ต้องตั้งค่าอะไร" : "ใส่ Gemini API key ฟรีครั้งเดียว", "ปิดท่าที่ยิมไม่มีเครื่องได้"] },
-    { i: "food", t: "กินให้ถึงเป้า", p: "แท็บ \"กิน\" ถ่ายรูปอาหาร AI ประเมินแคลอรี่และโปรตีน", b: ["บันทึกน้ำหนักตัว แอปบอกว่าขึ้นตามเป้าไหม", "วิ่งแล้วบันทึกท้ายหน้า \"วันนี้\""] },
+    { i: "food", t: "กินให้ถึงเป้า", p: "แท็บ \"กิน\" ถ่ายรูปอาหาร AI ประเมินแคลอรี่และโปรตีน", b: ["เลือกเป้า เพิ่มกล้าม คงน้ำหนัก หรือลดน้ำหนัก", "แตะเมนูทั่วไปเพื่อเพิ่มเร็ว ไม่ต้องถ่ายรูป"] },
+    { i: "run", t: "วิ่งแล้วบันทึก", p: "แท็บ \"วิ่ง\" ดูระยะรายสัปดาห์ นับระยะรองเท้า และหารองเท้าวิ่งตามเท้าและงบ", b: ["วิ่งตั้งแต่ 5 กม. แอปลดเซ็ตวันขาให้เอง"] },
     { i: "chart", t: "ดูความก้าวหน้า", p: "แท็บ \"ประวัติ\" มีกราฟน้ำหนักแต่ละท่า และสรุป 7 วันพร้อมคำแนะนำจาก AI", b: ["สำรองข้อมูลที่ \"ตั้งค่า\" สัปดาห์ละครั้ง"] }
   ];
   function showOnboarding() {
@@ -1928,7 +2390,8 @@
     function done() { S.onboarded = true; save(); wrap.remove(); }
     function draw() {
       var s = STEPS[i], last = i === STEPS.length - 1;
-      wrap.innerHTML = '<div class="sheet"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[s.i] + "</svg></div>" +
+      wrap.innerHTML = '<div class="sheet">' + (s.img ? '<img class="cover" src="' + s.img + '" alt="โลโก้ KRYVOS รูปคนกำลังวิ่ง" width="900" height="900">' :
+        '<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[s.i] + "</svg></div>") +
         "<h3>" + s.t + "</h3><p>" + s.p + "</p><ul>" + s.b.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" +
         '<div class="dots" aria-hidden="true">' + STEPS.map(function (_, k) { return '<i class="' + (k === i ? "on" : "") + '"></i>'; }).join("") + "</div>" +
         '<div class="acts"><button type="button" class="skip" data-o="skip">' + (last ? "" : "ข้าม") + '</button><button type="button" class="btn" data-o="next">' + (last ? "เริ่มใช้เลย" : "ถัดไป") + "</button></div></div>";
