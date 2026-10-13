@@ -1886,6 +1886,7 @@
   var portion = 1;
   function recentMeals() {
     var seen = {}, out = [];
+    seen["ตัวอย่าง (3 มื้อ)"] = seen[t("ตัวอย่าง (3 มื้อ)")] = 1; // sample data is a whole day, not a meal to add again
     for (var i = S.food.length - 1; i >= 0 && out.length < 6; i--) {
       var f = S.food[i], base = f.name.replace(/ ×[\d.½]+$/, "");
       if (seen[base] || Date.now() - f.ts > 30 * 864e5) continue;

@@ -24,3 +24,9 @@ test("last welcome page has no empty skip button", () => {
   assert.doesNotMatch(h, /\(last \? "" : t\("ข้าม"\)\)/);
   assert.match(h, /last \? "<span><\/span>"/);
 });
+
+test("sample data's food is not offered as a usual meal", () => {
+  const now = Date.now();
+  const a = load(["recentMeals"], { S: { food: [{ ts: now - 864e5, name: "ตัวอย่าง (3 มื้อ)", kcal: 2640, p: 100 }, { ts: now, name: "ข้าวมันไก่ต้ม", kcal: 585, p: 25 }] } });
+  assert.deepEqual([...a.recentMeals().map((m) => m.n)], ["ข้าวมันไก่ต้ม"]);
+});
