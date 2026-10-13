@@ -1,6 +1,6 @@
 // Offline support: keep the app shell cached so it opens in the gym without internet.
 // Bump VERSION whenever index.html changes so phones pick up the new version.
-var VERSION = "train-today-v12";
+var VERSION = "train-today-v13";
 var SHELL = ["./", "index.html", "manifest.json", "cover.jpg", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", function (e) {

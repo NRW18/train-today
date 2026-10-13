@@ -138,6 +138,20 @@
   .rest-list { margin: 12px 0 0; padding-left: 20px; }
   .rest-list li { margin-bottom: 6px; }
 
+  /* how-to videos */
+  .yt { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .yt a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; background: var(--card); color: var(--ink); font-size: .86rem; font-weight: 600; text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); }
+  .yt a:hover { box-shadow: inset 0 0 0 1.5px var(--red); }
+  .yt svg, .yt-chip svg { width: 18px; height: 18px; color: #E62117; flex: none; }
+  .yt-scan { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: .84rem; color: var(--soft); }
+  .yt-scan > span { width: 100%; }
+  .yt-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; background: var(--sunk); color: var(--ink); font-weight: 600; text-decoration: none; }
+  .howto-row { border-top: 1px solid var(--line); padding: 12px 0; }
+  .howto-row:first-child { border-top: 0; }
+  .howto-n { font-weight: 600; }
+  .howto-n small { display: block; color: var(--soft); font-weight: 400; font-size: .82rem; }
+  #howto-out { margin-top: 6px; }
+
   /* run tab */
   .run-type { margin-top: 10px; }
   .chip[aria-pressed="true"], .chip.on { background: var(--blue-bg); color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); font-weight: 600; }
@@ -612,6 +626,13 @@
       </div>
     </section>
 
+    <section class="card" aria-labelledby="howto-h">
+      <h2 id="howto-h">สงสัยท่าไหน ดูวิดีโอสอน</h2>
+      <label class="field txt"><input id="howto-q" type="search" placeholder="พิมพ์ชื่อท่าหรือเครื่อง" aria-label="ค้นหาท่า" autocomplete="off"></label>
+      <div id="howto-out" aria-live="polite"></div>
+      <p class="hint">เปิดผลค้นหาใน YouTube ดูหลาย ๆ คลิปแล้วเลือกที่สอนชัด เริ่มจากน้ำหนักเบาก่อนเสมอ</p>
+    </section>
+
     <section class="card">
       <h2>เครื่องที่ยิมคุณมี</h2>
       <p class="hint" style="margin:0 0 6px">ท่าที่เปิดไว้คือท่าที่แอปเลือกให้ได้ <span class="ai-tag">สแกนเจอ</span> คือเครื่องที่ AI เห็นในรูป</p>
@@ -750,6 +771,14 @@
     { id: "leg_curl", name: "ซีทเต็ดเลกเคิร์ล", day: "legs", m: ["hamstrings"], j: ["knee"], t: "kg" },
     { id: "calf_raise", name: "คาล์ฟเรส (เครื่อง)", day: "legs", m: ["calves"], j: ["ankle"], t: "kg" }
   ];
+  // English names, used only to search YouTube (there are far more English form videos)
+  var EN_NAME = {
+    chest_press: "machine chest press", shoulder_press: "machine shoulder press", pec_deck: "pec deck machine fly",
+    lateral_raise: "dumbbell lateral raise", triceps_pushdown: "cable triceps pushdown", pushup: "push up",
+    lat_pulldown: "lat pulldown", seated_row: "seated cable row machine", rear_delt: "reverse pec deck rear delt fly",
+    db_curl: "dumbbell bicep curl", plank: "plank", leg_press: "leg press machine", leg_extension: "leg extension machine",
+    leg_curl: "seated leg curl machine", calf_raise: "machine calf raise"
+  };
   // How to do each exercise, and the mistakes people make most often.
   var GUIDE = {
     chest_press: { how: ["ปรับเบาะให้ด้ามจับอยู่ระดับกลางอก", "ดันออกจนแขนเกือบตึง ไม่ล็อกศอก", "ผ่อนกลับช้า ๆ 2–3 วินาที ให้รู้สึกอกยืด"], miss: ["ยักไหล่ขึ้นหาหู", "ปล่อยน้ำหนักกระแทกกลับ"] },
@@ -842,6 +871,8 @@
     profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 },
     today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
   function strList(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, n).map(function (x) { return x.slice(0, 140); }); }
+  // a short plain-English name (letters, digits, spaces, a few marks) or nothing
+  function cleanEn(x) { return typeof x === "string" && /^[A-Za-z0-9 ().&\/-]{2,60}$/.test(x.trim()) ? x.trim() : ""; }
   function cleanGuide(g) { return g && typeof g === "object" ? { how: strList(g.how, 4), miss: strList(g.miss, 3) } : null; }
   function cleanCustom(list) {
     return (Array.isArray(list) ? list : []).filter(function (e) {
@@ -850,7 +881,9 @@
         Array.isArray(e.j) && e.j.every(function (j) { return JOINTS[j]; });
     }).map(function (e) {
       var g = cleanGuide(e.guide);
-      return { id: e.id, name: e.name.slice(0, 40), day: e.day, m: e.m, j: e.j, t: "kg", ai: true, guide: g && g.how.length ? g : null };
+      var o = { id: e.id, name: e.name.slice(0, 40), day: e.day, m: e.m, j: e.j, t: "kg", ai: true, guide: g && g.how.length ? g : null };
+      var en = cleanEn(e.en); if (en) o.en = en;
+      return o;
     });
   }
   // Sets typed or ticked during a workout, kept so a phone that closes the tab mid-session loses nothing.
@@ -1338,14 +1371,43 @@
     if (g) {
       return '<details class="guide" data-g="' + e.id + '"' + open + '><summary>วิธีเล่น</summary><div class="guide-body"><b>ทำอย่างไร</b><ol>' +
         g.how.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ol><b>จุดที่พลาดบ่อย</b><ul class="miss">' +
-        g.miss.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div></details>";
+        g.miss.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" + exVideos(e) + "</div></details>";
     }
     if (e.ai) {
       return '<details class="guide" data-g="' + e.id + '"' + open + '><summary>วิธีเล่น</summary><div class="guide-body">ท่านี้ AI เพิ่มเข้ามา ยังไม่มีคำอธิบาย' +
         (hasAI() ? '<button class="btn line" type="button" data-explain="' + e.id + '" style="margin-top:8px">ให้ AI อธิบายท่านี้</button>' : " (ใส่ Gemini key ที่แท็บเครื่อง แล้วให้ AI อธิบายได้)") +
-        "</div></details>";
+        exVideos(e) + "</div></details>";
     }
-    return "";
+    return '<details class="guide" data-g="' + e.id + '"' + open + '><summary>วิธีเล่น</summary><div class="guide-body">' + exVideos(e) + "</div></details>";
+  }
+
+  /* ---------- how-to videos: YouTube search links ----------
+     Search links instead of fixed videos: they never go dead, always show current videos,
+     and need no API key. Thai search first, English as a second choice (many more videos). */
+  function ytUrl(q) { return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q); }
+  function thName(name) { return String(name).replace(/\s*\([^)]*\)/g, "").trim(); }
+  var YT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3z"/></svg>';
+  // compact: one small link per item (scan results); otherwise a Thai and an English button
+  function ytLinks(th, en, compact) {
+    var t = thName(th);
+    if (compact) return '<a class="yt-chip" href="' + ytUrl("วิธีเล่น " + t) + '" target="_blank" rel="noopener noreferrer">' + YT_ICON + esc(t) + "</a>";
+    return '<div class="yt"><a href="' + ytUrl("วิธีเล่น " + t + " ท่าที่ถูกต้อง") + '" target="_blank" rel="noopener noreferrer">' + YT_ICON + "วิดีโอภาษาไทย</a>" +
+      (en ? '<a href="' + ytUrl("how to " + en + " proper form") + '" target="_blank" rel="noopener noreferrer">' + YT_ICON + "วิดีโอภาษาอังกฤษ</a>" : "") + "</div>";
+  }
+  function exVideos(e) { return ytLinks(e.name, EN_NAME[e.id] || e.en || ""); }
+
+  // "Which exercise are you unsure about?": find it in the app's list, or search YouTube for anything typed.
+  function howtoHtml(q) {
+    q = (q || "").trim();
+    var ql = q.toLowerCase();
+    var list = q ? EX.filter(function (e) { return e.name.toLowerCase().indexOf(ql) >= 0 || (EN_NAME[e.id] || e.en || "").toLowerCase().indexOf(ql) >= 0; }) : [];
+    var h = list.slice(0, 8).map(function (e) {
+      return '<div class="howto-row"><div class="howto-n">' + esc(e.name) + "<small>" + names(e.m.slice(0, 2), MUSCLES) + "</small></div>" + exVideos(e) + "</div>";
+    }).join("");
+    if (q) h += '<div class="howto-row"><div class="howto-n">ค้น "' + esc(q) + '" ใน YouTube<small>' + (list.length ? "หรือดูผลค้นหาอื่น" : "ไม่มีท่านี้ในแอป แต่ยังค้นวิดีโอได้") + "</small></div>" +
+      '<div class="yt"><a href="' + ytUrl("วิธีเล่น " + q) + '" target="_blank" rel="noopener noreferrer">' + YT_ICON + "ค้นใน YouTube</a></div></div>";
+    else h = '<p class="hint">ตัวอย่าง: เลกเพรส, ดัมเบล, squat, ไหล่</p>';
+    return h;
   }
 
   function explain(id, btn) {
@@ -1471,6 +1533,7 @@
       });
     });
     $("equip").innerHTML = h;
+    $("howto-out").innerHTML = howtoHtml($("howto-q").value);
     $("only-seen").hidden = !S.seen.length;
     var k = getKey();
     $("key-setup").hidden = hasAI() && !ownKeyOpen;
@@ -1498,7 +1561,7 @@
       "- If it supports a common exercise NOT in the known list, add it to new_exercises with a short Thai name (machine type in brackets), day push/pull/legs, muscles (main first, keys above), joints it loads (keys above).",
       "- If there is no gym equipment, return empty arrays.",
       "Return JSON only, exactly this shape:",
-      '{"equipment":[{"label_th":"string","known":["id"],"confidence":0.0}],"new_exercises":[{"name_th":"string","day":"push","muscles":["chest"],"joints":["shoulder"]}]}'
+      '{"equipment":[{"label_th":"string","label_en":"English machine name","known":["id"],"confidence":0.0}],"new_exercises":[{"name_th":"string","name_en":"English exercise name","day":"push","muscles":["chest"],"joints":["shoulder"]}]}'
     ].join("\n");
   }
 
@@ -1571,7 +1634,7 @@
       var ids = (Array.isArray(q.known) ? q.known : []).filter(function (id) { return EXBY[id]; });
       var label = typeof q.label_th === "string" ? q.label_th.slice(0, 50) : "เครื่องออกกำลังกาย";
       var conf = typeof q.confidence === "number" ? Math.max(0, Math.min(1, q.confidence)) : 0.5;
-      out.equipment.push({ label: label, ids: ids, conf: conf });
+      out.equipment.push({ label: label, en: cleanEn(q.label_en), ids: ids, conf: conf });
     });
     (r && Array.isArray(r.new_exercises) ? r.new_exercises : []).slice(0, 5).forEach(function (n) {
       if (!n || typeof n.name_th !== "string" || !DAYS[n.day]) return;
@@ -1580,7 +1643,7 @@
       var name = n.name_th.trim().slice(0, 40);
       if (!m.length || !name || taken[name.toLowerCase()]) return;
       taken[name.toLowerCase()] = 1;
-      out.fresh.push({ name: name, day: n.day, m: m, j: j });
+      out.fresh.push({ name: name, en: cleanEn(n.name_en), day: n.day, m: m, j: j });
     });
     return out;
   }
@@ -1628,7 +1691,11 @@
         h += '<label><input type="checkbox" data-new="' + k + '" checked><span>' + esc(n.name) + '<span class="newtag">ท่าใหม่</span><small>' +
           DAYS[n.day].name + " · " + names(n.m, MUSCLES) + (n.j.length ? " · โดน" + names(n.j, JOINTS) : "") + "</small></span></label>";
       });
-      h += '</div><button class="btn" type="button" data-apply="' + id + '" style="margin-top:10px">เพิ่มเข้าแอป</button>';
+      h += "</div>";
+      var vids = r.equipment.map(function (q) { return { th: q.label, en: q.en ? "how to use " + q.en : "" }; })
+        .concat(r.fresh.map(function (n) { return { th: n.name, en: n.en }; }));
+      h += '<div class="yt-scan"><span>ดูวิธีเล่นใน YouTube</span>' + vids.map(function (v) { return ytLinks(v.th, v.en, true); }).join("") + "</div>";
+      h += '<button class="btn" type="button" data-apply="' + id + '" style="margin-top:10px">เพิ่มเข้าแอป</button>';
       body.innerHTML = h;
       box._fresh = r.fresh;
     }).catch(function (e) {
@@ -1648,7 +1715,9 @@
     Array.prototype.forEach.call(box.querySelectorAll("input[data-new]:checked"), function (cb) {
       var n = box._fresh[+cb.dataset.new];
       var exId = "c_" + Date.now().toString(36) + "_" + cb.dataset.new;
-      S.custom.push({ id: exId, name: n.name, day: n.day, m: n.m, j: n.j, t: "kg", ai: true });
+      var c = { id: exId, name: n.name, day: n.day, m: n.m, j: n.j, t: "kg", ai: true };
+      if (n.en) c.en = n.en;
+      S.custom.push(c);
       S.seen.push(exId);
       added++;
     });
@@ -2117,6 +2186,7 @@
     S.prefs.rest = +b.dataset.v; save(); renderSettings();
   });
 
+  $("howto-q").addEventListener("input", function () { $("howto-out").innerHTML = howtoHtml(this.value); });
   $("equip").addEventListener("change", function (ev) {
     var id = ev.target.dataset.ex; if (!id) return;
     S.off = S.off.filter(function (x) { return x !== id; });

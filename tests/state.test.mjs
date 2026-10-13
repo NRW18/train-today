@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
-const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
+const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
   "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
