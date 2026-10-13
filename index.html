@@ -328,6 +328,24 @@
   .toggle input { width: 22px; height: 22px; accent-color: var(--blue); flex: none; }
   .toggle .lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
   .grp { font-family: var(--head); font-weight: 700; margin: 14px 0 2px; color: var(--soft); font-size: 0.85rem; letter-spacing: .04em; }
+  /* photo cards: the whole scan frame opens the camera */
+  .shoot .sub { margin: -6px 0 0; color: var(--blue); font-size: .95rem; }
+  .shot-btn { display: block; margin: 18px auto 4px; max-width: 300px; text-align: center; cursor: pointer; border-radius: 28px; color: var(--blue); -webkit-user-select: none; user-select: none; }
+  .shot-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 6px; }
+  .frame { position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; transition: transform .15s; }
+  .shot-btn:hover .frame { transform: scale(1.02); }
+  .shot-btn:active .frame { transform: scale(.98); }
+  .fc { position: absolute; width: 30%; height: 30%; border: 12px solid currentColor; }
+  .fc.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 40px; }
+  .fc.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 40px; }
+  .fc.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 40px; }
+  .fc.br { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 40px; }
+  .fbar { position: absolute; left: 25%; right: 25%; top: 50%; height: 12px; margin-top: -6px; background: currentColor; border-radius: 3px; }
+  .fcap { display: block; margin-top: 14px; font-size: 1rem; }
+  .shot-btn.busy { opacity: .6; pointer-events: none; }
+  .shot-btn.busy .fbar { animation: scanline 1.2s ease-in-out infinite alternate; }
+  @keyframes scanline { from { transform: translateY(-60px); } to { transform: translateY(60px); } }
+  @media (prefers-reduced-motion: reduce) { .frame { transition: none; } .shot-btn.busy .fbar { animation: none; } }
   .scan-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #2E6FD8, #4B8BF0); color: #fff; }
   .scan-btn svg { width: 22px; height: 22px; }
   .scan-btn.busy { opacity: .6; pointer-events: none; }
@@ -559,21 +577,23 @@
 
   <!-- FOOD + BODY WEIGHT -->
   <main id="v-food" hidden>
+    <section class="card shoot" aria-labelledby="food-shoot-h">
+      <h2 id="food-shoot-h">ถ่ายรูปอาหาร</h2>
+      <p class="sub">อาหารของคุณน่ากินรึเปล่าเราขอเช็กแคลหน่อยสิ</p>
+      <label class="shot-btn" id="food-label" tabindex="0" role="button" aria-label="ถ่ายรูปอาหาร (เปิดกล้อง)">
+        <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">(เปิดกล้อง)</span>
+        <input type="file" id="food-input" accept="image/*" capture="environment" hidden>
+      </label>
+      <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
+      <div id="food-ai" aria-live="polite"></div>
+    </section>
+
     <section class="card" aria-labelledby="eat-h">
       <h2 id="eat-h">วันนี้กินไปเท่าไร</h2>
       <div id="meters"></div>
       <div id="meals"></div>
-      <div class="row2">
-        <label class="btn scan-btn" id="food-label" style="margin-top:10px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.5"/></svg>
-          <span>ถ่ายรูปอาหาร</span>
-          <input type="file" id="food-input" accept="image/*" capture="environment" hidden>
-        </label>
-        <button class="btn line" type="button" id="manual-toggle">เพิ่มเอง</button>
-      </div>
+      <button class="btn line" type="button" id="manual-toggle" aria-controls="manual" aria-expanded="false">เพิ่มเอง</button>
       <div class="quick" id="quick"></div>
-      <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
-      <div id="food-ai" aria-live="polite"></div>
       <div id="manual" hidden>
         <div class="grid3">
           <label class="field txt"><input id="m-name" placeholder="อาหาร" aria-label="ชื่ออาหาร"></label>
@@ -635,9 +655,20 @@
 
   <!-- GYM: scan machines + equipment list -->
   <main id="v-gym" hidden>
-    <section class="card" aria-labelledby="scan-h">
-      <h2 id="scan-h">สแกนเครื่องในยิม</h2>
-      <p class="hint" style="margin:0 0 4px">ถ่ายรูปเครื่องทีละเครื่อง AI จะบอกว่าเป็นเครื่องอะไร เล่นท่าไหนได้ แล้วเพิ่มเข้าแอปให้</p>
+    <section class="card shoot" aria-labelledby="scan-h">
+      <h2 id="scan-h">ถ่ายรูปเครื่องเล่น</h2>
+      <p class="sub">เครื่องเล่นของคุณเป็นแบบไหนเราขอดูหน่อย!</p>
+
+      <div id="key-ready" hidden>
+        <label class="shot-btn" id="scan-label" tabindex="0" role="button" aria-label="ถ่ายรูปเครื่องเล่น (เปิดกล้อง)">
+          <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">(เปิดกล้อง)</span>
+          <input type="file" id="scan-input" accept="image/*" capture="environment" hidden>
+        </label>
+        <p class="hint">ถ่ายรูปเครื่องทีละเครื่อง AI จะบอกว่าเป็นเครื่องอะไร เล่นท่าไหนได้ แล้วเพิ่มเข้าแอปให้</p>
+        <p class="hint">ถ่ายให้เห็นทั้งเครื่อง เลี่ยงไม่ให้มีคนในภาพ รูปจะถูกส่งไปให้ Google Gemini วิเคราะห์ (แผนฟรี Google อาจนำไปปรับปรุงบริการ)</p>
+        <div id="scan-results" aria-live="polite"></div>
+        <p class="hint" style="margin-top:12px" id="key-status"></p>
+      </div>
 
       <div id="key-setup">
         <p class="q">ใส่ Gemini API key (ฟรี ใส่ครั้งเดียว)</p>
@@ -649,17 +680,6 @@
         <label class="field" style="margin-top:6px"><input type="password" id="key-input" autocomplete="off" spellcheck="false" placeholder="วางคีย์ที่นี่" aria-label="Gemini API key" style="font-family:var(--body);font-weight:500"></label>
         <button class="btn" type="button" id="key-save">บันทึกคีย์</button>
         <p class="hint">คีย์เก็บไว้ในเครื่องนี้เท่านั้น อย่าส่งคีย์ให้ใคร</p>
-      </div>
-
-      <div id="key-ready" hidden>
-        <label class="btn scan-btn" id="scan-label">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.5"/></svg>
-          <span>ถ่ายรูปเครื่อง</span>
-          <input type="file" id="scan-input" accept="image/*" capture="environment" hidden>
-        </label>
-        <p class="hint">ถ่ายให้เห็นทั้งเครื่อง เลี่ยงไม่ให้มีคนในภาพ รูปจะถูกส่งไปให้ Google Gemini วิเคราะห์ (แผนฟรี Google อาจนำไปปรับปรุงบริการ)</p>
-        <div id="scan-results" aria-live="polite"></div>
-        <p class="hint" style="margin-top:12px" id="key-status"></p>
       </div>
     </section>
 
@@ -2387,6 +2407,12 @@
   $("scan-results").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-apply]"); if (b) applyShot(b.dataset.apply);
   });
+  ["scan-label", "food-label"].forEach(function (id) {
+    $(id).addEventListener("keydown", function (ev) {
+      if (ev.key !== "Enter" && ev.key !== " ") return;
+      ev.preventDefault(); this.querySelector("input").click();
+    });
+  });
   $("act-more").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="history"]').click(); });
   $("go-scan").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="gym"]').click(); });
 
@@ -2484,7 +2510,10 @@
     $("pf-out").textContent = t("ร่างกายใช้พลังงานราว ") + e.tdee.toLocaleString(LOCALE) + t(" kcal ต่อวัน เป้า") + { gain: t("เพิ่มกล้าม +300"), keep: t("คงน้ำหนัก"), lose: t("ลดน้ำหนัก −500") }[S.prefs.goal] +
       " = " + e.kcal.toLocaleString(LOCALE) + t(" kcal และโปรตีน ") + e.p + t(" g ต่อวัน (ค่าประมาณ ปรับตามน้ำหนักจริงทุก 2–3 สัปดาห์)");
   });
-  $("manual-toggle").addEventListener("click", function () { $("manual").hidden = !$("manual").hidden; if (!$("manual").hidden) $("m-name").focus(); });
+  $("manual-toggle").addEventListener("click", function () {
+    $("manual").hidden = !$("manual").hidden; this.setAttribute("aria-expanded", $("manual").hidden ? "false" : "true");
+    if (!$("manual").hidden) $("m-name").focus();
+  });
   $("m-add").addEventListener("click", function () {
     var k = num($("m-kcal").value), p = num($("m-p").value);
     if (!$("m-name").value.trim() || (k == null && p == null)) { toast(t("ใส่ชื่ออาหาร และแคลอรี่หรือโปรตีนอย่างน้อย 1 อย่าง")); return; }
