@@ -1462,7 +1462,7 @@
       S.custom.forEach(function (c) { if (c.id === id) c.guide = g; });
       rebuildEx(); save(); openGuides[id] = true; renderPlan();
     }).catch(function (err) {
-      btn.disabled = false; btn.textContent = t("ลองอีกครั้ง"); toast(errText(err));
+      btn.disabled = false; btn.textContent = t("ลองอีกครั้ง"); toast(errText(err, "explain"));
     });
   }
 
@@ -1685,7 +1685,14 @@
     return out;
   }
 
-  function errText(e) {
+  // job: what the AI was asked to do ("scan", "food", "week", "explain"), so a bad answer gets the right message
+  var AI_FAIL = {
+    scan: t("สแกนไม่สำเร็จ ลองถ่ายใหม่ให้เห็นเครื่องชัด ๆ"),
+    food: t("ประเมินอาหารไม่สำเร็จ ลองถ่ายใหม่ให้เห็นอาหารชัด ๆ"),
+    week: t("AI สรุปไม่สำเร็จ ลองกดใหม่อีกครั้ง"),
+    explain: t("AI อธิบายท่าไม่สำเร็จ ลองกดใหม่อีกครั้ง")
+  };
+  function errText(e, job) {
     if (e && e.message === "nokey") return t("ยังไม่ได้ใส่ Gemini key (ใส่ที่แท็บเครื่อง)");
     if (!navigator.onLine || (e && e.message === "offline")) return t("ไม่มีอินเทอร์เน็ต ส่วนที่ใช้ AI ต้องต่อเน็ต (ส่วนอื่นของแอปใช้ออฟไลน์ได้)");
     if (e && e.proxy) {
@@ -1697,7 +1704,7 @@
     if (e && (e.status === 400 || e.status === 401 || e.status === 403)) return t("คีย์ใช้ไม่ได้ ลองลบคีย์แล้วใส่ใหม่");
     if (e && e.status === 429) return t("ใช้โควตาฟรีครบชั่วคราว รอสักครู่แล้วลองใหม่");
     if (e && e.message === "read") return t("เปิดรูปนี้ไม่ได้ ลองถ่ายใหม่");
-    return t("สแกนไม่สำเร็จ ลองถ่ายใหม่ให้เห็นเครื่องชัด ๆ");
+    return AI_FAIL[job] || AI_FAIL.scan;
   }
 
   function scan(file) {
@@ -1736,7 +1743,7 @@
       body.innerHTML = h;
       box._fresh = r.fresh;
     }).catch(function (e) {
-      box.querySelector("div").innerHTML = '<div class="err">' + esc(errText(e)) + "</div>";
+      box.querySelector("div").innerHTML = '<div class="err">' + esc(errText(e, "scan")) + "</div>";
     }).then(function () { $("scan-label").classList.remove("busy"); });
   }
 
@@ -1937,7 +1944,7 @@
         t('<p class="hint">ตัวเลขจาก AI เป็นค่าประมาณ อาจคลาดได้ราว 20–30% แก้ได้ก่อนบันทึก</p>') +
         t('<div class="row2"><button class="btn" type="button" id="fa-save">บันทึกมื้อนี้</button><button class="btn line" type="button" id="fa-cancel">ไม่บันทึก</button></div>');
     }).catch(function (e) {
-      out.querySelector(".shot div").innerHTML = '<div class="err">' + esc(errText(e)) + "</div>";
+      out.querySelector(".shot div").innerHTML = '<div class="err">' + esc(errText(e, "food")) + "</div>";
     }).then(function () { $("food-label").classList.remove("busy"); });
   }
 
@@ -2118,7 +2125,7 @@
       if (!text) throw new Error("empty");
       S.summary = { ts: Date.now(), text: text, tips: strList(r.tips_th, 4) };
       save(); renderWeek();
-    }).catch(function (e) { toast(errText(e)); }).then(function () { btn.disabled = false; btn.textContent = t("ให้ AI สรุปและแนะนำ"); });
+    }).catch(function (e) { toast(errText(e, "week")); }).then(function () { btn.disabled = false; btn.textContent = t("ให้ AI สรุปและแนะนำ"); });
   }
 
   /* ---------- sample data ---------- */

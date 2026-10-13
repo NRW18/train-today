@@ -9,6 +9,17 @@ const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 export function fnSource(name) {
   const start = html.indexOf("function " + name + "(");
   if (start < 0) throw new Error("function " + name + " not found in index.html");
+  return braced(start, name);
+}
+
+// Source of a `var NAME = { ... };` that spans several lines.
+export function varBlock(name) {
+  const start = html.indexOf("var " + name + " = {");
+  if (start < 0) throw new Error("var " + name + " not found in index.html");
+  return braced(start, name) + ";";
+}
+
+function braced(start, name) {
   let i = html.indexOf("{", start), depth = 0;
   for (; i < html.length; i++) {
     const c = html[i];
@@ -36,8 +47,11 @@ export function load(names, globals = {}, vars = []) {
   // the app's language helpers, in Thai (the language the code is written in); a test can override them
   const lang = { t: (x) => x, tf: (x, o) => String(x).replace(/\{(\w+)\}/g, (m, k) => (o[k] != null ? o[k] : m)), LANG: "th", LOCALE: "th-TH", AI_LANG: "Thai" };
   const ctx = vm.createContext({ ...lang, ...globals });
-  vm.runInContext(vars.map(varSource).concat(names.map(fnSource)).join("\n"), ctx);
+  vm.runInContext(vars.map(anyVar).concat(names.map(fnSource)).join("\n"), ctx);
   return ctx;
 }
 
 export { html };
+
+// a one-line var, or a multi-line object var
+function anyVar(name) { try { return varSource(name); } catch (e) { return varBlock(name); } }
