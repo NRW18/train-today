@@ -25,6 +25,11 @@
 - **การเลือกโปรแกรมและน้ำหนัก:** เป็นกฎจากหลักการฝึกความแข็งแรง เพื่อให้คาดเดาได้และอธิบายเหตุผลได้ทุกครั้ง
 - **ข้อมูลการซ้อม:** เก็บในเครื่องของผู้ใช้เท่านั้น
 
+## แอป Android
+- **ดาวน์โหลด APK (ทดสอบ):** https://github.com/NRW18/train-today/releases/tag/android-test
+- สร้างอัตโนมัติด้วย GitHub Actions (`.github/workflows/android.yml`) เป็น Trusted Web Activity ห่อเว็บแอปนี้ (`android/`)
+- ไฟล์ทดสอบเซ็นด้วยกุญแจชั่วคราวที่สร้างใหม่ทุกครั้ง ถ้าจะลง Google Play จริง ต้องใช้กุญแจถาวรที่เก็บเป็น secret ของ repo และวางไฟล์ assetlinks.json ที่ https://nrw18.github.io/.well-known/ เพื่อซ่อนแถบที่อยู่เว็บ
+
 ## ตัวกลาง AI (proxy/worker.js)
 Cloudflare Worker ที่เก็บ Gemini key เป็น secret ผู้ใช้จึงใช้ AI ได้ทันทีโดยไม่ต้องใส่คีย์ รับเฉพาะคำขอจากแอปนี้ ตรวจรูปแบบคำขอ และจำกัดคนละ 40 ครั้งต่อวันผ่าน Workers KV ไม่ส่งรายละเอียด error ของ Google กลับไปที่แอป
 
