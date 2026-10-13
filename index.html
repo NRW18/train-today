@@ -619,6 +619,20 @@
       return { id: e.id, name: e.name.slice(0, 40), day: e.day, m: e.m, j: e.j, t: "kg", ai: true, guide: g && g.how.length ? g : null };
     });
   }
+  // Sets typed or ticked during a workout, kept so a phone that closes the tab mid-session loses nothing.
+  // Older than 12 h means the workout was abandoned, so start fresh.
+  var DRAFT_TTL = 12 * 36e5;
+  function cleanDraft(d, ts) {
+    var out = {};
+    if (!d || typeof d !== "object" || !(Date.now() - ts < DRAFT_TTL)) return out;
+    Object.keys(d).forEach(function (id) {
+      if (!Array.isArray(d[id])) return;
+      out[id] = d[id].slice(0, 10).filter(function (s) { return s && typeof s === "object"; }).map(function (s) {
+        return { kg: s.kg == null ? "" : String(s.kg).slice(0, 8), reps: s.reps == null ? "" : String(s.reps).slice(0, 8), done: !!s.done, ed: !!s.ed };
+      });
+    });
+    return out;
+  }
   function okTs(x) { return x && isFinite(x.ts) && x.ts > 0; }
   function cleanFood(a) { return (Array.isArray(a) ? a : []).filter(okTs).map(function (f) { return { ts: f.ts, name: String(f.name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, +f.kcal || 0)), p: Math.max(0, Math.min(300, +f.p || 0)) }; }); }
   function cleanW(a) { return (Array.isArray(a) ? a : []).filter(function (w) { return okTs(w) && +w.kg > 20 && +w.kg < 300; }).map(function (w) { return { ts: w.ts, kg: +w.kg }; }); }
@@ -646,6 +660,7 @@
         S.prefs = cleanPrefs(d.prefs);
         if (d.summary && typeof d.summary.text === "string") S.summary = d.summary;
         S.onboarded = !!d.onboarded;
+        S.draft = cleanDraft(d.draft, d.draftTs);
         if (d.today && d.today.day === dayKey(Date.now())) { // skip/add choices only last for today
           S.today = { skip: strList(d.today.skip, 40), add: strList(d.today.add, 20) };
         }
@@ -662,6 +677,7 @@
       o.slot = S.slot; o.energy = S.energy; o.body = S.body; o.bodyDay = dayKey(Date.now()); o.scanned = S.scanned; o.summary = S.summary;
       o.today = { day: dayKey(Date.now()), skip: S.today.skip, add: S.today.add };
       o.onboarded = S.onboarded;
+      o.draft = S.draft; o.draftTs = Date.now();
       localStorage.setItem(KEY, JSON.stringify(o));
     } catch (e) { toast("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า"); }
   }
@@ -1519,6 +1535,7 @@
     var s = S.draft[t.dataset.ex][+t.dataset.i];
     s[t.dataset.f] = t.value; s.ed = true;
   });
+  $("plan").addEventListener("change", function (ev) { if (ev.target.dataset.ex) save(); });
   $("plan").addEventListener("click", function (ev) {
     if (ev.target.closest("#finish")) { finish(); return; }
     if (ev.target.closest("#add-toggle")) { S.picker = !S.picker; renderPlan(); return; }
@@ -1542,6 +1559,7 @@
     var b = ev.target.closest(".tick"); if (!b) return;
     var s = S.draft[b.dataset.ex][+b.dataset.i];
     s.done = !s.done; b.setAttribute("aria-pressed", s.done ? "true" : "false");
+    save();
     if (s.done) startRest();
   });
   $("plan").addEventListener("toggle", function (ev) {
@@ -1551,7 +1569,10 @@
   $("rest-minus").addEventListener("click", function () { restEnd = Math.max(Date.now(), restEnd - 15000); drawRest(); });
   $("rest-plus").addEventListener("click", function () { restEnd += 15000; restTotal += 15; restBuzzed = false; $("rest").classList.remove("done"); $("rest-lb").textContent = "พักก่อนเซ็ตต่อไป"; drawRest(); });
   $("rest-skip").addEventListener("click", stopRest);
-  document.addEventListener("visibilitychange", function () { if (!document.hidden && restTick) drawRest(); });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) save(); // the phone may close a hidden tab: keep half-typed sets
+    else if (restTick) drawRest();
+  });
   $("rest-sec").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
     S.prefs.rest = +b.dataset.v; save(); renderSettings();

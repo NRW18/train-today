@@ -1,0 +1,87 @@
+// Tests for saving and loading user data (index.html "state"). Run: node --test "tests/*.test.mjs"
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { load } from "./app.mjs";
+
+const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanPrefs",
+  "load", "snapshot", "save", "rebuildEx", "dayKey"];
+
+function fakeStorage(init = {}) {
+  const m = new Map(Object.entries(init));
+  return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), m };
+}
+function freshS() {
+  return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
+    food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null }, summary: null,
+    today: { skip: [], add: [] }, picker: false, onboarded: false };
+}
+// A sandbox app with its own storage; S starts empty like a fresh page load.
+export function app(storage = fakeStorage()) {
+  const toasts = [];
+  const ctx = load(STATE_FNS, {
+    S: freshS(), localStorage: storage, KEY: "train-today-v1", DRAFT_TTL: 12 * 36e5,
+    DAYS: { push: {}, pull: {}, legs: {} }, MUSCLES: { chest: 1, back: 1, quads: 1 }, JOINTS: { shoulder: 1, knee: 1 },
+    BASE_EX: [{ id: "chest_press" }, { id: "leg_press" }], EX: [], EXBY: {},
+    toast: (t) => toasts.push(t)
+  });
+  ctx.toasts = toasts;
+  ctx.storage = storage;
+  return ctx;
+}
+
+// Data saved by the version before this change (no draft fields). Must still load the same.
+const OLD_SAVE = {
+  log: [{ ts: 1760000000000, day: "push", energy: "ok", entries: [{ ex: "chest_press", sets: [{ kg: 25, reps: 12 }, { kg: 25, reps: 11 }] }] }],
+  off: ["pec_deck"], slot: "am", energy: "tired", body: {}, bodyDay: "2000-1-1", scanned: true, seen: ["chest_press"],
+  custom: [{ id: "c_abc_0", name: "สมิธสควอท (สมิธแมชชีน)", day: "legs", m: ["quads"], j: ["knee"], t: "kg", ai: true }],
+  food: [{ ts: 1760000000000, name: "ข้าวมันไก่", kcal: 600, p: 30 }], weights: [{ ts: 1760000000000, kg: 59.3 }],
+  runs: [{ ts: 1760000000000, km: 5, min: 30 }], prefs: { rest: 120, kcal: 3000, protein: 110, goalKg: 62 },
+  summary: { ts: 1760000000000, text: "ดีมาก", tips: ["กินเพิ่ม"] }, onboarded: true
+};
+
+test("old saved data (no draft) still loads the same", () => {
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE) }));
+  a.load();
+  assert.deepEqual(JSON.parse(JSON.stringify(a.S.log)), OLD_SAVE.log);
+  assert.deepEqual([...a.S.off], OLD_SAVE.off);
+  assert.equal(a.S.slot, "am");
+  assert.equal(a.S.energy, "tired");
+  assert.equal(a.S.custom.length, 1);
+  assert.equal(a.S.food[0].name, "ข้าวมันไก่");
+  assert.equal(a.S.weights[0].kg, 59.3);
+  assert.equal(a.S.runs[0].km, 5);
+  assert.equal(a.S.prefs.kcal, 3000);
+  assert.equal(a.S.summary.text, "ดีมาก");
+  assert.equal(a.S.onboarded, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(a.S.draft)), {});
+});
+
+test("ticked sets survive the tab being closed and reopened", () => {
+  const storage = fakeStorage();
+  const a = app(storage);
+  a.S.draft = { chest_press: [{ kg: 25, reps: 12, done: true }, { kg: "27.5", reps: "10", done: false, ed: true }] };
+  a.save();
+  const b = app(storage); // new page load, same phone
+  b.load();
+  assert.deepEqual(JSON.parse(JSON.stringify(b.S.draft)), {
+    chest_press: [{ kg: "25", reps: "12", done: true, ed: false }, { kg: "27.5", reps: "10", done: false, ed: true }]
+  });
+});
+
+test("a draft older than 12 hours is dropped", () => {
+  const saved = { ...OLD_SAVE, draft: { chest_press: [{ kg: 25, reps: 12, done: true }] }, draftTs: Date.now() - 13 * 36e5 };
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(saved) }));
+  a.load();
+  assert.deepEqual(JSON.parse(JSON.stringify(a.S.draft)), {});
+});
+
+test("a broken draft in storage does not break loading", () => {
+  const saved = { ...OLD_SAVE, draft: { chest_press: "oops", leg_press: [null, 5, { kg: {}, reps: 8, done: 1 }] }, draftTs: Date.now() };
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(saved) }));
+  a.load();
+  assert.equal(a.S.draft.chest_press, undefined);
+  assert.equal(a.S.draft.leg_press.length, 1);
+  assert.equal(a.S.draft.leg_press[0].reps, "8");
+  assert.equal(a.S.draft.leg_press[0].done, true);
+  assert.equal(a.S.log.length, 1);
+});
