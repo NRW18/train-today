@@ -142,14 +142,57 @@
   .rest-list { margin: 12px 0 0; padding-left: 20px; }
   .rest-list li { margin-bottom: 6px; }
 
-  /* today summary list */
-  .todo { list-style: none; margin: 0; padding: 0; counter-reset: t; }
-  .todo li { counter-increment: t; display: grid; grid-template-columns: 2rem 1fr auto; gap: 2px 10px; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--line); }
-  .todo li:first-child { border-top: 0; padding-top: 2px; }
-  .todo li::before { content: counter(t); font-family: var(--head); font-weight: 700; color: var(--card); background: var(--blue); width: 1.6rem; height: 1.6rem; border-radius: 8px; display: grid; place-items: center; font-size: .85rem; align-self: start; margin-top: 2px; }
-  .todo .nm { font-weight: 700; }
-  .todo .dose { font-family: var(--head); font-weight: 700; white-space: nowrap; }
-  .todo .kg { grid-column: 2 / -1; color: var(--soft); font-size: 0.86rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  /* today: one list, each exercise carries its own sets */
+  .exl { list-style: none; margin: 0; padding: 0; }
+  .exl .ex { border-top: 1px solid var(--line); padding: 16px 0 14px; scroll-margin-top: 12px; }
+  .exl .ex:first-child { border-top: 0; padding-top: 4px; }
+  .exh { display: grid; grid-template-columns: 1.9rem 1fr auto; gap: 0 10px; align-items: start; }
+  .exh .num { font-family: var(--head); font-weight: 700; font-size: .9rem; color: #fff; background: var(--blue); width: 1.9rem; height: 1.9rem; border-radius: 9px; display: grid; place-items: center; margin-top: 1px; transition: background .2s; }
+  .exh .num svg { width: 15px; height: 15px; }
+  .ex.done .num { background: var(--green); }
+  .exh .dose { font-family: var(--head); font-weight: 700; white-space: nowrap; padding-top: 2px; }
+  .exn { min-width: 0; }
+  .exn .ex-name { display: block; line-height: 1.35; padding-top: 2px; }
+  .exn .ex-mus { display: block; }
+  .ex-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 8px 0 2px; padding-left: calc(1.9rem + 10px); }
+  .ex-row .ex-tip { margin: 0; }
+  .ex .guide { margin-left: calc(1.9rem + 10px); }
+  .ex .sets { margin-top: 10px; }
+  .first-tip { background: var(--blue-bg); color: var(--blue); border-radius: 14px; padding: 10px 14px; font-size: .88rem; margin: 0 0 6px; }
+  .finish-note { text-align: center; }
+
+  /* hero: one bar per set, grouped by exercise, fills as sets are ticked */
+  .meter { display: flex; gap: 8px; margin-top: 18px; height: 20px; align-items: stretch; }
+  .meter .mg { display: flex; gap: 3px; flex: var(--n) 1 0; min-width: 0; }
+  .meter i { flex: 1; border-radius: 4px; background: rgba(255,255,255,.14); transition: background .25s; }
+  .meter i.on { background: #4CC283; }
+  .meter-t { display: flex; justify-content: space-between; margin-top: 8px; font-size: .86rem; color: var(--hero-soft); }
+  .meter-t b { color: var(--hero-ink); font-family: var(--head); }
+  @media (prefers-reduced-motion: reduce) { .meter i, .exh .num { transition: none; } }
+
+  /* "why today" folded under the hero */
+  .whyd { margin: -4px 0 14px; }
+  .whyd summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: .9rem; list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+  .whyd summary::-webkit-details-marker { display: none; }
+  .whyd summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
+  .whyd[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+
+  /* check-in folded to one line */
+  .ci { padding: 0; }
+  .ci > summary { list-style: none; cursor: pointer; padding: 14px 18px; display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; border-radius: 22px; }
+  .ci > summary::-webkit-details-marker { display: none; }
+  .ci-h { font-family: var(--head); font-weight: 700; font-size: 1.05rem; }
+  .ci-edit { font-size: .84rem; font-weight: 700; color: var(--blue); background: var(--blue-bg); border-radius: 99px; padding: 4px 12px; }
+  .ci-edit .c { display: none; }
+  .ci[open] .ci-edit .o { display: none; }
+  .ci[open] .ci-edit .c { display: inline; }
+  .ci-sum { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ci-sum span { font-size: .82rem; font-weight: 600; background: var(--sunk); color: var(--soft); border-radius: 99px; padding: 2px 10px; }
+  .ci-sum .sore { background: var(--yellow-bg); color: var(--yellow-ink); }
+  .ci-sum .pain { background: var(--red-bg); color: var(--red-ink); }
+  .ci-sum .ask { background: transparent; padding-left: 0; font-weight: 500; }
+  .ci[open] .ci-sum { display: none; }
+  .ci-body { padding: 0 18px 18px; }
   .sec-h { font-family: var(--head); font-weight: 700; font-size: 0.92rem; color: var(--soft); margin: 20px 0 0; letter-spacing: .01em; }
 
   /* skip / add / recommendations */
@@ -328,8 +371,9 @@
       <div><strong>ให้แอปรู้ว่ายิมคุณมีเครื่องอะไร</strong><br>ถ่ายรูปเครื่อง แล้ว AI จะเพิ่มท่าให้เอง</div>
       <button type="button" class="btn small-btn" id="go-scan">สแกน</button>
     </section>
-    <section class="card" aria-labelledby="ci-h">
-      <h2 id="ci-h">เช็กอินวันนี้</h2>
+    <details class="card ci" id="ci">
+      <summary><span class="ci-h">วันนี้เป็นยังไง</span><span class="ci-edit"><span class="o">ปรับ</span><span class="c">เสร็จแล้ว</span></span><span class="ci-sum" id="ci-sum"></span></summary>
+      <div class="ci-body">
       <p class="q">ซ้อมช่วงไหน</p>
       <div class="seg" id="slot" role="group" aria-label="ช่วงเวลา">
         <button type="button" data-v="am">เช้า (ช่วงบน)</button>
@@ -347,7 +391,8 @@
       <p class="q" style="margin-top:12px">ข้อต่อที่เจ็บ</p>
       <div class="chips" id="joints"></div>
       <div class="legend"><span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span><span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></div>
-    </section>
+      </div>
+    </details>
 
     <section class="card plan" id="plan" aria-live="polite"></section>
 
@@ -606,7 +651,7 @@
   var KEY = "train-today-v1", AIKEY = "train-today-gemini-key";
   var S = { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
     food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null }, summary: null,
-    today: { skip: [], add: [] }, picker: false, onboarded: false };
+    today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
   function strList(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, n).map(function (x) { return x.slice(0, 140); }); }
   function cleanGuide(g) { return g && typeof g === "object" ? { how: strList(g.how, 4), miss: strList(g.miss, 3) } : null; }
   function cleanCustom(list) {
@@ -619,10 +664,38 @@
       return { id: e.id, name: e.name.slice(0, 40), day: e.day, m: e.m, j: e.j, t: "kg", ai: true, guide: g && g.how.length ? g : null };
     });
   }
+  // Sets typed or ticked during a workout, kept so a phone that closes the tab mid-session loses nothing.
+  // Older than 12 h means the workout was abandoned, so start fresh.
+  var DRAFT_TTL = 12 * 36e5;
+  function cleanDraft(d, ts) {
+    var out = {};
+    if (!d || typeof d !== "object" || !(Date.now() - ts < DRAFT_TTL)) return out;
+    Object.keys(d).forEach(function (id) {
+      if (!Array.isArray(d[id])) return;
+      out[id] = d[id].slice(0, 10).filter(function (s) { return s && typeof s === "object"; }).map(function (s) {
+        return { kg: s.kg == null ? "" : String(s.kg).slice(0, 8), reps: s.reps == null ? "" : String(s.reps).slice(0, 8), done: !!s.done, ed: !!s.ed };
+      });
+    });
+    return out;
+  }
   function okTs(x) { return x && isFinite(x.ts) && x.ts > 0; }
   function cleanFood(a) { return (Array.isArray(a) ? a : []).filter(okTs).map(function (f) { return { ts: f.ts, name: String(f.name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, +f.kcal || 0)), p: Math.max(0, Math.min(300, +f.p || 0)) }; }); }
   function cleanW(a) { return (Array.isArray(a) ? a : []).filter(function (w) { return okTs(w) && +w.kg > 20 && +w.kg < 300; }).map(function (w) { return { ts: w.ts, kg: +w.kg }; }); }
   function cleanRuns(a) { return (Array.isArray(a) ? a : []).filter(function (r) { return okTs(r) && +r.km > 0 && +r.km < 100 && +r.min > 0; }).map(function (r) { return { ts: r.ts, km: +r.km, min: +r.min }; }); }
+  // Workout history: drop anything the rest of the app would crash on (a broken import used to brick the app).
+  // Sessions the app wrote itself pass through unchanged.
+  function cleanLog(a) {
+    return (Array.isArray(a) ? a : []).filter(function (s) { return okTs(s) && DAYS[s.day] && Array.isArray(s.entries); }).map(function (s) {
+      var o = {};
+      Object.keys(s).forEach(function (k) { o[k] = s[k]; });
+      o.entries = s.entries.filter(function (en) { return en && typeof en.ex === "string" && Array.isArray(en.sets); }).map(function (en) {
+        return { ex: en.ex, sets: en.sets.filter(function (x) { return x && isFinite(x.reps) && +x.reps >= 0; }).map(function (x) {
+          return "kg" in x ? { kg: isFinite(x.kg) && +x.kg >= 0 ? +x.kg : 0, reps: +x.reps } : { reps: +x.reps };
+        }) };
+      });
+      return o;
+    }).sort(function (x, y) { return x.ts - y.ts; });
+  }
   function cleanPrefs(p) {
     var d = { rest: 90, kcal: 2800, protein: null, goalKg: null };
     if (!p || typeof p !== "object") return d;
@@ -636,7 +709,7 @@
     try {
       var d = JSON.parse(localStorage.getItem(KEY) || "null");
       if (d && Array.isArray(d.log)) {
-        S.log = d.log; S.off = Array.isArray(d.off) ? d.off : [];
+        S.log = cleanLog(d.log); S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return typeof x === "string"; }) : [];
         if (d.slot) S.slot = d.slot; if (d.energy) S.energy = d.energy;
         if (d.body && d.bodyDay === dayKey(Date.now())) S.body = d.body; // soreness resets each day
         S.custom = cleanCustom(d.custom);
@@ -646,6 +719,8 @@
         S.prefs = cleanPrefs(d.prefs);
         if (d.summary && typeof d.summary.text === "string") S.summary = d.summary;
         S.onboarded = !!d.onboarded;
+        S.draft = cleanDraft(d.draft, d.draftTs);
+        S.draftTs = Object.keys(S.draft).length ? d.draftTs : 0;
         if (d.today && d.today.day === dayKey(Date.now())) { // skip/add choices only last for today
           S.today = { skip: strList(d.today.skip, 40), add: strList(d.today.add, 20) };
         }
@@ -662,6 +737,7 @@
       o.slot = S.slot; o.energy = S.energy; o.body = S.body; o.bodyDay = dayKey(Date.now()); o.scanned = S.scanned; o.summary = S.summary;
       o.today = { day: dayKey(Date.now()), skip: S.today.skip, add: S.today.add };
       o.onboarded = S.onboarded;
+      o.draft = S.draft; o.draftTs = S.draftTs; // set only when the user types or ticks, so an old draft still expires
       localStorage.setItem(KEY, JSON.stringify(o));
     } catch (e) { toast("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า"); }
   }
@@ -800,8 +876,19 @@
   }
   function skippedToday() { return S.today.skip.filter(function (id) { return EXBY[id]; }); }
 
+  // Before ticking a set: a set with no weight was saved as 0 kg, and next time the app said "add 2.5 kg to 0 kg".
+  function setMissing(e, s) {
+    var noKg = e && e.t === "kg" && !(num(s.kg) > 0), noReps = !num(s.reps);
+    if (noKg && noReps) return "ใส่น้ำหนักและจำนวนครั้งก่อนกด ✓";
+    if (noKg) return "ใส่น้ำหนัก (กก.) ก่อนกด ✓";
+    if (noReps) return e && e.t === "sec" ? "ใส่จำนวนวินาทีก่อนกด ✓" : "ใส่จำนวนครั้งก่อนกด ✓";
+    return "";
+  }
+
   function suggest(e, tired) {
     var last = lastEntry(e.id);
+    // older saves may hold sets logged at 0 kg: treat them like a first time rather than "add 2.5 kg to 0"
+    if (last && e.t === "kg" && !last.sets.some(function (s) { return s.kg > 0; })) last = null;
     if (!last) {
       if (e.t === "kg") return { kg: "", reps: HI, tip: "ครั้งแรก: เลือกน้ำหนักที่ทำได้ " + HI + " ครั้งแบบยังเหลือแรงอีก 2 ครั้ง" };
       if (e.t === "sec") return { kg: "", reps: 30, tip: "เริ่มที่ 30 วินาที ลำตัวตรง" };
@@ -829,6 +916,22 @@
     });
     $("muscles").innerHTML = Object.keys(MUSCLES).map(function (k) { return chip("m", k, MUSCLES[k]); }).join("");
     $("joints").innerHTML = Object.keys(JOINTS).map(function (k) { return chip("j", k, JOINTS[k]); }).join("");
+    $("ci-sum").innerHTML = ciSummary();
+  }
+  // The folded check-in: what the app is planning around, as short pills.
+  var SLOT_TH = { am: "เช้า: ช่วงบน", pm: "เย็น: ขา", any: "ฝึกได้ทุกส่วน" };
+  var ENERGY_TH = { good: "แรงดีมาก", ok: "แรงปกติ", tired: "เหนื่อย" };
+  function ciSummary() {
+    var h = "<span>" + SLOT_TH[S.slot] + "</span><span>" + ENERGY_TH[S.energy] + "</span>";
+    var parts = { sore: [], pain: [] };
+    Object.keys(S.body).forEach(function (k) {
+      var p = k.split(":"), label = (p[0] === "m" ? MUSCLES : JOINTS)[p[1]];
+      if (label && parts[S.body[k]]) parts[S.body[k]].push(label);
+    });
+    if (parts.sore.length) h += '<span class="sore">เมื่อย ' + parts.sore.join(" ") + "</span>";
+    if (parts.pain.length) h += '<span class="pain">เจ็บ ' + parts.pain.join(" ") + "</span>";
+    if (!parts.sore.length && !parts.pain.length) h += '<span class="ask">เมื่อยหรือเจ็บตรงไหน กดปรับ</span>';
+    return h;
   }
   function chip(kind, key, label) {
     var st = bodyState(kind, key);
@@ -857,56 +960,101 @@
     }
 
     var D = DAYS[current.day];
+    current.items.forEach(prepDraft);
     var totalSets = 0; current.items.forEach(function (it) { totalSets += it.sets; });
     var mins = Math.round(totalSets * (40 + S.prefs.rest) / 60) + 5; // ~40 s per set + rest + warm-up
     h += '<div class="hero' + (current.restAdvice ? " rest" : "") + '"><div class="eyebrow">โปรแกรมวันนี้</div><div class="day-name">' + (current.restAdvice ? "พักฟื้น +" : D.name) +
       '</div><div class="day-sub">' + (current.restAdvice ? "ท่าที่คุณเพิ่มเอง เล่นเบา ๆ" : D.th) + "</div>" +
-      (current.items.length ? '<div class="hero-stats"><span>' + current.items.length + " ท่า</span><span>" + totalSets + " เซ็ต</span><span>≈ " + mins + " นาที</span>" +
-        (S.energy === "tired" ? "<span>โหมดเหนื่อย</span>" : "") + "</div>" : "") + "</div>" + painAlert;
+      (current.items.length ? '<div class="hero-stats"><span>' + current.items.length + " ท่า</span><span>≈ " + mins + " นาที</span>" +
+        (S.energy === "tired" ? "<span>โหมดเหนื่อย</span>" : "") + "</div>" + meterHtml() : "") + "</div>";
+    if (current.why.length) h += '<details class="whyd"><summary>ทำไมวันนี้เป็น' + (current.restAdvice ? "แบบนี้" : " " + D.name) + '</summary><ul class="why" aria-label="เหตุผล">' +
+      current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></details>";
+    h += painAlert;
+    if (current.cut.length) h += '<div class="alert yellow" style="margin:0 0 12px"><strong>ตัดออกวันนี้</strong>' + current.cut.map(esc).join(", ") + "</div>";
     if (!current.items.length) {
       h += '<p class="empty">ข้ามทุกท่าแล้ว วันนี้พักได้ หรือกดเพิ่มท่าที่อยากเล่น</p>' + skippedBlock() + addBlock([]);
       el.innerHTML = h; return;
     }
-    h += '<ol class="todo" aria-label="โปรแกรมวันนี้">' + current.items.map(function (it) {
-      var e = it.e, s = it.sug, dose, kg;
-      if (e.t === "kg") {
-        dose = it.sets + " × " + (s.reps && s.reps !== HI ? s.reps + "–" + HI : LO + "–" + HI) + " ครั้ง";
-        kg = s.kg !== "" && s.kg != null ? s.kg + " กก." : "เลือกน้ำหนักที่ทำได้ " + HI + " ครั้งแบบยังเหลือแรง";
-      } else if (e.t === "sec") { dose = it.sets + " × " + s.reps + " วิ"; kg = "น้ำหนักตัว"; }
-      else { dose = it.sets + " × " + s.reps + " ครั้ง"; kg = "น้ำหนักตัว"; }
-      var act = it.added ? '<button type="button" class="mini" data-unadd="' + e.id + '">เอาออก</button>' : '<button type="button" class="mini" data-skip="' + e.id + '" aria-label="ข้าม ' + esc(e.name) + ' วันนี้">ข้าม</button>';
-      return '<li><span class="nm">' + esc(e.name) + (e.ai ? ' <span class="ai-tag">AI</span>' : "") + (it.added ? ' <span class="addtag">เพิ่มเอง</span>' : "") +
-        '</span><span class="dose">' + dose + '</span><span class="kg"><span>' + esc(kg) + (it.added && it.light ? " · " + esc(it.light) : "") + "</span>" + act + "</span></li>";
-    }).join("") + "</ol>";
+    // the first-time weight tip is the same for every new exercise: say it once, not on every card
+    var firsts = current.items.filter(isFirstKg);
+    if (firsts.length) h += '<p class="first-tip">ท่าที่เล่นครั้งแรก: เลือกน้ำหนักที่ทำได้ ' + HI + " ครั้งแบบยังเหลือแรงอีก 2 ครั้ง แล้วแอปจะคิดน้ำหนักครั้งต่อไปให้</p>";
+    h += '<ol class="exl" aria-label="โปรแกรมวันนี้">' + current.items.map(exHtml).join("") + "</ol>";
     h += skippedBlock() + recBlock(current.items) + addBlock(current.items.map(function (it) { return it.e.id; }));
-    h += '<p class="sec-h">ทำไมวันนี้เป็นแบบนี้</p>';
-    h += '<ul class="why" style="margin-top:6px" aria-label="เหตุผล">' + current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>";
-    if (current.cut.length) h += '<div class="alert yellow"><strong>ตัดออกวันนี้</strong>' + current.cut.map(esc).join(", ") + "</div>";
-
-    h += '<p class="sec-h">บันทึกระหว่างเล่น</p><div style="margin-top:2px">';
-    current.items.forEach(function (it) {
-      var e = it.e;
-      if (!S.draft[e.id] || S.draft[e.id].length !== it.sets) {
-        var prev = S.draft[e.id] || [];
-        S.draft[e.id] = [];
-        for (var i = 0; i < it.sets; i++) S.draft[e.id].push(prev[i] || { kg: it.sug.kg, reps: it.sug.reps, done: false });
-      }
-      // keep untouched sets in step with the latest suggestion (e.g. after changing energy)
-      S.draft[e.id].forEach(function (s) { if (!s.done && !s.ed) { s.kg = it.sug.kg; s.reps = it.sug.reps; } });
-      h += '<div class="ex"><div class="ex-top"><span class="ex-name">' + esc(e.name) + '</span><span class="ex-mus">' + names(e.m.slice(0, 2), MUSCLES) + "</span></div>";
-      h += '<div class="ex-tip' + (it.sug.keep ? " keep" : "") + '">' + esc(it.sug.tip) + (it.light ? " · " + esc(it.light) : "") + "</div>";
-      h += guideHtml(e) + '<div class="sets">';
-      S.draft[e.id].forEach(function (s, i) {
-        h += '<div class="set"><span class="n">' + (i + 1) + "</span>";
-        if (e.t === "kg") h += '<label class="field"><input inputmode="decimal" data-ex="' + e.id + '" data-i="' + i + '" data-f="kg" value="' + esc(s.kg) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + ' น้ำหนัก"><span>กก.</span></label>';
-        else h += "<span></span>";
-        h += '<label class="field"><input inputmode="numeric" data-ex="' + e.id + '" data-i="' + i + '" data-f="reps" value="' + esc(s.reps) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + (e.t === "sec" ? " วินาที" : " จำนวนครั้ง") + '"><span>' + (e.t === "sec" ? "วิ" : "ครั้ง") + "</span></label>";
-        h += '<button type="button" class="tick" data-ex="' + e.id + '" data-i="' + i + '" aria-pressed="' + (s.done ? "true" : "false") + '" aria-label="เสร็จเซ็ต ' + (i + 1) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></button></div>';
-      });
-      h += "</div></div>";
-    });
-    h += '</div><button class="btn" type="button" id="finish">บันทึกการซ้อม</button><p class="hint">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>';
+    h += '<button class="btn" type="button" id="finish">' + finishLabel() + '</button><p class="hint finish-note">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>';
     el.innerHTML = h;
+  }
+
+  function prepDraft(it) {
+    var e = it.e;
+    if (!S.draft[e.id] || S.draft[e.id].length !== it.sets) {
+      var prev = S.draft[e.id] || [];
+      S.draft[e.id] = [];
+      for (var i = 0; i < it.sets; i++) S.draft[e.id].push(prev[i] || { kg: it.sug.kg, reps: it.sug.reps, done: false });
+    }
+    // keep untouched sets in step with the latest suggestion (e.g. after changing energy)
+    S.draft[e.id].forEach(function (s) { if (!s.done && !s.ed) { s.kg = it.sug.kg; s.reps = it.sug.reps; } });
+  }
+  function isFirstKg(it) { return it.e.t === "kg" && (it.sug.kg === "" || it.sug.kg == null); }
+  function setsDone(id) { return (S.draft[id] || []).filter(function (s) { return s.done; }).length; }
+  function progress() {
+    var done = 0, total = 0;
+    ((current && current.items) || []).forEach(function (it) { total += it.sets; done += setsDone(it.e.id); });
+    return { done: done, total: total };
+  }
+  function meterHtml() {
+    var p = progress();
+    return '<div class="meter" aria-hidden="true">' + current.items.map(function (it) {
+      var d = setsDone(it.e.id), b = "";
+      for (var i = 0; i < it.sets; i++) b += "<i" + (i < d ? ' class="on"' : "") + "></i>";
+      return '<span class="mg" style="--n:' + it.sets + '">' + b + "</span>";
+    }).join("") + '</div><div class="meter-t" id="meter-t">' + meterText(p) + "</div>";
+  }
+  function meterText(p) {
+    return p.done ? "<span>เสร็จ <b>" + p.done + "</b> จาก " + p.total + " เซ็ต</span><span>" + (p.done >= p.total ? "ครบแล้ว กดบันทึกได้เลย" : "เหลือ " + (p.total - p.done) + " เซ็ต") + "</span>"
+      : "<span>" + p.total + " เซ็ต กด ✓ หลังจบแต่ละเซ็ต</span>";
+  }
+  function finishLabel() {
+    var p = progress();
+    return p.done ? "บันทึกการซ้อม (" + p.done + "/" + p.total + " เซ็ต)" : "บันทึกการซ้อม";
+  }
+  // After a tick: refresh the meter, the card's badge and the save button without redrawing the list.
+  function refreshProgress(exId) {
+    var p = progress();
+    var bars = document.querySelectorAll("#plan .meter i"), k = 0;
+    current.items.forEach(function (it) {
+      var d = setsDone(it.e.id);
+      for (var i = 0; i < it.sets; i++, k++) if (bars[k]) bars[k].className = i < d ? "on" : "";
+    });
+    if ($("meter-t")) $("meter-t").innerHTML = meterText(p);
+    if ($("finish")) $("finish").textContent = finishLabel();
+    var it = current.items.filter(function (x) { return x.e.id === exId; })[0], li = $("ex-" + exId);
+    if (it && li) {
+      var all = setsDone(exId) >= it.sets;
+      li.classList.toggle("done", all);
+      li.querySelector(".num").innerHTML = all ? CHECK_SVG : String(current.items.indexOf(it) + 1);
+    }
+  }
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+  function exHtml(it, idx) {
+    var e = it.e, s = it.sug, dose;
+    if (e.t === "kg") dose = it.sets + " × " + (s.reps && s.reps !== HI ? s.reps + "–" + HI : LO + "–" + HI) + " ครั้ง";
+    else if (e.t === "sec") dose = it.sets + " × " + s.reps + " วิ";
+    else dose = it.sets + " × " + s.reps + " ครั้ง";
+    var all = setsDone(e.id) >= it.sets;
+    var tip = isFirstKg(it) ? "ครั้งแรก เลือกน้ำหนักเอง" : s.tip;
+    var act = it.added ? '<button type="button" class="mini" data-unadd="' + e.id + '">เอาออก</button>' : '<button type="button" class="mini" data-skip="' + e.id + '" aria-label="ข้าม ' + esc(e.name) + ' วันนี้">ข้าม</button>';
+    var h = '<li class="ex' + (all ? " done" : "") + '" id="ex-' + e.id + '"><div class="exh"><span class="num">' + (all ? CHECK_SVG : idx + 1) + '</span><div class="exn"><span class="ex-name">' + esc(e.name) +
+      (e.ai ? ' <span class="ai-tag">AI</span>' : "") + (it.added ? ' <span class="addtag">เพิ่มเอง</span>' : "") + '</span><span class="ex-mus">' + names(e.m.slice(0, 2), MUSCLES) + '</span></div><span class="dose">' + dose + "</span></div>";
+    h += '<div class="ex-row"><span class="ex-tip' + (s.keep || isFirstKg(it) ? " keep" : "") + '">' + esc(tip) + (it.light ? " · " + esc(it.light) : "") + "</span>" + act + "</div>";
+    h += guideHtml(e) + '<div class="sets">';
+    S.draft[e.id].forEach(function (st, i) {
+      h += '<div class="set"><span class="n">' + (i + 1) + "</span>";
+      if (e.t === "kg") h += '<label class="field"><input inputmode="decimal" data-ex="' + e.id + '" data-i="' + i + '" data-f="kg" value="' + esc(st.kg) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + ' น้ำหนัก"><span>กก.</span></label>';
+      else h += "<span></span>";
+      h += '<label class="field"><input inputmode="numeric" data-ex="' + e.id + '" data-i="' + i + '" data-f="reps" value="' + esc(st.reps) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + (e.t === "sec" ? " วินาที" : " จำนวนครั้ง") + '"><span>' + (e.t === "sec" ? "วิ" : "ครั้ง") + "</span></label>";
+      h += '<button type="button" class="tick" data-ex="' + e.id + '" data-i="' + i + '" aria-pressed="' + (st.done ? "true" : "false") + '" aria-label="เสร็จเซ็ต ' + (i + 1) + '">' + CHECK_SVG + "</button></div>";
+    });
+    return h + "</div></li>";
   }
 
   // Suggest extra exercises for the muscles trained least in the past 7 days that are recovered and not in today's plan.
@@ -1163,18 +1311,30 @@
     if (!txt) throw new Error("empty");
     return JSON.parse(txt.replace(/^```(json)?|```$/g, "").trim());
   }
+  // The proxy sometimes answers 502/503 for a moment, or the gym wifi drops: wait 1.5 s and try once more.
+  // Never retry 429 (quota) or 400 (bad request): a second try would fail the same way.
+  function callProxy(parts, retried) {
+    function again() {
+      return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return callProxy(parts, true); });
+    }
+    return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
+      .then(function (res) {
+        if (!res.ok && !retried && (res.status === 502 || res.status === 503)) return again();
+        return res.json().catch(function () { return {}; }).then(function (j) {
+          if (!res.ok) { var pe = new Error("proxy"); pe.status = res.status; pe.proxy = true; pe.limit = j && j.error === "limit"; pe.scope = j && j.scope; throw pe; }
+          return parseGemini(j);
+        });
+      }, function (netErr) {
+        if (retried) throw netErr;
+        return again();
+      });
+  }
   function callGemini(parts, i) {
     i = i || 0;
     if (!navigator.onLine) return Promise.reject(new Error("offline"));
     if (!getKey()) {
       if (!PROXY_URL) return Promise.reject(new Error("nokey"));
-      return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
-        .then(function (res) {
-          return res.json().catch(function () { return {}; }).then(function (j) {
-            if (!res.ok) { var pe = new Error("proxy"); pe.status = res.status; pe.proxy = true; pe.limit = j && j.error === "limit"; pe.scope = j && j.scope; throw pe; }
-            return parseGemini(j);
-          });
-        });
+      return callProxy(parts, false);
     }
     var body = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } };
     return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + MODELS[i] + ":generateContent", {
@@ -1502,11 +1662,23 @@
   $("muscles").addEventListener("click", bodyClick);
   $("joints").addEventListener("click", bodyClick);
 
+  // The only two places a workout draft really changes, so the only places draftTs moves.
+  function editSet(exId, i, field, value) {
+    var s = S.draft[exId][i];
+    s[field] = value; s.ed = true; S.draftTs = Date.now();
+  }
+  function tickSet(exId, i) { // returns a message if the set cannot be ticked yet
+    var s = S.draft[exId][i];
+    var miss = !s.done && setMissing(EXBY[exId], s);
+    if (miss) return miss;
+    s.done = !s.done; S.draftTs = Date.now();
+    return "";
+  }
   $("plan").addEventListener("input", function (ev) {
     var t = ev.target; if (!t.dataset.ex) return;
-    var s = S.draft[t.dataset.ex][+t.dataset.i];
-    s[t.dataset.f] = t.value; s.ed = true;
+    editSet(t.dataset.ex, +t.dataset.i, t.dataset.f, t.value);
   });
+  $("plan").addEventListener("change", function (ev) { if (ev.target.dataset.ex) save(); });
   $("plan").addEventListener("click", function (ev) {
     if (ev.target.closest("#finish")) { finish(); return; }
     if (ev.target.closest("#add-toggle")) { S.picker = !S.picker; renderPlan(); return; }
@@ -1528,9 +1700,12 @@
     var ex = ev.target.closest("[data-explain]");
     if (ex) { explain(ex.dataset.explain, ex); return; }
     var b = ev.target.closest(".tick"); if (!b) return;
-    var s = S.draft[b.dataset.ex][+b.dataset.i];
-    s.done = !s.done; b.setAttribute("aria-pressed", s.done ? "true" : "false");
-    if (s.done) startRest();
+    var miss = tickSet(b.dataset.ex, +b.dataset.i);
+    if (miss) { toast(miss); return; }
+    var done = S.draft[b.dataset.ex][+b.dataset.i].done;
+    b.setAttribute("aria-pressed", done ? "true" : "false");
+    save(); refreshProgress(b.dataset.ex);
+    if (done) startRest();
   });
   $("plan").addEventListener("toggle", function (ev) {
     var d = ev.target; if (d.dataset && d.dataset.g) openGuides[d.dataset.g] = d.open;
@@ -1539,7 +1714,10 @@
   $("rest-minus").addEventListener("click", function () { restEnd = Math.max(Date.now(), restEnd - 15000); drawRest(); });
   $("rest-plus").addEventListener("click", function () { restEnd += 15000; restTotal += 15; restBuzzed = false; $("rest").classList.remove("done"); $("rest-lb").textContent = "พักก่อนเซ็ตต่อไป"; drawRest(); });
   $("rest-skip").addEventListener("click", stopRest);
-  document.addEventListener("visibilitychange", function () { if (!document.hidden && restTick) drawRest(); });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) save(); // the phone may close a hidden tab: keep half-typed sets
+    else if (restTick) drawRest();
+  });
   $("rest-sec").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
     S.prefs.rest = +b.dataset.v; save(); renderSettings();
@@ -1657,31 +1835,52 @@
   $("import").addEventListener("change", function () {
     var f = this.files && this.files[0]; if (!f) return;
     var r = new FileReader();
-    r.onload = function () {
-      try {
-        var d = JSON.parse(r.result);
-        if (!d || !Array.isArray(d.log)) throw 0;
-        S.log = d.log.filter(function (s) { return s && DAYS[s.day] && Array.isArray(s.entries) && isFinite(s.ts); });
-        S.custom = cleanCustom(d.custom); rebuildEx();
-        S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
-        S.scanned = S.scanned || S.seen.length > 0;
-        S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
-        S.food = cleanFood(d.food); S.weights = cleanW(d.weights); S.runs = cleanRuns(d.runs);
-        if (d.prefs) S.prefs = cleanPrefs(d.prefs);
-        S.draft = {}; save(); renderAll(); toast("นำเข้า " + S.log.length + " ครั้งแล้ว");
-      } catch (e) { toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป"); }
-    };
+    r.onload = function () { importBackup(r.result); };
     r.readAsText(f); this.value = "";
   });
-  $("sample").addEventListener("click", function () {
-    if (S.log.length && !confirm("แทนที่ข้อมูลเดิมด้วยข้อมูลตัวอย่าง?")) return;
+  // What would be lost, in words, e.g. ["การซ้อม 12 ครั้ง", "อาหาร 30 รายการ"]. Only lists what is not empty.
+  var DATA_WORDS = { log: ["การซ้อม", "ครั้ง"], runs: ["การวิ่ง", "ครั้ง"], food: ["อาหาร", "รายการ"], weights: ["น้ำหนักตัว", "ครั้ง"], custom: ["ท่าที่ AI เพิ่ม", "ท่า"] };
+  function dataList(d, keys) {
+    return keys.filter(function (k) { return d[k] && d[k].length; }).map(function (k) { return DATA_WORDS[k][0] + " " + d[k].length + " " + DATA_WORDS[k][1]; });
+  }
+  function draftTicked() {
+    return Object.keys(S.draft).some(function (id) { return S.draft[id].some(function (s) { return s.done; }); });
+  }
+  function importBackup(text) {
+    var d;
+    try { d = JSON.parse(text); } catch (e) { d = null; }
+    if (!d || !Array.isArray(d.log)) { toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป"); return; }
+    var custom = cleanCustom(d.custom);
+    var inc = { log: cleanLog(d.log), custom: custom, food: cleanFood(d.food), weights: cleanW(d.weights), runs: cleanRuns(d.runs) };
+    var keys = ["log", "runs", "food", "weights", "custom"];
+    var lost = dataList(S, keys);
+    if (draftTicked()) lost.push("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก");
+    if (lost.length) {
+      var got = dataList(inc, keys);
+      if (!confirm("นำเข้าไฟล์นี้จะแทนที่ข้อมูลเดิมทั้งหมดในเครื่องนี้ รวมถึงรายการเครื่องในยิมที่เลือกไว้\n\nจะหาย: " + lost.join(", ") +
+        "\n\nในไฟล์มี: " + (got.length ? got.join(", ") : "ไม่มีข้อมูล") + "\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" ข้อมูลเดิมจะกู้คืนไม่ได้ นำเข้าไหม?")) return;
+    }
+    S.log = inc.log;
+    S.custom = custom; rebuildEx();
+    S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
+    S.scanned = S.scanned || S.seen.length > 0;
+    S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
+    S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
+    if (d.prefs) S.prefs = cleanPrefs(d.prefs);
+    S.draft = {}; save(); renderAll(); toast("นำเข้า " + S.log.length + " ครั้งแล้ว");
+  }
+  $("sample").addEventListener("click", useSample);
+  function useSample() {
+    var lost = dataList(S, ["log", "runs", "food", "weights"]);
+    if (draftTicked()) lost.push("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก");
+    if (lost.length && !confirm("ข้อมูลตัวอย่างจะทับข้อมูลเดิมในเครื่องนี้\n\nจะหาย: " + lost.join(", ") + "\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" จะกู้คืนไม่ได้ ใส่ข้อมูลตัวอย่างไหม?")) return;
     S.log = sample(); S.draft = {};
     var H = 36e5, now = Date.now();
     S.runs = [{ ts: now - 3.5 * 24 * H, km: 4, min: 26 }];
     S.weights = [{ ts: now - 13 * 24 * H, kg: 58.6 }, { ts: now - 9 * 24 * H, kg: 58.8 }, { ts: now - 6 * 24 * H, kg: 59.0 }, { ts: now - 2 * 24 * H, kg: 59.3 }];
     S.food = [1, 2, 3, 4].map(function (d) { return { ts: now - d * 24 * H, name: "ตัวอย่าง (3 มื้อ)", kcal: 2400 + d * 60, p: 95 + d * 4 }; });
     save(); renderAll(); toast("ใส่ข้อมูลตัวอย่างแล้ว");
-  });
+  }
   $("clear").addEventListener("click", function () {
     if (!confirm("ลบข้อมูลทั้งหมดในเครื่องนี้ (การซ้อม วิ่ง อาหาร น้ำหนักตัว)? กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้")) return;
     S.log = []; S.draft = {}; S.body = {}; S.food = []; S.weights = []; S.runs = []; S.summary = null;

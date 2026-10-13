@@ -33,7 +33,16 @@
 - ไฟล์ทดสอบเซ็นด้วยกุญแจชั่วคราวที่สร้างใหม่ทุกครั้ง ถ้าจะลง Google Play จริง ต้องใช้กุญแจถาวรที่เก็บเป็น secret ของ repo และวางไฟล์ assetlinks.json ที่ https://nrw18.github.io/.well-known/ เพื่อซ่อนแถบที่อยู่เว็บ
 
 ## ตัวกลาง AI (proxy/worker.js)
-Cloudflare Worker ที่เก็บ Gemini key เป็น secret ผู้ใช้จึงใช้ AI ได้ทันทีโดยไม่ต้องใส่คีย์ รับเฉพาะคำขอจากแอปนี้ ตรวจรูปแบบคำขอ และจำกัดคนละ 40 ครั้งต่อวันผ่าน Workers KV ไม่ส่งรายละเอียด error ของ Google กลับไปที่แอป
+Cloudflare Worker ที่เก็บ Gemini key เป็น secret ผู้ใช้จึงใช้ AI ได้ทันทีโดยไม่ต้องใส่คีย์ รับเฉพาะคำขอจากแอปนี้ ตรวจรูปแบบคำขอ และจำกัดคนละ 40 ครั้งต่อวัน (ทั้งแอปรวม 450 ครั้งต่อวัน) ผ่าน Workers KV ไม่ส่งรายละเอียด error ของ Google กลับไปที่แอป ถ้า KV ใช้ไม่ได้ ตัวกลางยังตอบได้ตามปกติแต่ไม่นับครั้ง
+
+**Deploy ด้วย wrangler** (ต้องมี Node.js) ค่าตั้งอยู่ใน `proxy/wrangler.toml`
+1. `cd proxy`
+2. `npx wrangler login` ล็อกอิน Cloudflare ในเบราว์เซอร์ที่เปิดขึ้นมา
+3. `npx wrangler deploy` อัปโหลด `worker.js` ขึ้นไปทับตัวเดิม (`train-today-ai`)
+
+คีย์ `GEMINI_KEY` ตั้งไว้ใน Cloudflare แล้ว deploy ใหม่ไม่ลบคีย์ ห้ามใส่คีย์ในไฟล์ใน repo
+
+**ทดสอบ:** `node --test "tests/*.test.mjs"` (ที่โฟลเดอร์หลักของ repo)
 
 ## เทคโนโลยี
 HTML, CSS, JavaScript ล้วน (ไม่มี framework), Gemini API (รับรูปภาพ, ตอบเป็น JSON), Service Worker สำหรับใช้ออฟไลน์, Cloudflare Workers + KV (ตัวกลาง AI), GitHub Pages

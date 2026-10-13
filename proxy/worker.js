@@ -1,11 +1,9 @@
 // Cloudflare Worker: lets the วันนี้ฝึกอะไร app use Gemini without each user entering a key.
 // The Gemini key lives only in this worker as a secret (GEMINI_KEY) and is never sent to the app.
 //
-// Setup (Cloudflare dashboard):
-//   1. Workers & Pages -> Create -> Worker -> paste this file -> Deploy
-//   2. Settings -> Variables and Secrets -> add Secret  GEMINI_KEY = your Gemini API key
-//   3. Storage & Databases -> KV -> create a namespace (e.g. train-today-limits)
-//      then Worker -> Settings -> Bindings -> add KV namespace, variable name  RL
+// Deploy: in this folder run  npx wrangler login  then  npx wrangler deploy  (settings in wrangler.toml,
+// including the KV binding RL). The secret GEMINI_KEY is set once in the Cloudflare dashboard
+// (Worker -> Settings -> Variables and Secrets) and deploys keep it.
 //
 // Limits: each visitor (by IP) gets PER_IP_DAILY calls a day, and the whole app gets GLOBAL_DAILY.
 // Only requests from ALLOWED_ORIGINS are accepted from browsers. This keeps casual abuse away;
@@ -14,7 +12,7 @@
 const ALLOWED_ORIGINS = ["https://nrw18.github.io"];
 const MODELS = ["gemini-3-flash-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
 const PER_IP_DAILY = 40;
-const GLOBAL_DAILY = 600;
+const GLOBAL_DAILY = 450;     // each counted call writes KV twice; free KV allows 1,000 writes/day
 const MAX_TEXT = 8000;        // characters of prompt text
 const MAX_IMAGE_B64 = 2000000; // ~1.5 MB image after base64
 const UPSTREAM = "https://generativelanguage.googleapis.com/v1beta/models/";
@@ -55,18 +53,31 @@ function cleanParts(parts) {
   return out;
 }
 
+// If KV fails (e.g. the free plan's 1,000 writes/day ran out) we log it and let the request through
+// rather than answering 500: Gemini's own quota is the backstop for that day.
 async function countAndCheck(env, ip) {
   if (!env.RL) return { ok: true };            // no KV bound: no limits (set it up!)
   const day = new Date().toISOString().slice(0, 10);
   const ipKey = "ip:" + day + ":" + ip, allKey = "all:" + day;
-  const [ipN, allN] = await Promise.all([env.RL.get(ipKey), env.RL.get(allKey)]);
-  const a = parseInt(ipN || "0", 10), g = parseInt(allN || "0", 10);
+  let a, g;
+  try {
+    const [ipN, allN] = await Promise.all([env.RL.get(ipKey), env.RL.get(allKey)]);
+    a = parseInt(ipN || "0", 10) || 0;
+    g = parseInt(allN || "0", 10) || 0;
+  } catch (e) {
+    console.log("KV read failed, skipping limits:", e && e.message);
+    return { ok: true };
+  }
   if (a >= PER_IP_DAILY) return { ok: false, why: "user" };
   if (g >= GLOBAL_DAILY) return { ok: false, why: "app" };
-  await Promise.all([
-    env.RL.put(ipKey, String(a + 1), { expirationTtl: 172800 }),
-    env.RL.put(allKey, String(g + 1), { expirationTtl: 172800 })
-  ]);
+  try {
+    await Promise.all([
+      env.RL.put(ipKey, String(a + 1), { expirationTtl: 172800 }),
+      env.RL.put(allKey, String(g + 1), { expirationTtl: 172800 })
+    ]);
+  } catch (e) {
+    console.log("KV write failed, not counted:", e && e.message);
+  }
   return { ok: true, left: PER_IP_DAILY - a - 1 };
 }
 
