@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
 const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs",
-  "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince"];
+  "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -13,7 +13,7 @@ function fakeStorage(init = {}) {
 function freshS() {
   return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
     food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null }, summary: null,
-    today: { skip: [], add: [] }, picker: false, onboarded: false };
+    today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
 }
 // A sandbox app with its own storage; S starts empty like a fresh page load.
 export function app(storage = fakeStorage()) {
@@ -21,7 +21,7 @@ export function app(storage = fakeStorage()) {
   const ctx = load(STATE_FNS, {
     S: freshS(), localStorage: storage, KEY: "train-today-v1", DRAFT_TTL: 12 * 36e5,
     DAYS: { push: {}, pull: {}, legs: {} }, MUSCLES: { chest: 1, back: 1, quads: 1 }, JOINTS: { shoulder: 1, knee: 1 },
-    BASE_EX: [{ id: "chest_press", m: ["chest"] }, { id: "leg_press", m: ["quads"] }], EX: [], EXBY: {},
+    BASE_EX: [{ id: "chest_press", m: ["chest"], t: "kg" }, { id: "leg_press", m: ["quads"], t: "kg" }], EX: [], EXBY: {},
     toast: (t) => toasts.push(t)
   });
   ctx.toasts = toasts;
@@ -59,7 +59,11 @@ test("old saved data (no draft) still loads the same", () => {
 test("ticked sets survive the tab being closed and reopened", () => {
   const storage = fakeStorage();
   const a = app(storage);
-  a.S.draft = { chest_press: [{ kg: 25, reps: 12, done: true }, { kg: "27.5", reps: "10", done: false, ed: true }] };
+  a.rebuildEx();
+  a.S.draft = { chest_press: [{ kg: 25, reps: 12, done: false }, { kg: "", reps: "", done: false }] };
+  assert.equal(a.tickSet("chest_press", 0), "");
+  a.editSet("chest_press", 1, "kg", "27.5");
+  a.editSet("chest_press", 1, "reps", "10");
   a.save();
   const b = app(storage); // new page load, same phone
   b.load();
@@ -100,6 +104,68 @@ test("history is kept in time order", () => {
   const a = app(fakeStorage({ "train-today-v1": JSON.stringify(saved) }));
   a.load();
   assert.deepEqual([...a.S.log].map((s) => s.day), ["push", "pull"]);
+});
+
+// Simulate the clock: Date.now() inside the sandbox returns `now`.
+function withClock(a) {
+  const clock = { now: Date.now() };
+  a.Date = class extends Date { static now() { return clock.now; } };
+  return clock;
+}
+
+test("saving other things does not keep an old draft alive", () => {
+  const storage = fakeStorage();
+  const a = app(storage);
+  const clock = withClock(a);
+  a.rebuildEx();
+  a.S.draft = { chest_press: [{ kg: 25, reps: 12, done: false }] };
+  a.tickSet("chest_press", 0);
+  a.save();
+  const tickedAt = JSON.parse(storage.getItem("train-today-v1")).draftTs;
+  clock.now += 10 * 36e5; // 10 h later the user logs food, a run, etc.
+  a.save();
+  assert.equal(JSON.parse(storage.getItem("train-today-v1")).draftTs, tickedAt, "save() alone must not move draftTs");
+  clock.now += 3 * 36e5; // 13 h after the last tick
+  const b = app(storage);
+  b.Date = a.Date;
+  b.load();
+  assert.deepEqual(JSON.parse(JSON.stringify(b.S.draft)), {});
+});
+
+test("typing or ticking moves draftTs; a blocked tick does not", () => {
+  const a = app();
+  const clock = withClock(a);
+  a.rebuildEx();
+  a.S.draft = { chest_press: [{ kg: "", reps: "", done: false }] };
+  assert.equal(a.tickSet("chest_press", 0), "ใส่น้ำหนักและจำนวนครั้งก่อนกด ✓");
+  assert.equal(a.S.draftTs, 0);
+  clock.now = 1000;
+  a.editSet("chest_press", 0, "kg", "20");
+  assert.equal(a.S.draftTs, 1000);
+  clock.now = 2000;
+  a.editSet("chest_press", 0, "reps", "12");
+  clock.now = 3000;
+  assert.equal(a.tickSet("chest_press", 0), "");
+  assert.equal(a.S.draftTs, 3000);
+  assert.equal(a.S.draft.chest_press[0].done, true);
+});
+
+test("a draft kept alive by recent typing survives a reload", () => {
+  const storage = fakeStorage();
+  const a = app(storage);
+  const clock = withClock(a);
+  a.rebuildEx();
+  a.S.draft = { chest_press: [{ kg: 25, reps: 12, done: false }] };
+  a.tickSet("chest_press", 0);
+  clock.now += 11 * 36e5;
+  a.editSet("chest_press", 0, "reps", "11"); // still working out
+  a.save();
+  clock.now += 2 * 36e5; // 13 h after the first tick, 2 h after the last edit
+  const b = app(storage);
+  b.Date = a.Date;
+  b.load();
+  assert.equal(b.S.draft.chest_press[0].reps, "11");
+  assert.equal(b.S.draftTs, clock.now - 2 * 36e5);
 });
 
 test("a broken draft in storage does not break loading", () => {

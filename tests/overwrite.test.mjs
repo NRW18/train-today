@@ -87,7 +87,7 @@ test("import over existing data asks, says what is lost and what is in the file"
   const msg = a.asked[0];
   assert.match(msg, /จะหาย: การซ้อม 3 ครั้ง, ท่าที่ AI เพิ่ม 1 ท่า/);
   assert.match(msg, /ในไฟล์มี: การซ้อม 2 ครั้ง, อาหาร 1 รายการ/);
-  assert.match(msg, /เครื่องที่เปิดหรือปิดไว้/);
+  assert.match(msg, /รวมถึงรายการเครื่องในยิมที่เลือกไว้/);
   // cancelled: nothing changed
   assert.equal(a.S.log.length, 3);
   assert.equal(a.S.custom.length, 1);
