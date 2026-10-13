@@ -509,7 +509,7 @@ var EN = {
   "<div class=\"kmbars\" role=\"img\" aria-label=\"ระยะวิ่งรายสัปดาห์ 8 สัปดาห์ สัปดาห์นี้ ": "<div class=\"kmbars\" role=\"img\" aria-label=\"Weekly running distance, 8 weeks. This week ",
   " กม.\">": " km\">",
   "สัปดาห์นี้": "This week",
-  " ครั้ง</div><div class=\"k\">วิ่งใน 4 สัปดาห์</div></div><div class=\"stat\"><div class=\"v\">": " runs</div><div class=\"k\">in the last 4 weeks</div></div><div class=\"stat\"><div class=\"v\">",
+  " ครั้ง</div><div class=\"k\">วิ่งใน 4 สัปดาห์</div></div><div class=\"stat\"><div class=\"v\">": "</div><div class=\"k\">runs in the last 4 weeks</div></div><div class=\"stat\"><div class=\"v\">",
   " กม.</div><div class=\"k\">ไกลสุดใน 4 สัปดาห์</div></div>": " km</div><div class=\"k\">longest in 4 weeks</div></div>",
   "</div><div class=\"k\">pace ดีสุด (3 กม.ขึ้นไป)</div></div><div class=\"stat\"><div class=\"v\">": "</div><div class=\"k\">best pace (3 km or more)</div></div><div class=\"stat\"><div class=\"v\">",
   " กม.</div><div class=\"k\">เฉลี่ยต่อสัปดาห์</div></div></div>": " km</div><div class=\"k\">average per week</div></div></div>",
