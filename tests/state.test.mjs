@@ -3,8 +3,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
-const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
-  "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
+const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
+  "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "importBackup", "dataList", "draftTicked", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -178,4 +178,129 @@ test("a broken draft in storage does not break loading", () => {
   assert.equal(a.S.draft.leg_press[0].reps, "8");
   assert.equal(a.S.draft.leg_press[0].done, true);
   assert.equal(a.S.log.length, 1);
+});
+
+test("delete all data really deletes everything, keeps the language and own key (TASKS 10)", () => {
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE), "kryvos-lang": "en", "train-today-gemini-key": "k".repeat(39) });
+  const a = app(storage);
+  a.load();
+  assert.equal(a.S.custom.length, 1);
+  a.wipe();
+  const saved = JSON.parse(storage.getItem("train-today-v1"));
+  a.S = a.blankState(); a.load(); // a fresh page load reads what was saved
+  for (const k of ["log", "custom", "seen", "off", "food", "weights", "runs"]) assert.equal(a.S[k].length, 0, k);
+  assert.equal(a.S.scanned, false);
+  assert.equal(a.S.summary, null);
+  assert.equal(a.S.shoe, null);
+  assert.deepEqual({ ...a.S.prefs }, { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" });
+  assert.equal(saved.onboarded, true, "the welcome screens are not shown again");
+  assert.equal(storage.getItem("kryvos-lang"), "en");
+  assert.equal(storage.getItem("train-today-gemini-key").length, 39);
+  assert.equal(a.EX.length, 2, "only the built-in exercises are left");
+});
+
+test("removing an AI exercise hides it: history and recovery still know it (TASKS 11)", () => {
+  const save = { ...OLD_SAVE, log: OLD_SAVE.log.concat([{ ts: Date.now() - 36e5, day: "legs", energy: "ok", entries: [{ ex: "c_abc_0", sets: [{ kg: 40, reps: 10 }] }] }]), today: { day: "", skip: [], add: [] } };
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify(save) });
+  const a = app(storage);
+  a.load();
+  a.S.seen.push("c_abc_0"); a.S.today.add.push("c_abc_0");
+  a.hideCustom("c_abc_0"); a.save();
+  assert.equal(a.EX.some((e) => e.id === "c_abc_0"), false, "no longer offered");
+  assert.equal(a.EXBY.c_abc_0.name, "สมิธสควอท (สมิธแมชชีน)", "name still known for history");
+  assert.ok(a.lastTrained().quads, "its sets still count for recovery");
+  assert.equal(a.S.seen.includes("c_abc_0"), false);
+  assert.equal(a.S.today.add.includes("c_abc_0"), false);
+  // and after a reload
+  const b = app(storage); b.load();
+  assert.equal(b.S.custom[0].hidden, true);
+  assert.equal(b.EX.some((e) => e.id === "c_abc_0"), false);
+  assert.ok(b.EXBY.c_abc_0);
+});
+
+test("old saves without the hidden flag load as visible", () => {
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE) }));
+  a.load();
+  assert.equal(a.S.custom[0].hidden, undefined);
+  assert.ok(a.EX.some((e) => e.id === "c_abc_0"));
+});
+
+test("scanning a removed AI exercise again brings the same one back instead of a copy", () => {
+  const hidden = { id: "c_abc_0", name: "สมิธสควอท (สมิธแมชชีน)", day: "legs", m: ["quads"], j: ["knee"], t: "kg", ai: true, hidden: true };
+  const v = load(["validate", "cleanEn"], {
+    S: { custom: [hidden] }, EX: [{ id: "leg_press", name: "เลกเพรส" }], EXBY: { leg_press: {}, c_abc_0: hidden },
+    DAYS: { legs: {} }, MUSCLES: { quads: 1 }, JOINTS: { knee: 1 }
+  });
+  const r = v.validate({ equipment: [{ label_th: "สมิธ", known: ["c_abc_0", "leg_press"] }], new_exercises: [{ name_th: "สมิธสควอท (สมิธแมชชีน)", day: "legs", muscles: ["quads"], joints: ["knee"] }] });
+  assert.deepEqual([...r.equipment[0].ids], ["leg_press"], "a hidden id is not offered as known");
+  assert.equal(r.fresh[0].back, "c_abc_0");
+});
+
+// TASKS 14: two tabs share one storage. Each test is one tab saving, then the other tab hearing about it.
+function twoTabs() {
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE) });
+  const a = app(storage), b = app(storage);
+  a.load(); b.load();
+  return { storage, a, b };
+}
+
+test("another tab's save is picked up, so this tab no longer writes old data over it", () => {
+  const { storage, a, b } = twoTabs();
+  b.S.food.push({ ts: Date.now(), name: "ไข่ต้ม", kcal: 76, p: 6 }); b.save();
+  a.syncFromOtherTab();
+  assert.equal(a.S.food.length, 2);
+  a.S.weights.push({ ts: Date.now(), kg: 60 }); a.save(); // tab A saves later: B's meal must survive
+  const d = JSON.parse(storage.getItem("train-today-v1"));
+  assert.equal(d.food.length, 2);
+  assert.equal(d.weights.length, 2);
+});
+
+test("sets being typed or ticked in this tab are kept when the other tab's draft is older", () => {
+  const { a, b } = twoTabs();
+  b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: true, ed: true }] }; b.S.draftTs = Date.now() - 60000;
+  b.S.food.push({ ts: Date.now(), name: "นม", kcal: 130, p: 7 }); b.save();
+  a.S.draft = { chest_press: [{ kg: "30", reps: "12", done: true, ed: true }] }; a.S.draftTs = Date.now();
+  assert.equal(a.syncFromOtherTab(), true, "this tab's draft won, so it is saved back");
+  assert.deepEqual(Object.keys(a.S.draft), ["chest_press"]);
+  assert.equal(a.S.food.length, 2, "the rest still comes from the other tab");
+});
+
+test("the other tab's newer draft wins over this tab's older one", () => {
+  const { a, b } = twoTabs();
+  a.S.draft = { chest_press: [{ kg: "30", reps: "12", done: true, ed: true }] }; a.S.draftTs = Date.now() - 60000;
+  b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: true, ed: true }] }; b.S.draftTs = Date.now(); b.save();
+  assert.equal(a.syncFromOtherTab(), false);
+  assert.deepEqual(Object.keys(a.S.draft), ["leg_press"]);
+  assert.equal(a.S.draft.leg_press[0].done, true);
+});
+
+test("a tab with nothing typed takes the other tab's draft", () => {
+  const { a, b } = twoTabs();
+  b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: false, ed: true }] }; b.S.draftTs = Date.now(); b.save();
+  a.syncFromOtherTab();
+  assert.equal(a.S.draft.leg_press[0].kg, "50");
+});
+
+test("import restores body details, shoes and shoe finder answers, and drops the old AI summary", () => {
+  const a = app();
+  a.load();
+  Object.assign(a, { confirm: () => true, renderAll: () => {}, DATA_WORDS: {} });
+  a.S.summary = { ts: 1, text: "old", tips: [] };
+  const backup = { ...OLD_SAVE, profile: { sex: "f", age: 30, h: 165, act: 1.725 }, shoe: { name: "Pegasus 42", ts: 1760000000000, base: 120 },
+    shoeQ: { use: "race", sex: "f", width: "wide", arch: "flat", budget: 9000 }, app: "train-today", v: 3 };
+  a.importBackup(JSON.stringify(backup));
+  assert.deepEqual({ ...a.S.profile }, backup.profile);
+  assert.equal(a.S.shoe.name, "Pegasus 42");
+  assert.equal(a.S.shoe.base, 120);
+  assert.equal(a.S.shoeQ.use, "race");
+  assert.equal(a.S.summary, null);
+});
+
+test("importing an older backup without body details keeps the current ones", () => {
+  const a = app();
+  a.load();
+  Object.assign(a, { confirm: () => true, renderAll: () => {}, DATA_WORDS: {} });
+  a.S.profile = { sex: "m", age: 20, h: 175, act: 1.55 };
+  a.importBackup(JSON.stringify(OLD_SAVE));
+  assert.equal(a.S.profile.age, 20);
 });

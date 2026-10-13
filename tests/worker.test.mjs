@@ -127,3 +127,11 @@ test("Google errors are not passed through to the app", async () => {
   assert.equal(res.status, 502);
   assert.ok(!(await res.text()).includes("secret detail"));
 });
+
+test("Google unreachable: 502 with CORS, not a crash", async () => {
+  globalThis.fetch = async () => { throw new TypeError("network connection lost"); };
+  const res = await worker.fetch(req(GOOD_BODY), { GEMINI_KEY: "test", RL: fakeKV() });
+  assert.equal(res.status, 502);
+  assert.equal(res.headers.get("Access-Control-Allow-Origin"), ORIGIN);
+  assert.equal((await res.json()).error, "upstream");
+});

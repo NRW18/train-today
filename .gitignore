@@ -5,3 +5,4 @@ android/app/build/
 *.keystore
 proxy/.wrangler/
 .dev.vars
+design/

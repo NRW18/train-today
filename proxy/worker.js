@@ -100,13 +100,21 @@ export default {
 
     const payload = JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } });
     for (let i = 0; i < MODELS.length; i++) {
-      const res = await fetch(UPSTREAM + MODELS[i] + ":generateContent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_KEY },
-        body: payload
-      });
-      if (res.status === 404 && i + 1 < MODELS.length) continue;
-      const text = await res.text();
+      let res, text;
+      try {
+        res = await fetch(UPSTREAM + MODELS[i] + ":generateContent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_KEY },
+          body: payload
+        });
+        if (res.status === 404 && i + 1 < MODELS.length) continue;
+        text = await res.text();
+      } catch (e) {
+        // Google unreachable: answer like any other upstream failure (with CORS), so the app retries once
+        // and then says the AI is having trouble, instead of a bare 500 the browser reports as "offline".
+        console.log("Google fetch failed:", e && e.message);
+        return json({ error: "upstream", status: 0 }, 502, origin);
+      }
       // Never pass Google's error details through: they can mention the key or project.
       if (!res.ok) return json({ error: "upstream", status: res.status }, res.status === 429 ? 429 : 502, origin);
       return new Response(text, { status: 200, headers: { "Content-Type": "application/json", ...cors(origin) } });

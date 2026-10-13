@@ -1,9 +1,17 @@
 # Cloudflare Worker settings for the AI proxy. Deploy from this folder: npx wrangler deploy
 # GEMINI_KEY is a secret kept in Cloudflare, never in this file.
+# Keep these in step with the dashboard so a deploy does not switch logs off or preview URLs on.
 name = "train-today-ai"
 main = "worker.js"
-compatibility_date = "2026-10-01"
+compatibility_date = "2026-10-12"
+preview_urls = false
 
 [[kv_namespaces]]
 binding = "RL"
 id = "f20883e472194d99b3f4bd8cbfc65315"
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
