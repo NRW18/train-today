@@ -3,3 +3,5 @@ android/build/
 android/app/build/
 *.jks
 *.keystore
+proxy/.wrangler/
+.dev.vars
