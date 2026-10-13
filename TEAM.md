@@ -1,4 +1,4 @@
-# คู่มือทีม: วันนี้ฝึกอะไร
+# คู่มือทีม: KRYVOS
 
 อ่านไฟล์นี้ก่อนเริ่มแก้โค้ด ใช้เวลาราว 10 นาที
 
@@ -32,7 +32,10 @@
 | `rest timer` | ตัวจับเวลาพักระหว่างเซ็ต |
 | `render: history` | หน้า "ประวัติ" กราฟ และรายการซ้อม |
 | `render: gym` / `AI: recognise gym machines` | แท็บ "เครื่อง" และการสแกนด้วย AI (`callGemini()`, `validate()`) |
-| `food + body weight` | แท็บ "กิน" ถ่ายรูปอาหาร น้ำหนักตัว |
+| `knowledge: running shoes` | รายการรองเท้าวิ่ง ราคา และคะแนน (`SHOES`) |
+| `knowledge: common Thai dishes` | เมนูไทยสำหรับเพิ่มเร็ว (`FOODS`) |
+| `running: weekly distance` | แท็บ "วิ่ง" ระยะรายสัปดาห์ ระยะรองเท้า และตัวเลือกรองเท้า (`pickShoes()`) |
+| `food + body weight` | แท็บ "กิน" ถ่ายรูปอาหาร เพิ่มเร็ว เป้าเพิ่ม/ลดน้ำหนัก (`energyPlan()`, `weightTrend()`) |
 | `weekly summary` | สรุป 7 วัน และคำแนะนำจาก AI |
 | `events` | ปุ่มต่าง ๆ กดแล้วเกิดอะไร |
 | `onboarding` / `install as an app` | หน้าแนะนำการใช้ และปุ่มติดตั้ง |
