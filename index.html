@@ -1565,7 +1565,7 @@
       var pts = [];
       S.log.forEach(function (s) { s.entries.forEach(function (en) { if (en.ex === e.id && en.sets.length) pts.push(Math.max.apply(null, en.sets.map(function (x) { return x.kg || 0; }))); }); });
       if (!pts.length) return "";
-      var diff = pts[pts.length - 1] - pts[0];
+      var diff = r2(pts[pts.length - 1] - pts[0]);
       var lab = diff > 0 ? '<span class="up">+' + diff + t(" กก.</span>") : '<span class="flat">' + pts[pts.length - 1] + t(" กก.</span>");
       return '<div class="prog"><span>' + esc(e.name) + t(" <span class=\"ex-mus\">ล่าสุด ") + pts[pts.length - 1] + t(" กก.</span></span>") + lab + spark(pts) + "</div>";
     }).join("");
@@ -1819,6 +1819,8 @@
     return { bmr: Math.round(bmr), tdee: Math.round(tdee / 10) * 10, kcal: Math.round(kcal / 10) * 10, p: Math.round(w * PROTEIN_PER_KG[goal]) };
   }
   function r1(n) { return Math.round(n * 10) / 10; }
+  // weight lifted: 2 decimals keeps 1.25 kg plates and drops float noise (10.4 - 10.1 = 0.30000000000000043)
+  function r2(n) { return Math.round(n * 100) / 100; }
 
   // cap: the target is a ceiling (calories while losing weight), so going over is a warning, not a win
   function ring(label, val, target, unitTxt, color, cap) {
@@ -2115,7 +2117,7 @@
     ALL_EX.filter(function (e) { return e.t === "kg"; }).forEach(function (e) {
       var old = 0, neu = 0;
       S.log.forEach(function (s) { s.entries.forEach(function (en) { if (en.ex !== e.id) return; var b = Math.max.apply(null, en.sets.map(function (x) { return x.kg || 0; }).concat([0])); if (s.ts < since) old = Math.max(old, b); else neu = Math.max(neu, b); }); });
-      if (old && neu > old) ups.push({ name: e.name, from: old, to: neu });
+      if (old && neu > old) ups.push({ name: e.name, from: r2(old), to: r2(neu) });
     });
     return { sessions: sess.length, by: by, volume: Math.round(vol), runs: runs.length, km: r1(km), foodDays: dk.length, avgKcal: Math.round(avgK), avgProtein: Math.round(avgP),
       kcalTarget: S.prefs.kcal, proteinTarget: proteinTarget(), weightFrom: wFrom, weightTo: wTo, goalKg: S.prefs.goalKg, liftsUp: ups.slice(0, 5) };
