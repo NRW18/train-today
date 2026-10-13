@@ -58,13 +58,17 @@
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   /* header */
-  header.top { display: flex; align-items: flex-end; justify-content: space-between; padding: 22px 2px 6px; gap: 12px; }
-  .brand { margin: 0; line-height: 0; color: var(--brand-ink); }
-  .wordmark { height: 21px; width: auto; display: block; }
-  .top-r { display: flex; align-items: center; gap: 10px; }
-  .lang-btn { border: 0; background: var(--card); color: var(--ink); font-weight: 700; font-size: .8rem; border-radius: 99px; padding: 6px 11px; cursor: pointer; box-shadow: var(--shadow); font-family: var(--head); }
-  .date { color: var(--soft); font-size: 0.9rem; text-align: right; line-height: 1.3; }
-  .date b { display: block; color: var(--ink); font-family: var(--head); font-size: 1rem; }
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 20px 2px 8px; gap: 12px; }
+  .brand { margin: 0; display: flex; align-items: baseline; gap: 7px; color: var(--brand-ink); min-width: 0; }
+  .wordmark { height: 20px; width: auto; display: block; flex: none; align-self: center; }
+  .edition { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: .95rem; line-height: 1; color: var(--soft); letter-spacing: .01em; }
+  .top-r { display: flex; align-items: center; gap: 10px; flex: none; }
+  .date { color: var(--soft); font-size: 0.86rem; text-align: right; line-height: 1.25; }
+  .date b { display: block; color: var(--ink); font-family: var(--head); font-weight: 700; font-size: 1rem; }
+  .me { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--card); color: var(--blue); box-shadow: var(--shadow); display: grid; place-items: center; cursor: pointer; padding: 0; }
+  .me svg { width: 26px; height: 26px; }
+  .me[aria-current="true"] { box-shadow: inset 0 0 0 2px var(--blue), var(--shadow); }
+  @media (max-width: 370px) { .wordmark { height: 17px; } .edition { font-size: .85rem; } }
 
   /* cards */
   .card { background: var(--card); border-radius: 22px; padding: 18px; margin: 14px 0; box-shadow: var(--shadow); }
@@ -409,8 +413,8 @@
 <body>
 <div class="app">
   <header class="top">
-    <h1 class="brand"><svg class="wordmark" viewBox="100 250 1720 215" role="img" aria-label="KRYVOS"><path fill="currentColor" fill-rule="evenodd" d="M 207.7 259.3 L 107.1 415.6 L 160.3 415.6 L 262.6 259.3 Z M 381.2 259.3 L 229.8 340.7 L 310.8 415.6 L 424.2 459.9 L 298.4 333.7 L 437 259.3 Z M 599.1 362.4 C 609.2 361.9 631 359.2 651.8 343.8 C 657.8 339.4 678.3 323.9 684.6 297.8 C 686.1 291.6 687.1 286.8 685.5 281.4 C 681 267.2 660.6 258.3 633.6 257.9 L 487.1 259.3 L 469.8 267.7 L 460.5 286.3 L 633.2 287.4 L 633.2 325.7 L 497.3 325.7 L 601.3 417.8 L 661.5 417.8 L 599.1 362.4 M 723.1 259.3 L 794.8 341.2 L 765.2 417.8 L 814.3 417.8 L 853.3 320.8 L 960.4 259.3 L 916.6 259.3 L 838.7 303.5 L 793.5 257.9 Z M 983.5 257.9 L 1054.3 417.8 L 1083.1 417.8 L 1258 260.1 L 1197.8 257.9 L 1087.1 374.4 L 1039.7 257.9 Z M 1289 257.9 L 1208.9 417.8 L 1453.7 417.8 L 1527.7 257.9 Z M 1316.5 289.8 L 1271.3 384.6 L 1418.3 384.6 L 1464.8 289.8 Z M 1812.9 257.9 L 1567.5 257.9 L 1527.7 353.6 L 1707.9 355.8 L 1692.4 384.6 L 1542.7 384.6 L 1489.6 417.8 L 1693.3 417.8 L 1738 396.5 L 1772.6 320.8 L 1592.3 317.3 L 1606.5 289.8 L 1760.2 289.8 Z"/></svg></h1>
-    <div class="top-r"><div class="date" id="today-date"></div><button type="button" class="lang-btn" id="lang-btn" aria-label="Language / ภาษา"></button></div>
+    <h1 class="brand"><svg class="wordmark" viewBox="100 250 1720 215" role="img" aria-label="KRYVOS"><path fill="currentColor" fill-rule="evenodd" d="M 207.7 259.3 L 107.1 415.6 L 160.3 415.6 L 262.6 259.3 Z M 381.2 259.3 L 229.8 340.7 L 310.8 415.6 L 424.2 459.9 L 298.4 333.7 L 437 259.3 Z M 599.1 362.4 C 609.2 361.9 631 359.2 651.8 343.8 C 657.8 339.4 678.3 323.9 684.6 297.8 C 686.1 291.6 687.1 286.8 685.5 281.4 C 681 267.2 660.6 258.3 633.6 257.9 L 487.1 259.3 L 469.8 267.7 L 460.5 286.3 L 633.2 287.4 L 633.2 325.7 L 497.3 325.7 L 601.3 417.8 L 661.5 417.8 L 599.1 362.4 M 723.1 259.3 L 794.8 341.2 L 765.2 417.8 L 814.3 417.8 L 853.3 320.8 L 960.4 259.3 L 916.6 259.3 L 838.7 303.5 L 793.5 257.9 Z M 983.5 257.9 L 1054.3 417.8 L 1083.1 417.8 L 1258 260.1 L 1197.8 257.9 L 1087.1 374.4 L 1039.7 257.9 Z M 1289 257.9 L 1208.9 417.8 L 1453.7 417.8 L 1527.7 257.9 Z M 1316.5 289.8 L 1271.3 384.6 L 1418.3 384.6 L 1464.8 289.8 Z M 1812.9 257.9 L 1567.5 257.9 L 1527.7 353.6 L 1707.9 355.8 L 1692.4 384.6 L 1542.7 384.6 L 1489.6 417.8 L 1693.3 417.8 L 1738 396.5 L 1772.6 320.8 L 1592.3 317.3 L 1606.5 289.8 L 1760.2 289.8 Z"/></svg><span class="edition">Essential</span></h1>
+    <div class="top-r"><div class="date" id="today-date"></div><button type="button" class="me" id="me-btn" aria-label="โปรไฟล์และการตั้งค่า"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8.2" r="4.2"/><path d="M3.8 20.5c.9-4.1 4.2-6.6 8.2-6.6s7.3 2.5 8.2 6.6c.1.5-.3.9-.8.9H4.6c-.5 0-.9-.4-.8-.9z"/></svg></button></div>
   </header>
 
   <!-- TODAY -->
@@ -2521,6 +2525,7 @@
     b.addEventListener("click", function () {
       Array.prototype.forEach.call(tabs, function (x) { x.removeAttribute("aria-current"); });
       b.setAttribute("aria-current", "page");
+      $("me-btn").setAttribute("aria-current", b.dataset.tab === "settings" ? "true" : "false");
       ["today", "gym", "run", "food", "history", "settings"].forEach(function (v) { $("v-" + v).hidden = v !== b.dataset.tab; });
       if (b.dataset.tab === "history") renderHistory();
       if (b.dataset.tab === "gym") renderGym();
@@ -2584,8 +2589,8 @@
     document.body.appendChild(wrap); draw();
   }
   $("show-onb").addEventListener("click", showOnboarding);
-  $("lang-btn").textContent = LANG === "en" ? t("ไทย") : "EN";
-  $("lang-btn").addEventListener("click", function () { setLang(LANG === "en" ? "th" : "en"); });
+  // the round profile button opens the settings tab (the language switch lives there)
+  $("me-btn").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="settings"]').click(); });
   pressed("lang-seg", LANG);
   $("lang-seg").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (b && b.dataset.v !== LANG) setLang(b.dataset.v); });
 

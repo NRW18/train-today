@@ -745,6 +745,7 @@ var EN = {
   "ค้นหาท่า": "Search exercises",
   "เวลาพัก": "Rest time",
   "เมนู": "Menu",
+  "โปรไฟล์และการตั้งค่า": "Profile and settings",
   "ลดเวลาพัก 15 วินาที": "Rest 15 seconds less",
   "เพิ่มเวลาพัก 15 วินาที": "Rest 15 seconds more"
 };
