@@ -834,10 +834,20 @@
     calf_raise: { how: [t("ปลายเท้าวางบนขอบ ส้นเท้าลอย"), t("เขย่งขึ้นสุด ค้าง 1 วินาที"), t("ลดส้นเท้าลงต่ำกว่าขอบให้น่องยืด")], miss: [t("เด้งขึ้นลงเร็ว"), t("งอเข่าช่วย")] }
   };
 
-  var EX = [], EXBY = {};
+  // EX: exercises the app can pick or offer. ALL_EX and EXBY also hold AI exercises the user removed (hidden),
+  // so history, graphs and muscle recovery still know them.
+  var EX = [], ALL_EX = [], EXBY = {};
   function rebuildEx() {
-    EX = BASE_EX.concat(S.custom);
-    EXBY = {}; EX.forEach(function (e) { EXBY[e.id] = e; });
+    ALL_EX = BASE_EX.concat(S.custom);
+    EX = ALL_EX.filter(function (e) { return !e.hidden; });
+    EXBY = {}; ALL_EX.forEach(function (e) { EXBY[e.id] = e; });
+  }
+  // Removing an AI exercise hides it instead of deleting it: past sets still need its name and muscles.
+  function hideCustom(id) {
+    S.custom.forEach(function (c) { if (c.id === id) c.hidden = true; });
+    function drop(a) { return a.filter(function (x) { return x !== id; }); }
+    S.seen = drop(S.seen); S.off = drop(S.off); S.today.skip = drop(S.today.skip); S.today.add = drop(S.today.add);
+    rebuildEx();
   }
   var RECOVER_H = 48, LO = 8, HI = 12, STEP = 2.5;
 
@@ -929,6 +939,7 @@
       var g = cleanGuide(e.guide);
       var o = { id: e.id, name: e.name.slice(0, 40), day: e.day, m: e.m, j: e.j, t: "kg", ai: true, guide: g && g.how.length ? g : null };
       var en = cleanEn(e.en); if (en) o.en = en;
+      if (e.hidden === true) o.hidden = true;
       return o;
     });
   }
@@ -1159,7 +1170,7 @@
   // exercises the user added for today only (never ones that hit a painful spot)
   function extraItems(have, tired) {
     var ids = have.map(function (it) { return it.e.id; });
-    return S.today.add.filter(function (id) { return EXBY[id] && ids.indexOf(id) < 0 && !isPainful(EXBY[id]); }).map(function (id) {
+    return S.today.add.filter(function (id) { return EXBY[id] && !EXBY[id].hidden && ids.indexOf(id) < 0 && !isPainful(EXBY[id]); }).map(function (id) {
       var e = EXBY[id], st = exStatus(e);
       return { e: e, sets: tired ? 2 : 3, light: st.out || st.light ? t("เมื่อยอยู่ เล่นเบา ๆ") : null, sug: suggest(e, tired), added: true };
     });
@@ -1167,7 +1178,7 @@
   function isPainful(e) {
     return e.m.some(function (m) { return bodyState("m", m) === "pain"; }) || e.j.some(function (j) { return bodyState("j", j) === "pain"; });
   }
-  function skippedToday() { return S.today.skip.filter(function (id) { return EXBY[id]; }); }
+  function skippedToday() { return S.today.skip.filter(function (id) { return EXBY[id] && !EXBY[id].hidden; }); }
 
   // Before ticking a set: a set with no weight was saved as 0 kg, and next time the app said "add 2.5 kg to 0 kg".
   function setMissing(e, s) {
@@ -1538,7 +1549,7 @@
       var vol = 0;
       s.entries.forEach(function (en) { en.sets.forEach(function (x) { vol += (x.kg || 0) * (x.reps || 0); }); });
       return { ts: s.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill ' + s.day + '">' + DAYS[s.day].name + "</span> " + fmtDate(s.ts) + " " + fmtTime(s.ts) + "</span><span>" + (vol ? Math.round(vol).toLocaleString(LOCALE) + t(" กก. รวม") : "") + "</span></div>" +
-        '<div class="sess-ex">' + s.entries.map(function (en) { var e = EXBY[en.ex]; return e ? esc(e.name) + " " + en.sets.length + t(" เซ็ต") : ""; }).filter(Boolean).join(" · ") + "</div></div>" };
+        '<div class="sess-ex">' + s.entries.map(function (en) { var e = EXBY[en.ex]; return (e ? esc(e.name) : t("ท่าที่ลบแล้ว")) + " " + en.sets.length + t(" เซ็ต"); }).join(" · ") + "</div></div>" };
     }).concat(S.runs.map(function (r) {
       return { ts: r.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill run">RUN</span> ' + (r.t ? RUN_TYPES[r.t] + " " : "") + fmtDate(r.ts) + " " + fmtTime(r.ts) + "</span><span>" + r.km + t(" กม. · ") + Math.round(r.min) + t(" นาที</span></div>") +
         '<div class="sess-ex">pace ' + pace(r.km, r.min) + ' <button type="button" class="del" data-delrun="' + r.ts + t('">ลบ</button></div></div>') };
@@ -1550,7 +1561,7 @@
     }
     $("sessions").innerHTML = rows.slice(0, 40).map(function (r) { return r.html; }).join("");
 
-    var rows = EX.filter(function (e) { return e.t === "kg"; }).map(function (e) {
+    var rows = ALL_EX.filter(function (e) { return e.t === "kg"; }).map(function (e) {
       var pts = [];
       S.log.forEach(function (s) { s.entries.forEach(function (en) { if (en.ex === e.id && en.sets.length) pts.push(Math.max.apply(null, en.sets.map(function (x) { return x.kg || 0; }))); }); });
       if (!pts.length) return "";
@@ -1596,7 +1607,7 @@
   var shotN = 0;
 
   function buildPrompt() {
-    var known = BASE_EX.concat(S.custom).map(function (e) { return e.id + ": " + e.name; }).join("\n");
+    var known = EX.map(function (e) { return e.id + ": " + e.name; }).join("\n");
     return [
       "You identify gym equipment in a photo for a Thai workout-planning app.",
       "Known exercises (id: name):", known, "",
@@ -1675,10 +1686,12 @@
   // Never trust the model's output blindly: keep only known ids and valid keys.
   function validate(r) {
     var out = { equipment: [], fresh: [] };
-    var taken = {}; EX.forEach(function (e) { taken[e.name.toLowerCase()] = 1; });
+    var taken = {}, back = {};
+    EX.forEach(function (e) { taken[e.name.toLowerCase()] = 1; });
+    S.custom.forEach(function (c) { if (c.hidden) back[c.name.toLowerCase()] = c.id; });
     (r && Array.isArray(r.equipment) ? r.equipment : []).slice(0, 8).forEach(function (q) {
       if (!q) return;
-      var ids = (Array.isArray(q.known) ? q.known : []).filter(function (id) { return EXBY[id]; });
+      var ids = (Array.isArray(q.known) ? q.known : []).filter(function (id) { return EXBY[id] && !EXBY[id].hidden; });
       var label = typeof q.label_th === "string" ? q.label_th.slice(0, 50) : t("เครื่องออกกำลังกาย");
       var conf = typeof q.confidence === "number" ? Math.max(0, Math.min(1, q.confidence)) : 0.5;
       out.equipment.push({ label: label, en: cleanEn(q.label_en), ids: ids, conf: conf });
@@ -1690,7 +1703,9 @@
       var name = n.name_th.trim().slice(0, 40);
       if (!m.length || !name || taken[name.toLowerCase()]) return;
       taken[name.toLowerCase()] = 1;
-      out.fresh.push({ name: name, en: cleanEn(n.name_en), day: n.day, m: m, j: j });
+      var f = { name: name, en: cleanEn(n.name_en), day: n.day, m: m, j: j };
+      if (back[name.toLowerCase()]) f.back = back[name.toLowerCase()];
+      out.fresh.push(f);
     });
     return out;
   }
@@ -1768,6 +1783,11 @@
     });
     Array.prototype.forEach.call(box.querySelectorAll("input[data-new]:checked"), function (cb) {
       var n = box._fresh[+cb.dataset.new];
+      if (n.back && EXBY[n.back]) { // removed earlier: bring the same one back, with its history
+        delete EXBY[n.back].hidden;
+        if (S.seen.indexOf(n.back) < 0) S.seen.push(n.back);
+        added++; return;
+      }
       var exId = "c_" + Date.now().toString(36) + "_" + cb.dataset.new;
       var c = { id: exId, name: n.name, day: n.day, m: n.m, j: n.j, t: "kg", ai: true };
       if (n.en) c.en = n.en;
@@ -2092,7 +2112,7 @@
     var wFrom = before.length ? before[before.length - 1].kg : (wIn.length ? wIn[0].kg : null);
     var wTo = wIn.length ? wIn[wIn.length - 1].kg : null;
     var ups = [];
-    EX.filter(function (e) { return e.t === "kg"; }).forEach(function (e) {
+    ALL_EX.filter(function (e) { return e.t === "kg"; }).forEach(function (e) {
       var old = 0, neu = 0;
       S.log.forEach(function (s) { s.entries.forEach(function (en) { if (en.ex !== e.id) return; var b = Math.max.apply(null, en.sets.map(function (x) { return x.kg || 0; }).concat([0])); if (s.ts < since) old = Math.max(old, b); else neu = Math.max(neu, b); }); });
       if (old && neu > old) ups.push({ name: e.name, from: old, to: neu });
@@ -2252,10 +2272,7 @@
     ev.preventDefault();
     var id = b.dataset.del, e = EXBY[id];
     if (!e || !confirm(t('ลบท่า "') + e.name + t('" ออกจากแอป? ประวัติการซ้อมท่านี้จะยังอยู่'))) return;
-    S.custom = S.custom.filter(function (x) { return x.id !== id; });
-    S.seen = S.seen.filter(function (x) { return x !== id; });
-    S.off = S.off.filter(function (x) { return x !== id; });
-    rebuildEx(); save(); renderGym(); renderPlan();
+    hideCustom(id); save(); renderGym(); renderPlan();
   });
   $("only-seen").addEventListener("click", function () {
     if (!confirm(t("ปิดทุกท่าที่ยังไม่เคยสแกนเจอ? (วิดพื้นกับแพลงก์ไม่ต้องใช้เครื่อง จะเปิดไว้)"))) return;

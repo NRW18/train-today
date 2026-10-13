@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
 const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
-  "load", "snapshot", "save", "rebuildEx", "blankState", "wipe", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
+  "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -197,4 +197,41 @@ test("delete all data really deletes everything, keeps the language and own key 
   assert.equal(storage.getItem("kryvos-lang"), "en");
   assert.equal(storage.getItem("train-today-gemini-key").length, 39);
   assert.equal(a.EX.length, 2, "only the built-in exercises are left");
+});
+
+test("removing an AI exercise hides it: history and recovery still know it (TASKS 11)", () => {
+  const save = { ...OLD_SAVE, log: OLD_SAVE.log.concat([{ ts: Date.now() - 36e5, day: "legs", energy: "ok", entries: [{ ex: "c_abc_0", sets: [{ kg: 40, reps: 10 }] }] }]), today: { day: "", skip: [], add: [] } };
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify(save) });
+  const a = app(storage);
+  a.load();
+  a.S.seen.push("c_abc_0"); a.S.today.add.push("c_abc_0");
+  a.hideCustom("c_abc_0"); a.save();
+  assert.equal(a.EX.some((e) => e.id === "c_abc_0"), false, "no longer offered");
+  assert.equal(a.EXBY.c_abc_0.name, "สมิธสควอท (สมิธแมชชีน)", "name still known for history");
+  assert.ok(a.lastTrained().quads, "its sets still count for recovery");
+  assert.equal(a.S.seen.includes("c_abc_0"), false);
+  assert.equal(a.S.today.add.includes("c_abc_0"), false);
+  // and after a reload
+  const b = app(storage); b.load();
+  assert.equal(b.S.custom[0].hidden, true);
+  assert.equal(b.EX.some((e) => e.id === "c_abc_0"), false);
+  assert.ok(b.EXBY.c_abc_0);
+});
+
+test("old saves without the hidden flag load as visible", () => {
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE) }));
+  a.load();
+  assert.equal(a.S.custom[0].hidden, undefined);
+  assert.ok(a.EX.some((e) => e.id === "c_abc_0"));
+});
+
+test("scanning a removed AI exercise again brings the same one back instead of a copy", () => {
+  const hidden = { id: "c_abc_0", name: "สมิธสควอท (สมิธแมชชีน)", day: "legs", m: ["quads"], j: ["knee"], t: "kg", ai: true, hidden: true };
+  const v = load(["validate", "cleanEn"], {
+    S: { custom: [hidden] }, EX: [{ id: "leg_press", name: "เลกเพรส" }], EXBY: { leg_press: {}, c_abc_0: hidden },
+    DAYS: { legs: {} }, MUSCLES: { quads: 1 }, JOINTS: { knee: 1 }
+  });
+  const r = v.validate({ equipment: [{ label_th: "สมิธ", known: ["c_abc_0", "leg_press"] }], new_exercises: [{ name_th: "สมิธสควอท (สมิธแมชชีน)", day: "legs", muscles: ["quads"], joints: ["knee"] }] });
+  assert.deepEqual([...r.equipment[0].ids], ["leg_press"], "a hidden id is not offered as known");
+  assert.equal(r.fresh[0].back, "c_abc_0");
 });

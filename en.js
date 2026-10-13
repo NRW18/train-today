@@ -275,6 +275,7 @@ var EN = {
   "ครบแล้ว กดบันทึกได้เลย": "All done, save your workout",
   "เหลือ ": "Left: ",
   " เซ็ต": " sets",
+  "ท่าที่ลบแล้ว": "Removed exercise",
   " เซ็ต กด ✓ หลังจบแต่ละเซ็ต</span>": " sets · tap ✓ after each set</span>",
   "บันทึกการซ้อม (": "Save workout (",
   " เซ็ต)": " sets)",
