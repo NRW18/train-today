@@ -252,22 +252,27 @@
   .whyd summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
   .whyd[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
 
-  /* check-in folded to one line */
-  .ci { padding: 0; }
-  .ci > summary { list-style: none; cursor: pointer; padding: 14px 18px; display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; border-radius: 22px; }
-  .ci > summary::-webkit-details-marker { display: none; }
-  .ci-h { font-family: var(--head); font-weight: 700; font-size: 1.05rem; }
-  .ci-edit { font-size: .84rem; font-weight: 700; color: var(--blue); background: var(--blue-bg); border-radius: 99px; padding: 4px 12px; }
-  .ci-edit .c { display: none; }
-  .ci[open] .ci-edit .o { display: none; }
-  .ci[open] .ci-edit .c { display: inline; }
-  .ci-sum { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
-  .ci-sum span { font-size: .82rem; font-weight: 600; background: var(--sunk); color: var(--soft); border-radius: 99px; padding: 2px 10px; }
-  .ci-sum .sore { background: var(--yellow-bg); color: var(--yellow-ink); }
-  .ci-sum .pain { background: var(--red-bg); color: var(--red-ink); }
-  .ci-sum .ask { background: transparent; padding-left: 0; font-weight: 500; }
-  .ci[open] .ci-sum { display: none; }
-  .ci-body { padding: 0 18px 18px; }
+  /* check-in: one open card; selected choice is solid blue, sore/painful parts sit in capsule boxes */
+  .ci { padding: 20px 18px 16px; }
+  .ci-h { font-family: var(--head); font-weight: 700; font-size: 1.35rem; line-height: 1.3; margin: 0 0 4px; }
+  .ci .q { margin: 14px 0 8px; color: var(--ink); font-size: .95rem; }
+  .ci .seg { border-radius: 16px; padding: 5px; }
+  .ci .seg button { border-radius: 12px; padding: 11px 4px; color: var(--ink); }
+  .ci .seg button[aria-pressed="true"] { background: var(--blue); color: var(--card); box-shadow: none; }
+  .cap { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; width: 100%; margin-top: 12px; border: 0; background: var(--sunk); border-radius: 99px; padding: 12px 44px 12px 18px; text-align: left; cursor: pointer; position: relative; min-height: 50px; }
+  .cap::after { content: ""; position: absolute; right: 20px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--soft); border-bottom: 2px solid var(--soft); transform: translateY(-70%) rotate(45deg); transition: transform .15s; }
+  .cap[aria-expanded="true"] { border-radius: 22px; }
+  .cap[aria-expanded="true"]::after { transform: translateY(-30%) rotate(-135deg); }
+  .cap-k { font-weight: 600; }
+  .cap-ph { color: var(--soft); font-size: .9rem; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; border-radius: 99px; padding: 1px 4px 1px 10px; font-size: .86rem; font-weight: 600; background: var(--card); }
+  .tag .st { font-size: .74rem; font-weight: 700; border-radius: 99px; padding: 0 7px; }
+  .tag.sore .st { background: var(--yellow-solid); color: #3A2A00; }
+  .tag.pain .st { background: var(--red); color: #fff; }
+  .cap-body { padding: 12px 4px 2px; }
+  .tips { margin: 16px 2px 0; font-size: .84rem; color: var(--soft); line-height: 1.55; }
+  .tips b { color: var(--ink); font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) { .cap::after { transition: none; } }
   .sec-h { font-family: var(--head); font-weight: 700; font-size: 0.92rem; color: var(--soft); margin: 20px 0 0; letter-spacing: .01em; }
 
   /* skip / add / recommendations */
@@ -454,9 +459,8 @@
       <div><strong>ให้แอปรู้ว่ายิมคุณมีเครื่องอะไร</strong><br>ถ่ายรูปเครื่อง แล้ว AI จะเพิ่มท่าให้เอง</div>
       <button type="button" class="btn small-btn" id="go-scan">สแกน</button>
     </section>
-    <details class="card ci" id="ci">
-      <summary><span class="ci-h">วันนี้เป็นยังไง</span><span class="ci-edit"><span class="o">ปรับ</span><span class="c">เสร็จแล้ว</span></span><span class="ci-sum" id="ci-sum"></span></summary>
-      <div class="ci-body">
+    <section class="card ci" id="ci" aria-labelledby="ci-h">
+      <h2 class="ci-h" id="ci-h">วันนี้ฝึกอะไรกันดี?</h2>
       <p class="q">ซ้อมช่วงไหน</p>
       <div class="seg" id="slot" role="group" aria-label="ช่วงเวลา">
         <button type="button" data-v="am">เช้า (ช่วงบน)</button>
@@ -469,13 +473,12 @@
         <button type="button" data-v="ok">ปกติ</button>
         <button type="button" data-v="tired">เหนื่อย</button>
       </div>
-      <p class="q">ตรงไหนเมื่อยหรือเจ็บ</p>
-      <div class="chips" id="muscles"></div>
-      <p class="q" style="margin-top:12px">ข้อต่อที่เจ็บ</p>
-      <div class="chips" id="joints"></div>
-      <div class="legend"><span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span><span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></div>
-      </div>
-    </details>
+      <button type="button" class="cap" id="cap-m" aria-expanded="false" aria-controls="muscles"><span class="cap-k">เจ็บตรงไหน :</span><span id="cap-m-v"></span></button>
+      <div class="chips cap-body" id="muscles" role="group" aria-label="ตรงไหนเมื่อยหรือเจ็บ" hidden></div>
+      <button type="button" class="cap" id="cap-j" aria-expanded="false" aria-controls="joints"><span class="cap-k">ข้อต่อที่เจ็บ :</span><span id="cap-j-v"></span></button>
+      <div class="chips cap-body" id="joints" role="group" aria-label="ข้อต่อที่เจ็บ" hidden></div>
+      <p class="tips">Tips : <span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span> <span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></p>
+    </section>
 
     <section class="card plan" id="plan" aria-live="polite"></section>
 
@@ -1260,22 +1263,17 @@
     });
     $("muscles").innerHTML = Object.keys(MUSCLES).map(function (k) { return chip("m", k, MUSCLES[k]); }).join("");
     $("joints").innerHTML = Object.keys(JOINTS).map(function (k) { return chip("j", k, JOINTS[k]); }).join("");
-    $("ci-sum").innerHTML = ciSummary();
+    $("cap-m-v").innerHTML = capValue("m");
+    $("cap-j-v").innerHTML = capValue("j");
   }
-  // The folded check-in: what the app is planning around, as short pills.
-  var SLOT_TH = { am: t("เช้า: ช่วงบน"), pm: t("เย็น: ขา"), any: t("ฝึกได้ทุกส่วน") };
-  var ENERGY_TH = { good: t("แรงดีมาก"), ok: t("แรงปกติ"), tired: t("เหนื่อย") };
-  function ciSummary() {
-    var h = "<span>" + SLOT_TH[S.slot] + "</span><span>" + ENERGY_TH[S.energy] + "</span>";
-    var parts = { sore: [], pain: [] };
-    Object.keys(S.body).forEach(function (k) {
-      var p = k.split(":"), label = (p[0] === "m" ? MUSCLES : JOINTS)[p[1]];
-      if (label && parts[S.body[k]]) parts[S.body[k]].push(label);
-    });
-    if (parts.sore.length) h += t('<span class="sore">เมื่อย ') + parts.sore.join(" ") + "</span>";
-    if (parts.pain.length) h += t('<span class="pain">เจ็บ ') + parts.pain.join(" ") + "</span>";
-    if (!parts.sore.length && !parts.pain.length) h += t('<span class="ask">เมื่อยหรือเจ็บตรงไหน กดปรับ</span>');
-    return h;
+  // What is chosen, shown inside the capsule box ("m" muscles, "j" joints), so it reads without opening it.
+  function capValue(kind) {
+    var dict = kind === "m" ? MUSCLES : JOINTS;
+    var h = Object.keys(dict).filter(function (k) { return bodyState(kind, k); }).map(function (k) {
+      var st = bodyState(kind, k);
+      return '<span class="tag ' + st + '">' + dict[k] + (st === "sore" ? t('<span class="st">เมื่อย</span>') : t('<span class="st">เจ็บ</span>')) + "</span>";
+    }).join("");
+    return h || '<span class="cap-ph">' + t("แตะเพื่อเลือก") + "</span>";
   }
   function chip(kind, key, label) {
     var st = bodyState(kind, key);
@@ -2277,6 +2275,12 @@
     var again = document.querySelector('.chip[data-kind="' + b.dataset.kind + '"][data-key="' + b.dataset.key + '"]');
     if (again) again.focus();
   }
+  ["m", "j"].forEach(function (k) {
+    $("cap-" + k).addEventListener("click", function () {
+      var box = $(this.getAttribute("aria-controls")), open = box.hidden;
+      box.hidden = !open; this.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  });
   $("muscles").addEventListener("click", bodyClick);
   $("joints").addEventListener("click", bodyClick);
 

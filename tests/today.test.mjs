@@ -5,11 +5,11 @@ import { load } from "./app.mjs";
 
 function app(draft, body = {}) {
   const items = [{ e: { id: "a" }, sets: 3 }, { e: { id: "b" }, sets: 2 }];
-  return load(["setsDone", "progress", "meterText", "finishLabel", "ciSummary"], {
+  return load(["setsDone", "progress", "meterText", "finishLabel", "capValue", "bodyState"], {
     S: { draft, slot: "any", energy: "ok", body },
     current: { items },
     MUSCLES: { chest: "อก", quads: "ต้นขาหน้า" }, JOINTS: { knee: "เข่า" }
-  }, ["SLOT_TH", "ENERGY_TH"]);
+  });
 }
 
 test("nothing ticked: meter explains what to do, save button has no count", () => {
@@ -30,11 +30,12 @@ test("all ticked: tells the user to save", () => {
   assert.match(a.meterText(a.progress()), /ครบแล้ว/);
 });
 
-test("check-in summary lists sore and painful parts, or asks", () => {
-  assert.match(app({}).ciSummary(), /เมื่อยหรือเจ็บตรงไหน/);
-  const s = app({}, { "m:chest": "sore", "j:knee": "pain" }).ciSummary();
-  assert.match(s, /class="sore">เมื่อย อก/);
-  assert.match(s, /class="pain">เจ็บ เข่า/);
+test("check-in capsules show the sore and painful parts, or ask to choose", () => {
+  assert.match(app({}).capValue("m"), /แตะเพื่อเลือก/);
+  const a = app({}, { "m:chest": "sore", "j:knee": "pain" });
+  assert.match(a.capValue("m"), /class="tag sore">อก<span class="st">เมื่อย/);
+  assert.doesNotMatch(a.capValue("m"), /เข่า/);
+  assert.match(a.capValue("j"), /class="tag pain">เข่า<span class="st">เจ็บ/);
 });
 
 // Design: "Your Activity" strip, this week Monday to Sunday.
