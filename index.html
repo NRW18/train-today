@@ -2119,10 +2119,14 @@
     var dk = Object.keys(days), avgK = 0, avgP = 0;
     dk.forEach(function (k) { avgK += days[k].kc; avgP += days[k].p; });
     if (dk.length) { avgK /= dk.length; avgP /= dk.length; }
+    // start from the last weighing before the 7 days, but never one older than 14 days (a months-old
+    // value says nothing about this week); otherwise the first weighing inside the 7 days
     var wIn = S.weights.filter(function (w) { return w.ts >= since; });
-    var before = S.weights.filter(function (w) { return w.ts < since; });
-    var wFrom = before.length ? before[before.length - 1].kg : (wIn.length ? wIn[0].kg : null);
-    var wTo = wIn.length ? wIn[wIn.length - 1].kg : null;
+    var before = S.weights.filter(function (w) { return w.ts < since && w.ts >= now - 14 * 864e5; });
+    var first = before.length ? before[before.length - 1] : wIn[0];
+    var last = wIn[wIn.length - 1];
+    var two = first && last && first !== last; // one weighing is not a change
+    var wFrom = two ? first.kg : null, wTo = two ? last.kg : null, wFromTs = two ? first.ts : null;
     var ups = [];
     ALL_EX.filter(function (e) { return e.t === "kg"; }).forEach(function (e) {
       var old = 0, neu = 0;
@@ -2130,7 +2134,7 @@
       if (old && neu > old) ups.push({ name: e.name, from: r2(old), to: r2(neu) });
     });
     return { sessions: sess.length, by: by, volume: Math.round(vol), runs: runs.length, km: r1(km), foodDays: dk.length, avgKcal: Math.round(avgK), avgProtein: Math.round(avgP),
-      kcalTarget: S.prefs.kcal, proteinTarget: proteinTarget(), weightFrom: wFrom, weightTo: wTo, goalKg: S.prefs.goalKg, liftsUp: ups.slice(0, 5) };
+      kcalTarget: S.prefs.kcal, proteinTarget: proteinTarget(), weightFrom: wFrom, weightTo: wTo, weightFromTs: wFromTs, weighIns: wIn.length, goalKg: S.prefs.goalKg, liftsUp: ups.slice(0, 5) };
   }
   function stat(v, k) { return '<div class="stat"><div class="v">' + v + '</div><div class="k">' + k + "</div></div>"; }
   function renderWeek() {
@@ -2140,7 +2144,8 @@
       stat(w.km ? w.km + t(" กม.") : "–", tf(t("วิ่ง {n} ครั้ง"), { n: w.runs })) +
       stat(w.foodDays ? w.avgKcal.toLocaleString(LOCALE) : "–", t("kcal เฉลี่ย/วัน (เป้า ") + w.kcalTarget.toLocaleString(LOCALE) + ")") +
       stat(w.foodDays ? w.avgProtein + " g" : "–", t("โปรตีนเฉลี่ย/วัน (เป้า ") + w.proteinTarget + " g)") +
-      stat(w.weightTo != null && w.weightFrom != null ? (w.weightTo - w.weightFrom >= 0 ? "+" : "") + r1(w.weightTo - w.weightFrom) + t(" กก.") : "–", t("น้ำหนักตัว 7 วัน")) +
+      stat(w.weightTo != null && w.weightFrom != null ? (w.weightTo - w.weightFrom >= 0 ? "+" : "") + r1(w.weightTo - w.weightFrom) + t(" กก.") : "–",
+        t("น้ำหนักตัว 7 วัน") + (w.weightFromTs ? "<br>" + tf(t("เทียบกับ {d}"), { d: fmtDate(w.weightFromTs) }) : "")) +
       stat(w.liftsUp.length + t(" ท่า"), t("น้ำหนักยกขึ้น")) + "</div>";
     if (w.liftsUp.length) h += '<p class="hint" style="margin-top:10px">' + w.liftsUp.map(function (u) { return esc(u.name) + " " + u.from + "→" + u.to + t(" กก."); }).join(" · ") + "</p>";
     if (w.foodDays && w.foodDays < 3) h += t('<p class="hint">จดอาหารแค่ ') + w.foodDays + t(" วัน ค่าเฉลี่ยอาจยังไม่ตรง (ไม่นับวันนี้ที่ยังกินไม่ครบ)</p>");
@@ -2152,7 +2157,7 @@
   }
   function weekAI() {
     var w = weekStats(), btn = $("week-ai");
-    if (!w.sessions && !w.foodDays && !w.runs && w.weightTo == null) { toast(t("ยังไม่มีข้อมูล 7 วันที่ผ่านมา บันทึกก่อนแล้วค่อยให้ AI สรุป")); return; }
+    if (!w.sessions && !w.foodDays && !w.runs && !w.weighIns) { toast(t("ยังไม่มีข้อมูล 7 วันที่ผ่านมา บันทึกก่อนแล้วค่อยให้ AI สรุป")); return; }
     btn.disabled = true; btn.textContent = t("AI กำลังสรุป…");
     var p = [
       "You are a supportive strength coach. Summarise this user's last 7 days. Their goal: " + { gain: "build muscle and gain weight slowly", keep: "get stronger and keep their weight", lose: "lose fat while keeping muscle" }[S.prefs.goal] + ".",
