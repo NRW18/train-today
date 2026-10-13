@@ -30,3 +30,10 @@ test("sample data's food is not offered as a usual meal", () => {
   const a = load(["recentMeals"], { S: { food: [{ ts: now - 864e5, name: "ตัวอย่าง (3 มื้อ)", kcal: 2640, p: 100 }, { ts: now, name: "ข้าวมันไก่ต้ม", kcal: 585, p: 25 }] } });
   assert.deepEqual([...a.recentMeals().map((m) => m.n)], ["ข้าวมันไก่ต้ม"]);
 });
+
+test("food sheet: a day's total adds up that day's meals only", () => {
+  const d = (day, h) => new Date(2026, 9, day, h).getTime();
+  const a = load(["dayKcal", "dayKey"], { S: { food: [{ ts: d(12, 8), kcal: 400.4 }, { ts: d(12, 19), kcal: 600 }, { ts: d(13, 8), kcal: 300 }] } });
+  assert.equal(a.dayKcal(a.dayKey(d(12, 12))), 1000);
+  assert.equal(a.dayKcal(a.dayKey(d(14, 12))), 0);
+});

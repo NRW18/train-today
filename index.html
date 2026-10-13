@@ -483,6 +483,19 @@
   .sh-next svg { width: 22px; height: 22px; }
   .sheet.dark .sh-next { background: transparent; color: var(--hero-ink); box-shadow: inset 0 0 0 2px var(--hero-ink); }
   .shot .mini { margin-top: 6px; }
+  .kcal-t { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  .kcal-t th, .kcal-t td { text-align: left; padding: 6px 4px; vertical-align: top; }
+  .kcal-t td:last-child, .kcal-t th:last-child { text-align: right; white-space: nowrap; }
+  .kcal-t thead th { color: var(--soft); font-weight: 500; font-size: .86rem; }
+  .kcal-t tfoot th, .kcal-t tfoot td { font-weight: 700; border-top: 1px solid var(--line); padding-top: 8px; }
+  .wk7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 18px; text-align: center; }
+  .wk7 button { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 6px; font: inherit; color: inherit; }
+  .wk7 button:disabled { cursor: default; opacity: .45; }
+  .wk7 .n { width: 44px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--blue-bg); color: var(--blue); font-family: var(--head); font-weight: 700; font-size: 1.05rem; }
+  .wk7 button[aria-pressed="true"] .n { background: var(--blue); color: var(--card); }
+  .wk7 .l { font-size: .82rem; color: var(--soft); border-bottom: 2px solid transparent; line-height: 1.25; }
+  .wk7 .now .l { color: var(--ink); font-weight: 700; border-bottom-color: var(--blue); }
+  .wk-total { font-family: var(--head); font-weight: 700; margin: 10px 0 0; }
   @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
   .toast { position: fixed; left: 50%; bottom: calc(108px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--hero); color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: 90vw; z-index: 30; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
   .toast.show { opacity: 1; }
@@ -627,7 +640,6 @@
         <input type="file" id="food-input" accept="image/*" capture="environment" hidden>
       </label>
       <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
-      <div id="food-ai" aria-live="polite"></div>
     </section>
 
     <section class="card" aria-labelledby="eat-h">
@@ -2171,30 +2183,71 @@
     }).filter(function (x) { return x.name; });
     return { items: items, note: r && typeof r.note_th === "string" ? r.note_th.slice(0, 120) : "" };
   }
-  var foodPending = null;
+  // Food photo result in a light bottom sheet: the photo, a calorie table from the AI, the same editable numbers
+  // and save button, and this week's days (tap one to see that day's total).
+  var foodShot = null;
   function foodScan(file) {
-    var out = $("food-ai");
-    out.innerHTML = t('<div class="shot" style="border-top:0;margin-top:4px"><img alt="รูปอาหารที่ถ่าย"><div><div class="st">AI กำลังดูอาหาร…</div></div></div>');
+    var s = foodShot = { state: "busy", img: "", day: dayKey(Date.now()) };
+    openSheet("", function () { foodShot = null; }, $("food-label")); drawFoodSheet(); sheet.focus();
     $("food-label").classList.add("busy");
     shrink(file).then(function (dataUrl) {
-      out.querySelector("img").src = dataUrl;
+      s.img = dataUrl; if (foodShot === s) drawFoodSheet();
       return callGemini([{ text: foodPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }]);
     }).then(function (raw) {
-      var r = validFood(raw), body = out.querySelector(".shot div");
-      if (!r.items.length) { body.innerHTML = t('<div class="st">ไม่เห็นอาหารในรูปนี้ ลองถ่ายใหม่ให้เห็นจานชัด ๆ</div>'); return; }
-      var kc = 0, pr = 0; r.items.forEach(function (x) { kc += x.kcal; pr += x.p; });
-      foodPending = true;
-      body.innerHTML = "<strong>" + r.items.map(function (x) { return esc(x.name); }).join(", ") + "</strong>" +
-        '<div class="st">' + r.items.map(function (x) { return esc(x.name) + " ~" + Math.round(x.kcal) + " kcal, " + Math.round(x.p) + "g"; }).join(" · ") + "</div>" +
-        (r.note ? '<div class="st">' + esc(r.note) + "</div>" : "") +
+      s.r = validFood(raw); s.state = s.r.items.length ? "done" : "empty";
+    }).catch(function (e) {
+      s.state = "err"; s.err = errText(e, "food");
+    }).then(function () { $("food-label").classList.remove("busy"); if (foodShot === s) drawFoodSheet(); });
+  }
+  function dayKcal(key) { var k = 0; S.food.forEach(function (x) { if (dayKey(x.ts) === key) k += x.kcal; }); return Math.round(k); }
+  function weekDaysHtml(sel) {
+    var start = new Date(weekStart(Date.now())), now = Date.now();
+    var h = "";
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var key = dayKey(d.getTime()), today = key === dayKey(now), future = d.getTime() > now;
+      h += '<button type="button" data-day="' + key + '" aria-pressed="' + (key === sel ? "true" : "false") + '"' + (future ? " disabled" : "") + (today ? ' class="now"' : "") +
+        ' aria-label="' + esc(d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" })) + '"><span class="n" aria-hidden="true">' + d.getDate() + '</span><span class="l" aria-hidden="true">' +
+        d.toLocaleDateString(LOCALE, { weekday: "narrow" }) + "</span></button>";
+    }
+    return h;
+  }
+  function drawFoodSheet() {
+    var s = foodShot, h = sheetHead(t("อาหารที่คุณถ่ายคือ"), s.state === "done") + '<img class="sh-img" alt="' + t("รูปอาหารที่ถ่าย") + '"' + (s.img ? ' src="' + s.img + '"' : "") + ">";
+    if (s.state === "busy") h += '<p class="sh-msg" role="status">' + t("AI กำลังดูอาหาร…") + "</p>";
+    else if (s.state === "err") h += '<p class="sh-msg err" role="alert">' + esc(s.err) + "</p>";
+    else if (s.state === "empty") h += '<p class="sh-msg">' + t("ไม่เห็นอาหารในรูปนี้ ลองถ่ายใหม่ให้เห็นจานชัด ๆ") + "</p>";
+    else {
+      var r = s.r, kc = 0, pr = 0; r.items.forEach(function (x) { kc += x.kcal; pr += x.p; });
+      h += '<h3 class="sh-sec">' + t("แคลอรี่") + '</h3><table class="kcal-t"><thead><tr><th scope="col">' + t("ส่วนประกอบ") + '</th><th scope="col">' + t("แคลอรี่โดยประมาณ") + "</th></tr></thead><tbody>" +
+        r.items.map(function (x) { return "<tr><td>" + esc(x.name) + "</td><td>" + Math.round(x.kcal).toLocaleString(LOCALE) + " kcal</td></tr>"; }).join("") +
+        '</tbody><tfoot><tr><th scope="row">' + t("รวมทั้งหมด") + "</th><td>" + Math.round(kc).toLocaleString(LOCALE) + " kcal</td></tr></tfoot></table>" +
+        (r.note ? '<p class="hint">' + esc(r.note) + "</p>" : "") +
         '<div class="grid2"><label class="field"><input inputmode="numeric" id="fa-kcal" value="' + Math.round(kc) + t('" aria-label="แคลอรี่"><span>kcal</span></label>') +
         '<label class="field"><input inputmode="numeric" id="fa-p" value="' + Math.round(pr) + t('" aria-label="โปรตีน กรัม"><span>g</span></label></div>') +
         '<input type="hidden" id="fa-name" value="' + esc(r.items.map(function (x) { return x.name; }).join(", ").slice(0, 60)) + '">' +
         t('<p class="hint">ตัวเลขจาก AI เป็นค่าประมาณ อาจคลาดได้ราว 20–30% แก้ได้ก่อนบันทึก</p>') +
         t('<div class="row2"><button class="btn" type="button" id="fa-save">บันทึกมื้อนี้</button><button class="btn line" type="button" id="fa-cancel">ไม่บันทึก</button></div>');
-    }).catch(function (e) {
-      out.querySelector(".shot div").innerHTML = '<div class="err">' + esc(errText(e, "food")) + "</div>";
-    }).then(function () { $("food-label").classList.remove("busy"); });
+    }
+    h += '<div class="wk7" role="group" aria-label="' + t("แคลอรี่ที่บันทึกไว้ สัปดาห์นี้") + '">' + weekDaysHtml(s.day) + '</div><p class="wk-total" id="wk-total" aria-live="polite">Total ' + dayKcal(s.day).toLocaleString(LOCALE) + " kcal</p>";
+    var focusIn = sheet.contains(document.activeElement) && document.activeElement !== sheet;
+    sheet.innerHTML = h;
+    if (focusIn) sheet.focus();
+    sheet.onclick = function (ev) {
+      var day = ev.target.closest("[data-day]");
+      if (day) { // only the circles and the total change, so typed numbers stay
+        s.day = day.dataset.day;
+        Array.prototype.forEach.call(sheet.querySelectorAll("[data-day]"), function (b) { b.setAttribute("aria-pressed", b === day ? "true" : "false"); });
+        $("wk-total").textContent = "Total " + dayKcal(s.day).toLocaleString(LOCALE) + " kcal";
+      } else if (ev.target.closest("[data-close]") || ev.target.closest("#fa-cancel")) closeSheet();
+      else if (ev.target.closest("[data-share]")) {
+        var tot = 0; s.r.items.forEach(function (x) { tot += x.kcal; });
+        share(t("อาหารที่คุณถ่ายคือ") + "\n" + s.r.items.map(function (x) { return "• " + x.name + " ~" + Math.round(x.kcal) + " kcal"; }).join("\n") + "\n" + t("รวมทั้งหมด") + " ~" + Math.round(tot) + " kcal");
+      } else if (ev.target.closest("#fa-save")) {
+        addFood($("fa-name").value, num($("fa-kcal").value), num($("fa-p").value));
+        closeSheet(); toast(t("บันทึกมื้อนี้แล้ว"));
+      }
+    };
   }
 
   /* ---------- running: weekly distance, shoe mileage, shoe finder ---------- */
@@ -2595,12 +2648,6 @@
 
   // food
   $("food-input").addEventListener("change", function () { var f = this.files && this.files[0]; if (f) foodScan(f); this.value = ""; });
-  $("food-ai").addEventListener("click", function (ev) {
-    if (ev.target.closest("#fa-save")) {
-      addFood($("fa-name").value, num($("fa-kcal").value), num($("fa-p").value));
-      $("food-ai").innerHTML = ""; foodPending = null; toast(t("บันทึกมื้อนี้แล้ว"));
-    } else if (ev.target.closest("#fa-cancel")) { $("food-ai").innerHTML = ""; foodPending = null; }
-  });
   $("quick").addEventListener("click", function (ev) {
     var pb = ev.target.closest("#portion button");
     if (pb) { portion = +pb.dataset.v; $("quick").innerHTML = quickHtml(); return; }
