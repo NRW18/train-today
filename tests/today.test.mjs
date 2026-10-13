@@ -54,3 +54,13 @@ test("week strip: workout and run per day, today, days still to come", () => {
   assert.equal(w[3].future, true);
   assert.equal(w[2].future, false);
 });
+
+test("scan sheet lists exercises the AI is surest of first, then new ones", () => {
+  const a = load(["shotItems"]);
+  const items = a.shotItems({
+    equipment: [{ ids: ["leg_curl"], conf: 0.4 }, { ids: ["leg_extension", "leg_curl"], conf: 0.9 }],
+    fresh: [{ name: "สมิธสควอท" }]
+  });
+  assert.deepEqual([...items.map((x) => x.id || x.fresh.name)], ["leg_extension", "leg_curl", "สมิธสควอท"]);
+  assert.equal(items[1].conf, 0.9, "listed once, with the surer confidence");
+});
