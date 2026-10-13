@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
 const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
-  "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
+  "load", "snapshot", "save", "rebuildEx", "blankState", "wipe", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -178,4 +178,23 @@ test("a broken draft in storage does not break loading", () => {
   assert.equal(a.S.draft.leg_press[0].reps, "8");
   assert.equal(a.S.draft.leg_press[0].done, true);
   assert.equal(a.S.log.length, 1);
+});
+
+test("delete all data really deletes everything, keeps the language and own key (TASKS 10)", () => {
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE), "kryvos-lang": "en", "train-today-gemini-key": "k".repeat(39) });
+  const a = app(storage);
+  a.load();
+  assert.equal(a.S.custom.length, 1);
+  a.wipe();
+  const saved = JSON.parse(storage.getItem("train-today-v1"));
+  a.S = a.blankState(); a.load(); // a fresh page load reads what was saved
+  for (const k of ["log", "custom", "seen", "off", "food", "weights", "runs"]) assert.equal(a.S[k].length, 0, k);
+  assert.equal(a.S.scanned, false);
+  assert.equal(a.S.summary, null);
+  assert.equal(a.S.shoe, null);
+  assert.deepEqual({ ...a.S.prefs }, { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" });
+  assert.equal(saved.onboarded, true, "the welcome screens are not shown again");
+  assert.equal(storage.getItem("kryvos-lang"), "en");
+  assert.equal(storage.getItem("train-today-gemini-key").length, 39);
+  assert.equal(a.EX.length, 2, "only the built-in exercises are left");
 });

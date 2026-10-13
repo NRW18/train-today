@@ -902,10 +902,20 @@
 
   /* ---------- state ---------- */
   var KEY = "train-today-v1", AIKEY = "train-today-gemini-key";
-  var S = { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
-    food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" }, summary: null,
-    profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 },
-    today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
+  var S = blankState();
+  function blankState() {
+    return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
+      food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" }, summary: null,
+      profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 },
+      today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
+  }
+  // "Delete all data": everything the app stored goes. Only the language and the user's own Gemini key
+  // (kept under their own keys, outside S) stay, and the welcome screens are not shown again.
+  function wipe() {
+    var seenIntro = S.onboarded;
+    S = blankState(); S.onboarded = seenIntro;
+    rebuildEx(); save();
+  }
   function strList(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, n).map(function (x) { return x.slice(0, 140); }); }
   // a short plain-English name (letters, digits, spaces, a few marks) or nothing
   function cleanEn(x) { return typeof x === "string" && /^[A-Za-z0-9 ().&\/-]{2,60}$/.test(x.trim()) ? x.trim() : ""; }
@@ -2454,9 +2464,9 @@
     save(); renderAll(); toast(t("ใส่ข้อมูลตัวอย่างแล้ว"));
   }
   $("clear").addEventListener("click", function () {
-    if (!confirm(t("ลบข้อมูลทั้งหมดในเครื่องนี้ (การซ้อม วิ่ง อาหาร น้ำหนักตัว)? กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้"))) return;
-    S.log = []; S.draft = {}; S.body = {}; S.food = []; S.weights = []; S.runs = []; S.summary = null; S.shoe = null;
-    save(); renderAll(); toast(t("ลบข้อมูลแล้ว"));
+    if (!confirm(t("ลบข้อมูลทั้งหมดในเครื่องนี้? การซ้อม วิ่ง อาหาร น้ำหนักตัว เป้าหมาย รองเท้า ท่าที่ AI เพิ่ม เครื่องที่สแกน และท่าที่ปิดไว้ จะหายหมด กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้\n\nที่ยังอยู่: ภาษาที่เลือก และ Gemini key ของคุณ (ถ้าใส่ไว้)"))) return;
+    stopRest(); runType = null; wipe();
+    renderAll(); toast(t("ลบข้อมูลแล้ว"));
   });
 
   var tabs = document.querySelectorAll("nav.tabs button");

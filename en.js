@@ -551,7 +551,7 @@ var EN = {
   "\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" จะกู้คืนไม่ได้ ใส่ข้อมูลตัวอย่างไหม?": "\n\nIf you haven't tapped \"Back up\" yet, it can't be recovered. Add sample data?",
   "ตัวอย่าง (3 มื้อ)": "Sample (3 meals)",
   "ใส่ข้อมูลตัวอย่างแล้ว": "Sample data added",
-  "ลบข้อมูลทั้งหมดในเครื่องนี้ (การซ้อม วิ่ง อาหาร น้ำหนักตัว)? กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้": "Delete all data on this phone (workouts, runs, food, body weight)? It can't be recovered without a backup",
+  "ลบข้อมูลทั้งหมดในเครื่องนี้? การซ้อม วิ่ง อาหาร น้ำหนักตัว เป้าหมาย รองเท้า ท่าที่ AI เพิ่ม เครื่องที่สแกน และท่าที่ปิดไว้ จะหายหมด กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้\n\nที่ยังอยู่: ภาษาที่เลือก และ Gemini key ของคุณ (ถ้าใส่ไว้)": "Delete all data on this phone? Workouts, runs, food, body weight, goals, shoes, AI-added exercises, scanned machines and switched-off exercises will all be gone. It can't be recovered without a backup\n\nWhat stays: your language and your own Gemini key (if you added one)",
   "ลบข้อมูลแล้ว": "Data deleted",
   "ยินดีต้อนรับสู่ KRYVOS": "Welcome to KRYVOS",
   "โค้ชซ้อมรายวัน ยกเวท วิ่ง และการกิน อยู่ในแอปเดียว": "Your daily training coach for lifting, running and eating, all in one app",
