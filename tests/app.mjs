@@ -24,10 +24,17 @@ export function fnSource(name) {
   throw new Error("unbalanced braces in " + name);
 }
 
-// Build a sandbox with the given globals and functions from index.html.
-export function load(names, globals = {}) {
+// Source of a one-line `var NAME = ...;` from index.html.
+export function varSource(name) {
+  const m = html.match(new RegExp("^\\s*var " + name + " = .*;$", "m"));
+  if (!m) throw new Error("var " + name + " not found in index.html");
+  return m[0].trim();
+}
+
+// Build a sandbox with the given globals, then the one-line vars and functions from index.html.
+export function load(names, globals = {}, vars = []) {
   const ctx = vm.createContext({ ...globals });
-  vm.runInContext(names.map(fnSource).join("\n"), ctx);
+  vm.runInContext(vars.map(varSource).concat(names.map(fnSource)).join("\n"), ctx);
   return ctx;
 }
 

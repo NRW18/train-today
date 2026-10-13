@@ -1704,9 +1704,20 @@
   $("import").addEventListener("change", function () {
     var f = this.files && this.files[0]; if (!f) return;
     var r = new FileReader();
-    r.onload = function () {
+    r.onload = function () { importBackup(r.result); };
+    r.readAsText(f); this.value = "";
+  });
+  // What would be lost, in words, e.g. ["การซ้อม 12 ครั้ง", "อาหาร 30 รายการ"]. Only lists what is not empty.
+  var DATA_WORDS = { log: ["การซ้อม", "ครั้ง"], runs: ["การวิ่ง", "ครั้ง"], food: ["อาหาร", "รายการ"], weights: ["น้ำหนักตัว", "ครั้ง"], custom: ["ท่าที่ AI เพิ่ม", "ท่า"] };
+  function dataList(d, keys) {
+    return keys.filter(function (k) { return d[k] && d[k].length; }).map(function (k) { return DATA_WORDS[k][0] + " " + d[k].length + " " + DATA_WORDS[k][1]; });
+  }
+  function draftTicked() {
+    return Object.keys(S.draft).some(function (id) { return S.draft[id].some(function (s) { return s.done; }); });
+  }
+  function importBackup(text) {
       try {
-        var d = JSON.parse(r.result);
+        var d = JSON.parse(text);
         if (!d || !Array.isArray(d.log)) throw 0;
         S.log = cleanLog(d.log);
         S.custom = cleanCustom(d.custom); rebuildEx();
@@ -1717,18 +1728,19 @@
         if (d.prefs) S.prefs = cleanPrefs(d.prefs);
         S.draft = {}; save(); renderAll(); toast("นำเข้า " + S.log.length + " ครั้งแล้ว");
       } catch (e) { toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป"); }
-    };
-    r.readAsText(f); this.value = "";
-  });
-  $("sample").addEventListener("click", function () {
-    if (S.log.length && !confirm("แทนที่ข้อมูลเดิมด้วยข้อมูลตัวอย่าง?")) return;
+  }
+  $("sample").addEventListener("click", useSample);
+  function useSample() {
+    var lost = dataList(S, ["log", "runs", "food", "weights"]);
+    if (draftTicked()) lost.push("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก");
+    if (lost.length && !confirm("ข้อมูลตัวอย่างจะทับข้อมูลเดิมในเครื่องนี้\n\nจะหาย: " + lost.join(", ") + "\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" จะกู้คืนไม่ได้ ใส่ข้อมูลตัวอย่างไหม?")) return;
     S.log = sample(); S.draft = {};
     var H = 36e5, now = Date.now();
     S.runs = [{ ts: now - 3.5 * 24 * H, km: 4, min: 26 }];
     S.weights = [{ ts: now - 13 * 24 * H, kg: 58.6 }, { ts: now - 9 * 24 * H, kg: 58.8 }, { ts: now - 6 * 24 * H, kg: 59.0 }, { ts: now - 2 * 24 * H, kg: 59.3 }];
     S.food = [1, 2, 3, 4].map(function (d) { return { ts: now - d * 24 * H, name: "ตัวอย่าง (3 มื้อ)", kcal: 2400 + d * 60, p: 95 + d * 4 }; });
     save(); renderAll(); toast("ใส่ข้อมูลตัวอย่างแล้ว");
-  });
+  }
   $("clear").addEventListener("click", function () {
     if (!confirm("ลบข้อมูลทั้งหมดในเครื่องนี้ (การซ้อม วิ่ง อาหาร น้ำหนักตัว)? กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้")) return;
     S.log = []; S.draft = {}; S.body = {}; S.food = []; S.weights = []; S.runs = []; S.summary = null;
