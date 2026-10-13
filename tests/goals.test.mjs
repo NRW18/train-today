@@ -70,3 +70,13 @@ test("budget too low: no picks, but the nearest model is offered", () => {
   assert.equal(r.picks.length, 0);
   assert.ok(r.nearest && r.nearest.s.p > 3000);
 });
+
+test("saving the goal numbers keeps the chosen goal and rest time", () => {
+  const a = load(["withGoals", "cleanPrefs"]);
+  const p = a.withGoals({ rest: 120, kcal: 2800, protein: null, goalKg: null, goal: "lose" }, 2000, 130, 65);
+  assert.equal(p.goal, "lose");
+  assert.equal(p.rest, 120);
+  assert.equal(p.kcal, 2000);
+  assert.equal(p.goalKg, 65);
+  assert.equal(a.withGoals({ rest: 90, kcal: 2500, goal: "keep" }, null, null, null).kcal, 2500, "empty calories keep the old target");
+});

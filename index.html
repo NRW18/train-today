@@ -2434,8 +2434,12 @@
     S.weights.push({ ts: Date.now(), kg: r1(k) });
     $("bw-input").value = ""; save(); renderFood(); toast(t("บันทึกน้ำหนัก ") + r1(k) + t(" กก. แล้ว"));
   });
+  // The goal buttons save on tap; "save goal" stores the numbers and must keep the rest of prefs (goal, rest time).
+  function withGoals(prefs, kcal, protein, goalKg) {
+    return cleanPrefs({ rest: prefs.rest, goal: prefs.goal, kcal: kcal || prefs.kcal, protein: protein, goalKg: goalKg });
+  }
   $("g-save").addEventListener("click", function () {
-    S.prefs = cleanPrefs({ rest: S.prefs.rest, kcal: num($("g-kcal").value) || S.prefs.kcal, protein: num($("g-p").value), goalKg: num($("g-kg").value) });
+    S.prefs = withGoals(S.prefs, num($("g-kcal").value), num($("g-p").value), num($("g-kg").value));
     save(); renderFood(); toast(t("บันทึกเป้าหมายแล้ว"));
   });
   $("week-ai").addEventListener("click", weekAI);
