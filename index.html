@@ -2489,6 +2489,11 @@
     S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
     S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
     if (d.prefs) S.prefs = cleanPrefs(d.prefs);
+    // body details and shoes are in backups since v3; older files leave the current ones alone
+    if ("profile" in d) S.profile = cleanProfile(d.profile);
+    if ("shoe" in d) S.shoe = cleanShoe(d.shoe);
+    if ("shoeQ" in d) S.shoeQ = cleanShoeQ(d.shoeQ);
+    S.summary = null; // it described the data that was just replaced
     S.draft = {}; save(); renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว"));
   }
   $("sample").addEventListener("click", useSample);

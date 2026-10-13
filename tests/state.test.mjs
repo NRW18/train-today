@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
 const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
-  "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
+  "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "importBackup", "dataList", "draftTicked", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -279,4 +279,28 @@ test("a tab with nothing typed takes the other tab's draft", () => {
   b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: false, ed: true }] }; b.S.draftTs = Date.now(); b.save();
   a.syncFromOtherTab();
   assert.equal(a.S.draft.leg_press[0].kg, "50");
+});
+
+test("import restores body details, shoes and shoe finder answers, and drops the old AI summary", () => {
+  const a = app();
+  a.load();
+  Object.assign(a, { confirm: () => true, renderAll: () => {}, DATA_WORDS: {} });
+  a.S.summary = { ts: 1, text: "old", tips: [] };
+  const backup = { ...OLD_SAVE, profile: { sex: "f", age: 30, h: 165, act: 1.725 }, shoe: { name: "Pegasus 42", ts: 1760000000000, base: 120 },
+    shoeQ: { use: "race", sex: "f", width: "wide", arch: "flat", budget: 9000 }, app: "train-today", v: 3 };
+  a.importBackup(JSON.stringify(backup));
+  assert.deepEqual({ ...a.S.profile }, backup.profile);
+  assert.equal(a.S.shoe.name, "Pegasus 42");
+  assert.equal(a.S.shoe.base, 120);
+  assert.equal(a.S.shoeQ.use, "race");
+  assert.equal(a.S.summary, null);
+});
+
+test("importing an older backup without body details keeps the current ones", () => {
+  const a = app();
+  a.load();
+  Object.assign(a, { confirm: () => true, renderAll: () => {}, DATA_WORDS: {} });
+  a.S.profile = { sex: "m", age: 20, h: 175, act: 1.55 };
+  a.importBackup(JSON.stringify(OLD_SAVE));
+  assert.equal(a.S.profile.age, 20);
 });
