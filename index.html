@@ -1163,18 +1163,30 @@
     if (!txt) throw new Error("empty");
     return JSON.parse(txt.replace(/^```(json)?|```$/g, "").trim());
   }
+  // The proxy sometimes answers 502/503 for a moment, or the gym wifi drops: wait 1.5 s and try once more.
+  // Never retry 429 (quota) or 400 (bad request): a second try would fail the same way.
+  function callProxy(parts, retried) {
+    function again() {
+      return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return callProxy(parts, true); });
+    }
+    return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
+      .then(function (res) {
+        if (!res.ok && !retried && (res.status === 502 || res.status === 503)) return again();
+        return res.json().catch(function () { return {}; }).then(function (j) {
+          if (!res.ok) { var pe = new Error("proxy"); pe.status = res.status; pe.proxy = true; pe.limit = j && j.error === "limit"; pe.scope = j && j.scope; throw pe; }
+          return parseGemini(j);
+        });
+      }, function (netErr) {
+        if (retried) throw netErr;
+        return again();
+      });
+  }
   function callGemini(parts, i) {
     i = i || 0;
     if (!navigator.onLine) return Promise.reject(new Error("offline"));
     if (!getKey()) {
       if (!PROXY_URL) return Promise.reject(new Error("nokey"));
-      return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
-        .then(function (res) {
-          return res.json().catch(function () { return {}; }).then(function (j) {
-            if (!res.ok) { var pe = new Error("proxy"); pe.status = res.status; pe.proxy = true; pe.limit = j && j.error === "limit"; pe.scope = j && j.scope; throw pe; }
-            return parseGemini(j);
-          });
-        });
+      return callProxy(parts, false);
     }
     var body = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } };
     return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + MODELS[i] + ":generateContent", {
