@@ -1716,18 +1716,27 @@
     return Object.keys(S.draft).some(function (id) { return S.draft[id].some(function (s) { return s.done; }); });
   }
   function importBackup(text) {
-      try {
-        var d = JSON.parse(text);
-        if (!d || !Array.isArray(d.log)) throw 0;
-        S.log = cleanLog(d.log);
-        S.custom = cleanCustom(d.custom); rebuildEx();
-        S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
-        S.scanned = S.scanned || S.seen.length > 0;
-        S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
-        S.food = cleanFood(d.food); S.weights = cleanW(d.weights); S.runs = cleanRuns(d.runs);
-        if (d.prefs) S.prefs = cleanPrefs(d.prefs);
-        S.draft = {}; save(); renderAll(); toast("นำเข้า " + S.log.length + " ครั้งแล้ว");
-      } catch (e) { toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป"); }
+    var d;
+    try { d = JSON.parse(text); } catch (e) { d = null; }
+    if (!d || !Array.isArray(d.log)) { toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป"); return; }
+    var custom = cleanCustom(d.custom);
+    var inc = { log: cleanLog(d.log), custom: custom, food: cleanFood(d.food), weights: cleanW(d.weights), runs: cleanRuns(d.runs) };
+    var keys = ["log", "runs", "food", "weights", "custom"];
+    var lost = dataList(S, keys);
+    if (draftTicked()) lost.push("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก");
+    if (lost.length) {
+      var got = dataList(inc, keys);
+      if (!confirm("นำเข้าไฟล์นี้จะแทนที่ข้อมูลเดิมทั้งหมดในเครื่องนี้ รวมถึงเครื่องที่เปิดหรือปิดไว้\n\nจะหาย: " + lost.join(", ") +
+        "\n\nในไฟล์มี: " + (got.length ? got.join(", ") : "ไม่มีข้อมูล") + "\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" ข้อมูลเดิมจะกู้คืนไม่ได้ นำเข้าไหม?")) return;
+    }
+    S.log = inc.log;
+    S.custom = custom; rebuildEx();
+    S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
+    S.scanned = S.scanned || S.seen.length > 0;
+    S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
+    S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
+    if (d.prefs) S.prefs = cleanPrefs(d.prefs);
+    S.draft = {}; save(); renderAll(); toast("นำเข้า " + S.log.length + " ครั้งแล้ว");
   }
   $("sample").addEventListener("click", useSample);
   function useSample() {
