@@ -218,6 +218,24 @@
   .first-tip { background: var(--blue-bg); color: var(--blue); border-radius: 14px; padding: 10px 14px; font-size: .88rem; margin: 0 0 6px; }
   .finish-note { text-align: center; }
 
+  /* today: "Your Activity", this week Monday to Sunday */
+  .act { margin: 8px 0 6px; }
+  .act-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .act-h { font-family: var(--head); font-weight: 700; font-size: 1.6rem; line-height: 1.15; margin: 0; letter-spacing: .005em; }
+  .act-sub { margin: 2px 0 0; color: var(--soft); font-size: .92rem; }
+  .pill-btn { border: 0; background: var(--card); color: var(--blue); font-weight: 700; font-size: .82rem; border-radius: 99px; padding: 6px 14px; box-shadow: var(--shadow); cursor: pointer; white-space: nowrap; margin-top: 6px; }
+  .week { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+  .wd .dot { position: relative; width: 44px; max-width: 100%; aspect-ratio: 1; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; background: var(--card); box-shadow: inset 0 0 0 2px var(--line); }
+  .wd .dot svg { width: 22px; height: 22px; }
+  .dot.push { background: var(--blue-bg); color: var(--blue); box-shadow: none; }
+  .dot.pull { background: var(--green-bg); color: var(--green); box-shadow: none; }
+  .dot.legs { background: var(--yellow-bg); color: var(--yellow); box-shadow: none; }
+  .dot.run { background: var(--violet-bg); color: var(--violet); box-shadow: none; }
+  .dot.ask { color: var(--blue); font-family: var(--head); font-weight: 700; font-size: 1.3rem; box-shadow: inset 0 0 0 2px var(--blue); }
+  .dot .rd { position: absolute; right: -1px; top: -1px; width: 13px; height: 13px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 0 2px var(--bg); }
+  .wl { display: inline-block; margin-top: 6px; font-size: .82rem; color: var(--soft); line-height: 1.25; padding-bottom: 1px; border-bottom: 2px solid transparent; }
+  .wd.now .wl { color: var(--ink); font-weight: 700; border-bottom-color: var(--blue); }
+
   /* hero: one bar per set, grouped by exercise, fills as sets are ticked */
   .meter { display: flex; gap: 8px; margin-top: 18px; height: 20px; align-items: stretch; }
   .meter .mg { display: flex; gap: 3px; flex: var(--n) 1 0; min-width: 0; }
@@ -419,6 +437,13 @@
 
   <!-- TODAY -->
   <main id="v-today">
+    <section class="act" aria-labelledby="act-h">
+      <div class="act-top">
+        <div><h2 class="act-h" id="act-h">Your Activity</h2><p class="act-sub">สถิติของคุณ</p></div>
+        <button type="button" class="pill-btn" id="act-more">ดูเพิ่มเติม</button>
+      </div>
+      <ol class="week" id="week-strip" aria-label="สัปดาห์นี้ วันจันทร์ถึงวันอาทิตย์"></ol>
+    </section>
     <section class="card install-bar" id="install-bar" hidden>
       <img src="icon-192.png" alt="" width="48" height="48">
       <div class="ib-txt"><strong>ติดตั้งเป็นแอป</strong><span id="ib-sub">เปิดจากหน้าจอได้ทันที ใช้ได้แม้ไม่มีเน็ต</span></div>
@@ -1259,7 +1284,40 @@
     return '<button type="button" class="chip ' + (st || "") + '" data-kind="' + kind + '" data-key="' + key + '" aria-label="' + desc + '">' + label + tag + "</button>";
   }
 
+  // This week, Monday to Sunday: which workout (last one that day) and whether there was a run.
+  function weekActivity(now) {
+    var out = [], start = new Date(weekStart(now));
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var from = d.getTime(), next = new Date(d); next.setDate(d.getDate() + 1);
+      var inDay = function (x) { return x.ts >= from && x.ts < next.getTime(); };
+      var lifts = S.log.filter(inDay);
+      out.push({ ts: from, lift: lifts.length ? lifts[lifts.length - 1].day : null, run: S.runs.some(inDay), today: sameDay(from, now), future: from > now });
+    }
+    return out;
+  }
+  var DAY_ICON = {
+    push: '<path d="M12 3v7M9 6l3-3 3 3M4 17h16M6.5 14v6M17.5 14v6M3.5 15.5v3M20.5 15.5v3"/>',
+    pull: '<path d="M4 6h16M6.5 3v6M17.5 3v6M3.5 4.5v3M20.5 4.5v3M12 11v9M9 17l3 3 3-3"/>',
+    legs: '<path d="M9.5 3v8.5L7 18v3h8.5l-.5-2.5-2.8-1.3L14 11V3"/>',
+    run: '<circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>'
+  };
+  function weekStripHtml(now) {
+    return weekActivity(now).map(function (a) {
+      var d = new Date(a.ts), kind = a.lift || (a.run ? "run" : ""), inner = "", what = [];
+      if (a.lift) what.push(DAYS[a.lift].name);
+      if (a.run) what.push(t("วิ่ง"));
+      if (kind) inner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + DAY_ICON[kind] + "</svg>" + (a.lift && a.run ? '<i class="rd"></i>' : "");
+      else if (a.today) { kind = "ask"; inner = "?"; }
+      var label = d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "short" }) + ": " +
+        (what.length ? what.join(", ") : a.today ? t("วันนี้ยังไม่ได้ซ้อม") : a.future ? t("ยังไม่ถึง") : t("ไม่มีกิจกรรม"));
+      return '<li class="wd' + (a.today ? " now" : "") + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + '><span class="dot ' + kind + '" aria-hidden="true">' + inner +
+        '</span><span class="wl" aria-hidden="true">' + d.toLocaleDateString(LOCALE, { weekday: "narrow" }) + "</span></li>";
+    }).join("");
+  }
+
   function renderPlan() {
+    $("week-strip").innerHTML = weekStripHtml(Date.now());
     current = plan();
     var el = $("plan"), h = "";
     var painKeys = Object.keys(S.body).filter(function (k) { return S.body[k] === "pain"; });
@@ -2323,6 +2381,7 @@
   $("scan-results").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-apply]"); if (b) applyShot(b.dataset.apply);
   });
+  $("act-more").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="history"]').click(); });
   $("go-scan").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="gym"]').click(); });
 
   // running

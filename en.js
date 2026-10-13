@@ -279,6 +279,9 @@ var EN = {
   "อัปเดตข้อมูลจากแท็บอื่นแล้ว": "Updated with changes from your other tab",
   "เทียบกับ {d}": "since {d}",
   "ลบ \"{n}\" ออกจากอาหารวันนี้?": "Delete \"{n}\" from today's food?",
+  "วันนี้ยังไม่ได้ซ้อม": "not trained yet today",
+  "ยังไม่ถึง": "still to come",
+  "ไม่มีกิจกรรม": "no activity",
   " เซ็ต กด ✓ หลังจบแต่ละเซ็ต</span>": " sets · tap ✓ after each set</span>",
   "บันทึกการซ้อม (": "Save workout (",
   " เซ็ต)": " sets)",
@@ -746,6 +749,9 @@ var EN = {
   "เวลาพัก": "Rest time",
   "เมนู": "Menu",
   "โปรไฟล์และการตั้งค่า": "Profile and settings",
+  "สถิติของคุณ": "Your week at a glance",
+  "ดูเพิ่มเติม": "See more",
+  "สัปดาห์นี้ วันจันทร์ถึงวันอาทิตย์": "This week, Monday to Sunday",
   "ลดเวลาพัก 15 วินาที": "Rest 15 seconds less",
   "เพิ่มเวลาพัก 15 วินาที": "Rest 15 seconds more"
 };

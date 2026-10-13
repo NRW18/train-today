@@ -36,3 +36,20 @@ test("check-in summary lists sore and painful parts, or asks", () => {
   assert.match(s, /class="sore">เมื่อย อก/);
   assert.match(s, /class="pain">เจ็บ เข่า/);
 });
+
+// Design: "Your Activity" strip, this week Monday to Sunday.
+test("week strip: workout and run per day, today, days still to come", () => {
+  const mon = new Date(2026, 9, 12, 0, 0, 0).getTime(), H = 36e5; // Monday 12 Oct 2026
+  const now = mon + 2 * 24 * H + 9 * H; // Wednesday 09:00
+  const a = load(["weekActivity", "weekStart", "sameDay", "dayKey"], {
+    S: { log: [{ ts: mon + 18 * H, day: "push" }, { ts: mon + 24 * H + 18 * H, day: "legs" }], runs: [{ ts: mon + 24 * H + 7 * H, km: 5, min: 30 }] }
+  });
+  const w = a.weekActivity(now);
+  assert.equal(w.length, 7);
+  assert.equal(new Date(w[0].ts).getDay(), 1, "starts on Monday");
+  assert.deepEqual([w[0].lift, w[0].run], ["push", false]);
+  assert.deepEqual([w[1].lift, w[1].run], ["legs", true], "Tuesday: legs and a run");
+  assert.deepEqual([w[2].lift, w[2].run, w[2].today], [null, false, true]);
+  assert.equal(w[3].future, true);
+  assert.equal(w[2].future, false);
+});
