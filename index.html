@@ -1045,6 +1045,16 @@
       localStorage.setItem(KEY, JSON.stringify(o));
     } catch (e) { toast(t("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า")); }
   }
+  // Another tab saved: take its data so this tab never writes old data over it. The sets being typed or
+  // ticked (the draft) stay from whichever tab touched them last. Returns true if this tab's draft won,
+  // so the caller saves it back for the other tab.
+  function syncFromOtherTab() {
+    var mine = { draft: S.draft, draftTs: S.draftTs, picker: S.picker };
+    S = blankState(); load();
+    S.picker = mine.picker;
+    if (mine.draftTs > S.draftTs) { S.draft = mine.draft; S.draftTs = mine.draftTs; return true; }
+    return false;
+  }
   // The app's own AI proxy (proxy/worker.js on Cloudflare). It holds the Gemini key, so users need no key.
   // A user who saves their own key still goes direct to Gemini.
   var PROXY_URL = "https://train-today-ai.nnrwachr.workers.dev/";
@@ -2502,6 +2512,12 @@
       if (b.dataset.tab === "today") renderPlan();
       window.scrollTo(0, 0);
     });
+  });
+
+  window.addEventListener("storage", function (ev) {
+    if (ev.key !== KEY && ev.key !== null) return; // null: storage was cleared
+    if (syncFromOtherTab()) save();
+    renderAll(); toast(t("อัปเดตข้อมูลจากแท็บอื่นแล้ว"));
   });
 
   var tt;

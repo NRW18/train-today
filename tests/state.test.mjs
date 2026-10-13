@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
 const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
-  "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
+  "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -234,4 +234,49 @@ test("scanning a removed AI exercise again brings the same one back instead of a
   const r = v.validate({ equipment: [{ label_th: "สมิธ", known: ["c_abc_0", "leg_press"] }], new_exercises: [{ name_th: "สมิธสควอท (สมิธแมชชีน)", day: "legs", muscles: ["quads"], joints: ["knee"] }] });
   assert.deepEqual([...r.equipment[0].ids], ["leg_press"], "a hidden id is not offered as known");
   assert.equal(r.fresh[0].back, "c_abc_0");
+});
+
+// TASKS 14: two tabs share one storage. Each test is one tab saving, then the other tab hearing about it.
+function twoTabs() {
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify(OLD_SAVE) });
+  const a = app(storage), b = app(storage);
+  a.load(); b.load();
+  return { storage, a, b };
+}
+
+test("another tab's save is picked up, so this tab no longer writes old data over it", () => {
+  const { storage, a, b } = twoTabs();
+  b.S.food.push({ ts: Date.now(), name: "ไข่ต้ม", kcal: 76, p: 6 }); b.save();
+  a.syncFromOtherTab();
+  assert.equal(a.S.food.length, 2);
+  a.S.weights.push({ ts: Date.now(), kg: 60 }); a.save(); // tab A saves later: B's meal must survive
+  const d = JSON.parse(storage.getItem("train-today-v1"));
+  assert.equal(d.food.length, 2);
+  assert.equal(d.weights.length, 2);
+});
+
+test("sets being typed or ticked in this tab are kept when the other tab's draft is older", () => {
+  const { a, b } = twoTabs();
+  b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: true, ed: true }] }; b.S.draftTs = Date.now() - 60000;
+  b.S.food.push({ ts: Date.now(), name: "นม", kcal: 130, p: 7 }); b.save();
+  a.S.draft = { chest_press: [{ kg: "30", reps: "12", done: true, ed: true }] }; a.S.draftTs = Date.now();
+  assert.equal(a.syncFromOtherTab(), true, "this tab's draft won, so it is saved back");
+  assert.deepEqual(Object.keys(a.S.draft), ["chest_press"]);
+  assert.equal(a.S.food.length, 2, "the rest still comes from the other tab");
+});
+
+test("the other tab's newer draft wins over this tab's older one", () => {
+  const { a, b } = twoTabs();
+  a.S.draft = { chest_press: [{ kg: "30", reps: "12", done: true, ed: true }] }; a.S.draftTs = Date.now() - 60000;
+  b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: true, ed: true }] }; b.S.draftTs = Date.now(); b.save();
+  assert.equal(a.syncFromOtherTab(), false);
+  assert.deepEqual(Object.keys(a.S.draft), ["leg_press"]);
+  assert.equal(a.S.draft.leg_press[0].done, true);
+});
+
+test("a tab with nothing typed takes the other tab's draft", () => {
+  const { a, b } = twoTabs();
+  b.S.draft = { leg_press: [{ kg: "50", reps: "10", done: false, ed: true }] }; b.S.draftTs = Date.now(); b.save();
+  a.syncFromOtherTab();
+  assert.equal(a.S.draft.leg_press[0].kg, "50");
 });

@@ -276,6 +276,7 @@ var EN = {
   "เหลือ ": "Left: ",
   " เซ็ต": " sets",
   "ท่าที่ลบแล้ว": "Removed exercise",
+  "อัปเดตข้อมูลจากแท็บอื่นแล้ว": "Updated with changes from your other tab",
   " เซ็ต กด ✓ หลังจบแต่ละเซ็ต</span>": " sets · tap ✓ after each set</span>",
   "บันทึกการซ้อม (": "Save workout (",
   " เซ็ต)": " sets)",
