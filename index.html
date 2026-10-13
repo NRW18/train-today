@@ -1162,7 +1162,7 @@
     var runKm = 0, runTs = 0;
     S.runs.forEach(function (r) { if (hoursSince(r.ts) < 24) { runKm += r.km; runTs = Math.max(runTs, r.ts); } });
     var runTired = pick.d === "legs" && runKm >= 5;
-    if (runTired) why.push(t("วิ่งไป ") + (Math.round(runKm * 10) / 10) + t(" กม. เมื่อ ") + fmtH(hoursSince(runTs)) + t("ที่แล้ว ลดเซ็ตขา 1 เซ็ต"));
+    if (runTired) why.push(t("วิ่งไป ") + (Math.round(runKm * 10) / 10) + t(" กม. เมื่อ ") + fmtH(hoursSince(runTs)) + t(" ที่แล้ว ลดเซ็ตขา 1 เซ็ต"));
 
     var items = pick.avail.map(function (e) {
       var st = exStatus(e);
@@ -2265,7 +2265,7 @@
     var d = ev.target; if (d.dataset && d.dataset.g) openGuides[d.dataset.g] = d.open;
   }, true);
 
-  $("rest-minus").addEventListener("click", function () { restEnd = Math.max(Date.now(), restEnd - 15000); drawRest(); });
+  $("rest-minus").addEventListener("click", function () { restEnd = Math.max(Date.now(), restEnd - 15000); restTotal = Math.max(1, restTotal - 15); drawRest(); });
   $("rest-plus").addEventListener("click", function () { restEnd += 15000; restTotal += 15; restBuzzed = false; $("rest").classList.remove("done"); $("rest-lb").textContent = t("พักก่อนเซ็ตต่อไป"); drawRest(); });
   $("rest-skip").addEventListener("click", stopRest);
   document.addEventListener("visibilitychange", function () {
@@ -2422,6 +2422,8 @@
   });
   $("meals").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-delfood]"); if (!b) return;
+    var meal = S.food.filter(function (f) { return String(f.ts) === b.dataset.delfood; })[0];
+    if (!meal || !confirm(tf(t("ลบ \"{n}\" ออกจากอาหารวันนี้?"), { n: meal.name }))) return;
     S.food = S.food.filter(function (f) { return String(f.ts) !== b.dataset.delfood; });
     save(); renderFood();
   });
@@ -2558,7 +2560,7 @@
         '<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[s.i] + "</svg></div>") +
         "<h3>" + s.t + "</h3><p>" + s.p + "</p><ul>" + s.b.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" +
         '<div class="dots" aria-hidden="true">' + STEPS.map(function (_, k) { return '<i class="' + (k === i ? "on" : "") + '"></i>'; }).join("") + "</div>" +
-        '<div class="acts"><button type="button" class="skip" data-o="skip">' + (last ? "" : t("ข้าม")) + '</button><button type="button" class="btn" data-o="next">' + (last ? t("เริ่มใช้เลย") : t("ถัดไป")) + "</button></div></div>";
+        '<div class="acts">' + (last ? "<span></span>" : '<button type="button" class="skip" data-o="skip">' + t("ข้าม") + "</button>") + '<button type="button" class="btn" data-o="next">' + (last ? t("เริ่มใช้เลย") : t("ถัดไป")) + "</button></div></div>";
       var nb = wrap.querySelector('[data-o="next"]'); if (nb) nb.focus();
     }
     wrap.addEventListener("click", function (ev) {
