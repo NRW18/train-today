@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load, html } from "./app.mjs";
 
-const SHOES = new Function(html.match(/var SHOES = (\[[\s\S]*?\n  \]);/)[1].replace(/^/, "return "))();
+const SHOES = new Function("t", "return " + html.match(/var SHOES = (\[[\s\S]*?\n  \]);/)[1])((x) => x);
 
 test("energy plan: Mifflin-St Jeor with goal surplus/deficit", () => {
   const a = load(["energyPlan"], {}, ["GOAL_KCAL", "PROTEIN_PER_KG"]);
