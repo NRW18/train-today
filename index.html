@@ -142,14 +142,57 @@
   .rest-list { margin: 12px 0 0; padding-left: 20px; }
   .rest-list li { margin-bottom: 6px; }
 
-  /* today summary list */
-  .todo { list-style: none; margin: 0; padding: 0; counter-reset: t; }
-  .todo li { counter-increment: t; display: grid; grid-template-columns: 2rem 1fr auto; gap: 2px 10px; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--line); }
-  .todo li:first-child { border-top: 0; padding-top: 2px; }
-  .todo li::before { content: counter(t); font-family: var(--head); font-weight: 700; color: var(--card); background: var(--blue); width: 1.6rem; height: 1.6rem; border-radius: 8px; display: grid; place-items: center; font-size: .85rem; align-self: start; margin-top: 2px; }
-  .todo .nm { font-weight: 700; }
-  .todo .dose { font-family: var(--head); font-weight: 700; white-space: nowrap; }
-  .todo .kg { grid-column: 2 / -1; color: var(--soft); font-size: 0.86rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  /* today: one list, each exercise carries its own sets */
+  .exl { list-style: none; margin: 0; padding: 0; }
+  .exl .ex { border-top: 1px solid var(--line); padding: 16px 0 14px; scroll-margin-top: 12px; }
+  .exl .ex:first-child { border-top: 0; padding-top: 4px; }
+  .exh { display: grid; grid-template-columns: 1.9rem 1fr auto; gap: 0 10px; align-items: start; }
+  .exh .num { font-family: var(--head); font-weight: 700; font-size: .9rem; color: #fff; background: var(--blue); width: 1.9rem; height: 1.9rem; border-radius: 9px; display: grid; place-items: center; margin-top: 1px; transition: background .2s; }
+  .exh .num svg { width: 15px; height: 15px; }
+  .ex.done .num { background: var(--green); }
+  .exh .dose { font-family: var(--head); font-weight: 700; white-space: nowrap; padding-top: 2px; }
+  .exn { min-width: 0; }
+  .exn .ex-name { display: block; line-height: 1.35; padding-top: 2px; }
+  .exn .ex-mus { display: block; }
+  .ex-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 8px 0 2px; padding-left: calc(1.9rem + 10px); }
+  .ex-row .ex-tip { margin: 0; }
+  .ex .guide { margin-left: calc(1.9rem + 10px); }
+  .ex .sets { margin-top: 10px; }
+  .first-tip { background: var(--blue-bg); color: var(--blue); border-radius: 14px; padding: 10px 14px; font-size: .88rem; margin: 0 0 6px; }
+  .finish-note { text-align: center; }
+
+  /* hero: one bar per set, grouped by exercise, fills as sets are ticked */
+  .meter { display: flex; gap: 8px; margin-top: 18px; height: 20px; align-items: stretch; }
+  .meter .mg { display: flex; gap: 3px; flex: var(--n) 1 0; min-width: 0; }
+  .meter i { flex: 1; border-radius: 4px; background: rgba(255,255,255,.14); transition: background .25s; }
+  .meter i.on { background: #4CC283; }
+  .meter-t { display: flex; justify-content: space-between; margin-top: 8px; font-size: .86rem; color: var(--hero-soft); }
+  .meter-t b { color: var(--hero-ink); font-family: var(--head); }
+  @media (prefers-reduced-motion: reduce) { .meter i, .exh .num { transition: none; } }
+
+  /* "why today" folded under the hero */
+  .whyd { margin: -4px 0 14px; }
+  .whyd summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: .9rem; list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+  .whyd summary::-webkit-details-marker { display: none; }
+  .whyd summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
+  .whyd[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+
+  /* check-in folded to one line */
+  .ci { padding: 0; }
+  .ci > summary { list-style: none; cursor: pointer; padding: 14px 18px; display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; border-radius: 22px; }
+  .ci > summary::-webkit-details-marker { display: none; }
+  .ci-h { font-family: var(--head); font-weight: 700; font-size: 1.05rem; }
+  .ci-edit { font-size: .84rem; font-weight: 700; color: var(--blue); background: var(--blue-bg); border-radius: 99px; padding: 4px 12px; }
+  .ci-edit .c { display: none; }
+  .ci[open] .ci-edit .o { display: none; }
+  .ci[open] .ci-edit .c { display: inline; }
+  .ci-sum { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ci-sum span { font-size: .82rem; font-weight: 600; background: var(--sunk); color: var(--soft); border-radius: 99px; padding: 2px 10px; }
+  .ci-sum .sore { background: var(--yellow-bg); color: var(--yellow-ink); }
+  .ci-sum .pain { background: var(--red-bg); color: var(--red-ink); }
+  .ci-sum .ask { background: transparent; padding-left: 0; font-weight: 500; }
+  .ci[open] .ci-sum { display: none; }
+  .ci-body { padding: 0 18px 18px; }
   .sec-h { font-family: var(--head); font-weight: 700; font-size: 0.92rem; color: var(--soft); margin: 20px 0 0; letter-spacing: .01em; }
 
   /* skip / add / recommendations */
@@ -328,8 +371,9 @@
       <div><strong>ให้แอปรู้ว่ายิมคุณมีเครื่องอะไร</strong><br>ถ่ายรูปเครื่อง แล้ว AI จะเพิ่มท่าให้เอง</div>
       <button type="button" class="btn small-btn" id="go-scan">สแกน</button>
     </section>
-    <section class="card" aria-labelledby="ci-h">
-      <h2 id="ci-h">เช็กอินวันนี้</h2>
+    <details class="card ci" id="ci">
+      <summary><span class="ci-h">วันนี้เป็นยังไง</span><span class="ci-edit"><span class="o">ปรับ</span><span class="c">เสร็จแล้ว</span></span><span class="ci-sum" id="ci-sum"></span></summary>
+      <div class="ci-body">
       <p class="q">ซ้อมช่วงไหน</p>
       <div class="seg" id="slot" role="group" aria-label="ช่วงเวลา">
         <button type="button" data-v="am">เช้า (ช่วงบน)</button>
@@ -347,7 +391,8 @@
       <p class="q" style="margin-top:12px">ข้อต่อที่เจ็บ</p>
       <div class="chips" id="joints"></div>
       <div class="legend"><span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span><span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></div>
-    </section>
+      </div>
+    </details>
 
     <section class="card plan" id="plan" aria-live="polite"></section>
 
@@ -871,6 +916,22 @@
     });
     $("muscles").innerHTML = Object.keys(MUSCLES).map(function (k) { return chip("m", k, MUSCLES[k]); }).join("");
     $("joints").innerHTML = Object.keys(JOINTS).map(function (k) { return chip("j", k, JOINTS[k]); }).join("");
+    $("ci-sum").innerHTML = ciSummary();
+  }
+  // The folded check-in: what the app is planning around, as short pills.
+  var SLOT_TH = { am: "เช้า: ช่วงบน", pm: "เย็น: ขา", any: "ฝึกได้ทุกส่วน" };
+  var ENERGY_TH = { good: "แรงดีมาก", ok: "แรงปกติ", tired: "เหนื่อย" };
+  function ciSummary() {
+    var h = "<span>" + SLOT_TH[S.slot] + "</span><span>" + ENERGY_TH[S.energy] + "</span>";
+    var parts = { sore: [], pain: [] };
+    Object.keys(S.body).forEach(function (k) {
+      var p = k.split(":"), label = (p[0] === "m" ? MUSCLES : JOINTS)[p[1]];
+      if (label && parts[S.body[k]]) parts[S.body[k]].push(label);
+    });
+    if (parts.sore.length) h += '<span class="sore">เมื่อย ' + parts.sore.join(" ") + "</span>";
+    if (parts.pain.length) h += '<span class="pain">เจ็บ ' + parts.pain.join(" ") + "</span>";
+    if (!parts.sore.length && !parts.pain.length) h += '<span class="ask">เมื่อยหรือเจ็บตรงไหน กดปรับ</span>';
+    return h;
   }
   function chip(kind, key, label) {
     var st = bodyState(kind, key);
@@ -899,56 +960,101 @@
     }
 
     var D = DAYS[current.day];
+    current.items.forEach(prepDraft);
     var totalSets = 0; current.items.forEach(function (it) { totalSets += it.sets; });
     var mins = Math.round(totalSets * (40 + S.prefs.rest) / 60) + 5; // ~40 s per set + rest + warm-up
     h += '<div class="hero' + (current.restAdvice ? " rest" : "") + '"><div class="eyebrow">โปรแกรมวันนี้</div><div class="day-name">' + (current.restAdvice ? "พักฟื้น +" : D.name) +
       '</div><div class="day-sub">' + (current.restAdvice ? "ท่าที่คุณเพิ่มเอง เล่นเบา ๆ" : D.th) + "</div>" +
-      (current.items.length ? '<div class="hero-stats"><span>' + current.items.length + " ท่า</span><span>" + totalSets + " เซ็ต</span><span>≈ " + mins + " นาที</span>" +
-        (S.energy === "tired" ? "<span>โหมดเหนื่อย</span>" : "") + "</div>" : "") + "</div>" + painAlert;
+      (current.items.length ? '<div class="hero-stats"><span>' + current.items.length + " ท่า</span><span>≈ " + mins + " นาที</span>" +
+        (S.energy === "tired" ? "<span>โหมดเหนื่อย</span>" : "") + "</div>" + meterHtml() : "") + "</div>";
+    if (current.why.length) h += '<details class="whyd"><summary>ทำไมวันนี้เป็น' + (current.restAdvice ? "แบบนี้" : " " + D.name) + '</summary><ul class="why" aria-label="เหตุผล">' +
+      current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></details>";
+    h += painAlert;
+    if (current.cut.length) h += '<div class="alert yellow" style="margin:0 0 12px"><strong>ตัดออกวันนี้</strong>' + current.cut.map(esc).join(", ") + "</div>";
     if (!current.items.length) {
       h += '<p class="empty">ข้ามทุกท่าแล้ว วันนี้พักได้ หรือกดเพิ่มท่าที่อยากเล่น</p>' + skippedBlock() + addBlock([]);
       el.innerHTML = h; return;
     }
-    h += '<ol class="todo" aria-label="โปรแกรมวันนี้">' + current.items.map(function (it) {
-      var e = it.e, s = it.sug, dose, kg;
-      if (e.t === "kg") {
-        dose = it.sets + " × " + (s.reps && s.reps !== HI ? s.reps + "–" + HI : LO + "–" + HI) + " ครั้ง";
-        kg = s.kg !== "" && s.kg != null ? s.kg + " กก." : "เลือกน้ำหนักที่ทำได้ " + HI + " ครั้งแบบยังเหลือแรง";
-      } else if (e.t === "sec") { dose = it.sets + " × " + s.reps + " วิ"; kg = "น้ำหนักตัว"; }
-      else { dose = it.sets + " × " + s.reps + " ครั้ง"; kg = "น้ำหนักตัว"; }
-      var act = it.added ? '<button type="button" class="mini" data-unadd="' + e.id + '">เอาออก</button>' : '<button type="button" class="mini" data-skip="' + e.id + '" aria-label="ข้าม ' + esc(e.name) + ' วันนี้">ข้าม</button>';
-      return '<li><span class="nm">' + esc(e.name) + (e.ai ? ' <span class="ai-tag">AI</span>' : "") + (it.added ? ' <span class="addtag">เพิ่มเอง</span>' : "") +
-        '</span><span class="dose">' + dose + '</span><span class="kg"><span>' + esc(kg) + (it.added && it.light ? " · " + esc(it.light) : "") + "</span>" + act + "</span></li>";
-    }).join("") + "</ol>";
+    // the first-time weight tip is the same for every new exercise: say it once, not on every card
+    var firsts = current.items.filter(isFirstKg);
+    if (firsts.length) h += '<p class="first-tip">ท่าที่เล่นครั้งแรก: เลือกน้ำหนักที่ทำได้ ' + HI + " ครั้งแบบยังเหลือแรงอีก 2 ครั้ง แล้วแอปจะคิดน้ำหนักครั้งต่อไปให้</p>";
+    h += '<ol class="exl" aria-label="โปรแกรมวันนี้">' + current.items.map(exHtml).join("") + "</ol>";
     h += skippedBlock() + recBlock(current.items) + addBlock(current.items.map(function (it) { return it.e.id; }));
-    h += '<p class="sec-h">ทำไมวันนี้เป็นแบบนี้</p>';
-    h += '<ul class="why" style="margin-top:6px" aria-label="เหตุผล">' + current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>";
-    if (current.cut.length) h += '<div class="alert yellow"><strong>ตัดออกวันนี้</strong>' + current.cut.map(esc).join(", ") + "</div>";
-
-    h += '<p class="sec-h">บันทึกระหว่างเล่น</p><div style="margin-top:2px">';
-    current.items.forEach(function (it) {
-      var e = it.e;
-      if (!S.draft[e.id] || S.draft[e.id].length !== it.sets) {
-        var prev = S.draft[e.id] || [];
-        S.draft[e.id] = [];
-        for (var i = 0; i < it.sets; i++) S.draft[e.id].push(prev[i] || { kg: it.sug.kg, reps: it.sug.reps, done: false });
-      }
-      // keep untouched sets in step with the latest suggestion (e.g. after changing energy)
-      S.draft[e.id].forEach(function (s) { if (!s.done && !s.ed) { s.kg = it.sug.kg; s.reps = it.sug.reps; } });
-      h += '<div class="ex"><div class="ex-top"><span class="ex-name">' + esc(e.name) + '</span><span class="ex-mus">' + names(e.m.slice(0, 2), MUSCLES) + "</span></div>";
-      h += '<div class="ex-tip' + (it.sug.keep ? " keep" : "") + '">' + esc(it.sug.tip) + (it.light ? " · " + esc(it.light) : "") + "</div>";
-      h += guideHtml(e) + '<div class="sets">';
-      S.draft[e.id].forEach(function (s, i) {
-        h += '<div class="set"><span class="n">' + (i + 1) + "</span>";
-        if (e.t === "kg") h += '<label class="field"><input inputmode="decimal" data-ex="' + e.id + '" data-i="' + i + '" data-f="kg" value="' + esc(s.kg) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + ' น้ำหนัก"><span>กก.</span></label>';
-        else h += "<span></span>";
-        h += '<label class="field"><input inputmode="numeric" data-ex="' + e.id + '" data-i="' + i + '" data-f="reps" value="' + esc(s.reps) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + (e.t === "sec" ? " วินาที" : " จำนวนครั้ง") + '"><span>' + (e.t === "sec" ? "วิ" : "ครั้ง") + "</span></label>";
-        h += '<button type="button" class="tick" data-ex="' + e.id + '" data-i="' + i + '" aria-pressed="' + (s.done ? "true" : "false") + '" aria-label="เสร็จเซ็ต ' + (i + 1) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></button></div>';
-      });
-      h += "</div></div>";
-    });
-    h += '</div><button class="btn" type="button" id="finish">บันทึกการซ้อม</button><p class="hint">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>';
+    h += '<button class="btn" type="button" id="finish">' + finishLabel() + '</button><p class="hint finish-note">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>';
     el.innerHTML = h;
+  }
+
+  function prepDraft(it) {
+    var e = it.e;
+    if (!S.draft[e.id] || S.draft[e.id].length !== it.sets) {
+      var prev = S.draft[e.id] || [];
+      S.draft[e.id] = [];
+      for (var i = 0; i < it.sets; i++) S.draft[e.id].push(prev[i] || { kg: it.sug.kg, reps: it.sug.reps, done: false });
+    }
+    // keep untouched sets in step with the latest suggestion (e.g. after changing energy)
+    S.draft[e.id].forEach(function (s) { if (!s.done && !s.ed) { s.kg = it.sug.kg; s.reps = it.sug.reps; } });
+  }
+  function isFirstKg(it) { return it.e.t === "kg" && (it.sug.kg === "" || it.sug.kg == null); }
+  function setsDone(id) { return (S.draft[id] || []).filter(function (s) { return s.done; }).length; }
+  function progress() {
+    var done = 0, total = 0;
+    ((current && current.items) || []).forEach(function (it) { total += it.sets; done += setsDone(it.e.id); });
+    return { done: done, total: total };
+  }
+  function meterHtml() {
+    var p = progress();
+    return '<div class="meter" aria-hidden="true">' + current.items.map(function (it) {
+      var d = setsDone(it.e.id), b = "";
+      for (var i = 0; i < it.sets; i++) b += "<i" + (i < d ? ' class="on"' : "") + "></i>";
+      return '<span class="mg" style="--n:' + it.sets + '">' + b + "</span>";
+    }).join("") + '</div><div class="meter-t" id="meter-t">' + meterText(p) + "</div>";
+  }
+  function meterText(p) {
+    return p.done ? "<span>เสร็จ <b>" + p.done + "</b> จาก " + p.total + " เซ็ต</span><span>" + (p.done >= p.total ? "ครบแล้ว กดบันทึกได้เลย" : "เหลือ " + (p.total - p.done) + " เซ็ต") + "</span>"
+      : "<span>" + p.total + " เซ็ต กด ✓ หลังจบแต่ละเซ็ต</span>";
+  }
+  function finishLabel() {
+    var p = progress();
+    return p.done ? "บันทึกการซ้อม (" + p.done + "/" + p.total + " เซ็ต)" : "บันทึกการซ้อม";
+  }
+  // After a tick: refresh the meter, the card's badge and the save button without redrawing the list.
+  function refreshProgress(exId) {
+    var p = progress();
+    var bars = document.querySelectorAll("#plan .meter i"), k = 0;
+    current.items.forEach(function (it) {
+      var d = setsDone(it.e.id);
+      for (var i = 0; i < it.sets; i++, k++) if (bars[k]) bars[k].className = i < d ? "on" : "";
+    });
+    if ($("meter-t")) $("meter-t").innerHTML = meterText(p);
+    if ($("finish")) $("finish").textContent = finishLabel();
+    var it = current.items.filter(function (x) { return x.e.id === exId; })[0], li = $("ex-" + exId);
+    if (it && li) {
+      var all = setsDone(exId) >= it.sets;
+      li.classList.toggle("done", all);
+      li.querySelector(".num").innerHTML = all ? CHECK_SVG : String(current.items.indexOf(it) + 1);
+    }
+  }
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+  function exHtml(it, idx) {
+    var e = it.e, s = it.sug, dose;
+    if (e.t === "kg") dose = it.sets + " × " + (s.reps && s.reps !== HI ? s.reps + "–" + HI : LO + "–" + HI) + " ครั้ง";
+    else if (e.t === "sec") dose = it.sets + " × " + s.reps + " วิ";
+    else dose = it.sets + " × " + s.reps + " ครั้ง";
+    var all = setsDone(e.id) >= it.sets;
+    var tip = isFirstKg(it) ? "ครั้งแรก เลือกน้ำหนักเอง" : s.tip;
+    var act = it.added ? '<button type="button" class="mini" data-unadd="' + e.id + '">เอาออก</button>' : '<button type="button" class="mini" data-skip="' + e.id + '" aria-label="ข้าม ' + esc(e.name) + ' วันนี้">ข้าม</button>';
+    var h = '<li class="ex' + (all ? " done" : "") + '" id="ex-' + e.id + '"><div class="exh"><span class="num">' + (all ? CHECK_SVG : idx + 1) + '</span><div class="exn"><span class="ex-name">' + esc(e.name) +
+      (e.ai ? ' <span class="ai-tag">AI</span>' : "") + (it.added ? ' <span class="addtag">เพิ่มเอง</span>' : "") + '</span><span class="ex-mus">' + names(e.m.slice(0, 2), MUSCLES) + '</span></div><span class="dose">' + dose + "</span></div>";
+    h += '<div class="ex-row"><span class="ex-tip' + (s.keep || isFirstKg(it) ? " keep" : "") + '">' + esc(tip) + (it.light ? " · " + esc(it.light) : "") + "</span>" + act + "</div>";
+    h += guideHtml(e) + '<div class="sets">';
+    S.draft[e.id].forEach(function (st, i) {
+      h += '<div class="set"><span class="n">' + (i + 1) + "</span>";
+      if (e.t === "kg") h += '<label class="field"><input inputmode="decimal" data-ex="' + e.id + '" data-i="' + i + '" data-f="kg" value="' + esc(st.kg) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + ' น้ำหนัก"><span>กก.</span></label>';
+      else h += "<span></span>";
+      h += '<label class="field"><input inputmode="numeric" data-ex="' + e.id + '" data-i="' + i + '" data-f="reps" value="' + esc(st.reps) + '" aria-label="' + esc(e.name) + " เซ็ต " + (i + 1) + (e.t === "sec" ? " วินาที" : " จำนวนครั้ง") + '"><span>' + (e.t === "sec" ? "วิ" : "ครั้ง") + "</span></label>";
+      h += '<button type="button" class="tick" data-ex="' + e.id + '" data-i="' + i + '" aria-pressed="' + (st.done ? "true" : "false") + '" aria-label="เสร็จเซ็ต ' + (i + 1) + '">' + CHECK_SVG + "</button></div>";
+    });
+    return h + "</div></li>";
   }
 
   // Suggest extra exercises for the muscles trained least in the past 7 days that are recovered and not in today's plan.
@@ -1598,7 +1704,7 @@
     if (miss) { toast(miss); return; }
     var done = S.draft[b.dataset.ex][+b.dataset.i].done;
     b.setAttribute("aria-pressed", done ? "true" : "false");
-    save();
+    save(); refreshProgress(b.dataset.ex);
     if (done) startRest();
   });
   $("plan").addEventListener("toggle", function (ev) {
