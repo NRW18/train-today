@@ -637,6 +637,20 @@
   function cleanFood(a) { return (Array.isArray(a) ? a : []).filter(okTs).map(function (f) { return { ts: f.ts, name: String(f.name || "อาหาร").slice(0, 60), kcal: Math.max(0, Math.min(5000, +f.kcal || 0)), p: Math.max(0, Math.min(300, +f.p || 0)) }; }); }
   function cleanW(a) { return (Array.isArray(a) ? a : []).filter(function (w) { return okTs(w) && +w.kg > 20 && +w.kg < 300; }).map(function (w) { return { ts: w.ts, kg: +w.kg }; }); }
   function cleanRuns(a) { return (Array.isArray(a) ? a : []).filter(function (r) { return okTs(r) && +r.km > 0 && +r.km < 100 && +r.min > 0; }).map(function (r) { return { ts: r.ts, km: +r.km, min: +r.min }; }); }
+  // Workout history: drop anything the rest of the app would crash on (a broken import used to brick the app).
+  // Sessions the app wrote itself pass through unchanged.
+  function cleanLog(a) {
+    return (Array.isArray(a) ? a : []).filter(function (s) { return okTs(s) && DAYS[s.day] && Array.isArray(s.entries); }).map(function (s) {
+      var o = {};
+      Object.keys(s).forEach(function (k) { o[k] = s[k]; });
+      o.entries = s.entries.filter(function (en) { return en && typeof en.ex === "string" && Array.isArray(en.sets); }).map(function (en) {
+        return { ex: en.ex, sets: en.sets.filter(function (x) { return x && isFinite(x.reps) && +x.reps >= 0; }).map(function (x) {
+          return "kg" in x ? { kg: isFinite(x.kg) && +x.kg >= 0 ? +x.kg : 0, reps: +x.reps } : { reps: +x.reps };
+        }) };
+      });
+      return o;
+    }).sort(function (x, y) { return x.ts - y.ts; });
+  }
   function cleanPrefs(p) {
     var d = { rest: 90, kcal: 2800, protein: null, goalKg: null };
     if (!p || typeof p !== "object") return d;
@@ -650,7 +664,7 @@
     try {
       var d = JSON.parse(localStorage.getItem(KEY) || "null");
       if (d && Array.isArray(d.log)) {
-        S.log = d.log; S.off = Array.isArray(d.off) ? d.off : [];
+        S.log = cleanLog(d.log); S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return typeof x === "string"; }) : [];
         if (d.slot) S.slot = d.slot; if (d.energy) S.energy = d.energy;
         if (d.body && d.bodyDay === dayKey(Date.now())) S.body = d.body; // soreness resets each day
         S.custom = cleanCustom(d.custom);
@@ -1694,7 +1708,7 @@
       try {
         var d = JSON.parse(r.result);
         if (!d || !Array.isArray(d.log)) throw 0;
-        S.log = d.log.filter(function (s) { return s && DAYS[s.day] && Array.isArray(s.entries) && isFinite(s.ts); });
+        S.log = cleanLog(d.log);
         S.custom = cleanCustom(d.custom); rebuildEx();
         S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
         S.scanned = S.scanned || S.seen.length > 0;

@@ -3,8 +3,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
-const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanPrefs",
-  "load", "snapshot", "save", "rebuildEx", "dayKey"];
+const STATE_FNS = ["strList", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs",
+  "load", "snapshot", "save", "rebuildEx", "dayKey", "lastTrained", "lastEntry", "hoursSince"];
 
 function fakeStorage(init = {}) {
   const m = new Map(Object.entries(init));
@@ -21,7 +21,7 @@ export function app(storage = fakeStorage()) {
   const ctx = load(STATE_FNS, {
     S: freshS(), localStorage: storage, KEY: "train-today-v1", DRAFT_TTL: 12 * 36e5,
     DAYS: { push: {}, pull: {}, legs: {} }, MUSCLES: { chest: 1, back: 1, quads: 1 }, JOINTS: { shoulder: 1, knee: 1 },
-    BASE_EX: [{ id: "chest_press" }, { id: "leg_press" }], EX: [], EXBY: {},
+    BASE_EX: [{ id: "chest_press", m: ["chest"] }, { id: "leg_press", m: ["quads"] }], EX: [], EXBY: {},
     toast: (t) => toasts.push(t)
   });
   ctx.toasts = toasts;
@@ -73,6 +73,33 @@ test("a draft older than 12 hours is dropped", () => {
   const a = app(fakeStorage({ "train-today-v1": JSON.stringify(saved) }));
   a.load();
   assert.deepEqual(JSON.parse(JSON.stringify(a.S.draft)), {});
+});
+
+test("broken workout history is cleaned instead of crashing the app", () => {
+  const good = OLD_SAVE.log[0];
+  const saved = { ...OLD_SAVE, log: [
+    good,
+    null,
+    { ts: 1760100000000, day: "legs", entries: [null, { ex: "leg_press" }, { ex: "leg_press", sets: [{ kg: "60", reps: "10" }, { kg: "x", reps: 8 }, { reps: "abc" }, null] }] },
+    { ts: 1760050000000, day: "sunday", entries: [] },
+    { day: "pull", entries: [] },
+    { ts: 1759900000000, day: "pull" }
+  ] };
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(saved) }));
+  a.load();
+  assert.equal(a.S.log.length, 2);
+  assert.deepEqual(JSON.parse(JSON.stringify(a.S.log[0])), good); // app-written data unchanged
+  assert.deepEqual(JSON.parse(JSON.stringify(a.S.log[1].entries)), [{ ex: "leg_press", sets: [{ kg: 60, reps: 10 }, { kg: 0, reps: 8 }] }]);
+  // these walked every entry and crashed on the broken ones before
+  assert.equal(a.lastTrained().quads, 1760100000000);
+  assert.equal(a.lastEntry("leg_press").sets.length, 2);
+});
+
+test("history is kept in time order", () => {
+  const saved = { ...OLD_SAVE, log: [{ ts: 3e12, day: "pull", entries: [] }, { ts: 2e12, day: "push", entries: [] }] };
+  const a = app(fakeStorage({ "train-today-v1": JSON.stringify(saved) }));
+  a.load();
+  assert.deepEqual([...a.S.log].map((s) => s.day), ["push", "pull"]);
 });
 
 test("a broken draft in storage does not break loading", () => {
