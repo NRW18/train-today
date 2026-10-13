@@ -830,8 +830,19 @@
   }
   function skippedToday() { return S.today.skip.filter(function (id) { return EXBY[id]; }); }
 
+  // Before ticking a set: a set with no weight was saved as 0 kg, and next time the app said "add 2.5 kg to 0 kg".
+  function setMissing(e, s) {
+    var noKg = e && e.t === "kg" && !(num(s.kg) > 0), noReps = !num(s.reps);
+    if (noKg && noReps) return "ใส่น้ำหนักและจำนวนครั้งก่อนกด ✓";
+    if (noKg) return "ใส่น้ำหนัก (กก.) ก่อนกด ✓";
+    if (noReps) return e && e.t === "sec" ? "ใส่จำนวนวินาทีก่อนกด ✓" : "ใส่จำนวนครั้งก่อนกด ✓";
+    return "";
+  }
+
   function suggest(e, tired) {
     var last = lastEntry(e.id);
+    // older saves may hold sets logged at 0 kg: treat them like a first time rather than "add 2.5 kg to 0"
+    if (last && e.t === "kg" && !last.sets.some(function (s) { return s.kg > 0; })) last = null;
     if (!last) {
       if (e.t === "kg") return { kg: "", reps: HI, tip: "ครั้งแรก: เลือกน้ำหนักที่ทำได้ " + HI + " ครั้งแบบยังเหลือแรงอีก 2 ครั้ง" };
       if (e.t === "sec") return { kg: "", reps: 30, tip: "เริ่มที่ 30 วินาที ลำตัวตรง" };
@@ -1572,6 +1583,8 @@
     if (ex) { explain(ex.dataset.explain, ex); return; }
     var b = ev.target.closest(".tick"); if (!b) return;
     var s = S.draft[b.dataset.ex][+b.dataset.i];
+    var miss = !s.done && setMissing(EXBY[b.dataset.ex], s);
+    if (miss) { toast(miss); return; }
     s.done = !s.done; b.setAttribute("aria-pressed", s.done ? "true" : "false");
     save();
     if (s.done) startRest();
