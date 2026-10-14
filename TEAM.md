@@ -4,6 +4,7 @@
 
 - **แอปจริง:** https://nrw18.github.io/train-today/
 - **หัวหน้าทีม:** Norrawat Nakphut (GitHub: NRW18)
+- **ร่วมพัฒนา:** Krittanun Boonman
 
 ## แอปนี้ทำอะไร
 
