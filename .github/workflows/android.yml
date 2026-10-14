@@ -45,25 +45,35 @@ jobs:
       - name: Collect files
         run: |
           mkdir -p out
-          cp android/app/build/outputs/apk/release/app-release.apk out/train-today.apk
-          cp android/app/build/outputs/bundle/release/app-release.aab out/train-today.aab
+          cp android/app/build/outputs/apk/release/app-release.apk out/KRYVOS.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab out/KRYVOS.aab
           ls -la out
 
       - uses: actions/upload-artifact@v4
         with:
-          name: train-today-android
+          name: kryvos-android
           path: out/
+
+      # Files were called train-today.* before the KRYVOS rename; remove them so the release
+      # only offers the new files.
+      - name: Remove old file names from the test release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for f in train-today.apk train-today.aab; do
+            gh release delete-asset android-test "$f" --repo "${{ github.repository }}" -y || true
+          done
 
       - name: Publish test release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-test
-          name: "แอป Android (ทดสอบ)"
+          name: "KRYVOS Android (ทดสอบ)"
           prerelease: true
           body: |
-            ไฟล์ทดสอบของแอป วันนี้ฝึกอะไร (Made by Norrawat Nakphut & Krittanun Boonman)
-            - train-today.apk: ดาวน์โหลดแล้วติดตั้งบน Android ได้เลย (ต้องกดอนุญาตให้ติดตั้งจากแหล่งที่ไม่รู้จัก)
-            - train-today.aab: สำหรับอัปขึ้น Google Play (ไฟล์ทดสอบนี้เซ็นด้วยกุญแจชั่วคราว)
+            ไฟล์ทดสอบของแอป KRYVOS (Made by Norrawat Nakphut & Krittanun Boonman)
+            - KRYVOS.apk: ดาวน์โหลดแล้วติดตั้งบน Android ได้เลย (ต้องกดอนุญาตให้ติดตั้งจากแหล่งที่ไม่รู้จัก)
+            - KRYVOS.aab: สำหรับอัปขึ้น Google Play (ไฟล์ทดสอบนี้เซ็นด้วยกุญแจชั่วคราว)
           files: |
-            out/train-today.apk
-            out/train-today.aab
+            out/KRYVOS.apk
+            out/KRYVOS.aab
