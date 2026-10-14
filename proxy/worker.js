@@ -91,7 +91,7 @@ async function countAndCheck(env, ip) {
 
 // The only event names the app may send. Anything else is dropped.
 const EVENTS = [
-  "open", "install",
+  "open", "install", "today_mode_toggle", "today_section_toggle", "today_day_open", "quick_add_open",
   "tab_today", "tab_gym", "tab_run", "tab_food", "tab_history", "tab_settings",
   "checkin", "set_done", "workout_done", "ex_skip", "ex_add",
   "howto_open", "video_open", "scan_machine", "gym_group_toggle",

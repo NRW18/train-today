@@ -1,7 +1,7 @@
 // Small fixes from TASKS 16.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { load, html } from "./app.mjs";
+import { load, html, fnSource } from "./app.mjs";
 
 test("run note has a space: \"5 ชม. ที่แล้ว\"", () => {
   const a = load(["fmtH"]);
@@ -10,7 +10,7 @@ test("run note has a space: \"5 ชม. ที่แล้ว\"", () => {
 });
 
 test("deleting a meal asks first", () => {
-  const h = html.slice(html.indexOf('$("meals").addEventListener'), html.indexOf('$("bw-save")'));
+  const h = fnSource("deleteMeal");
   assert.match(h, /confirm\(/);
 });
 
