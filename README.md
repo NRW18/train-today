@@ -64,4 +64,4 @@ HTML, CSS, JavaScript ล้วน (ไม่มี framework), Gemini API (ร�
 
 > ไม่ใช่คำแนะนำทางการแพทย์
 
-Made by Norrawat Nakphut
+Made by Norrawat Nakphut & Krittanun Boonman

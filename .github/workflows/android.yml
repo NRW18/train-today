@@ -61,7 +61,7 @@ jobs:
           name: "แอป Android (ทดสอบ)"
           prerelease: true
           body: |
-            ไฟล์ทดสอบของแอป วันนี้ฝึกอะไร (Made by Norrawat Nakphut)
+            ไฟล์ทดสอบของแอป วันนี้ฝึกอะไร (Made by Norrawat Nakphut & Krittanun Boonman)
             - train-today.apk: ดาวน์โหลดแล้วติดตั้งบน Android ได้เลย (ต้องกดอนุญาตให้ติดตั้งจากแหล่งที่ไม่รู้จัก)
             - train-today.aab: สำหรับอัปขึ้น Google Play (ไฟล์ทดสอบนี้เซ็นด้วยกุญแจชั่วคราว)
           files: |

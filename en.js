@@ -730,7 +730,7 @@ var EN = {
   "วิ่ง: เตือนเมื่อระยะสัปดาห์นี้เพิ่มเกินราว 10% จากสัปดาห์ก่อน รองเท้าเตือนที่ 600 และ 800 กม.": "Running: warns when this week's distance is more than about 10% above last week. Shoes warn at 600 and 800 km",
   "รองเท้าวิ่ง: ให้คะแนนตามแบบการใช้ อุ้งเท้า หน้าเท้า และน้ำหนักตัว ไม่แนะนำรุ่นที่เกินงบ ราคาจากเว็บทางการในไทย": "Running shoes: scored on use, arch, foot width and body weight. Never suggests a model over budget. Prices from official Thai websites",
   "AI (Gemini) ใช้ 4 อย่าง: จำเครื่องจากรูป, ประเมินอาหารจากรูป, อธิบายท่าที่ AI เพิ่มเข้ามา และสรุปรายสัปดาห์ แอปตรวจคำตอบก่อนใช้ และให้คุณยืนยันหรือแก้ก่อนบันทึกเสมอ": "AI (Gemini) does 4 things: recognises machines from photos, estimates food from photos, explains exercises AI added, and writes the weekly summary. The app checks every answer and you always confirm or edit before saving",
-  "ไม่ใช่คำแนะนำทางการแพทย์ ถ้าเจ็บมากหรือเจ็บไม่หายให้พบแพทย์ · Made by Norrawat Nakphut": "Not medical advice. If pain is severe or doesn't go away, see a doctor · Made by Norrawat Nakphut",
+  "ไม่ใช่คำแนะนำทางการแพทย์ ถ้าเจ็บมากหรือเจ็บไม่หายให้พบแพทย์ · Made by Norrawat Nakphut & Krittanun Boonman": "Not medical advice. If pain is severe or doesn't go away, see a doctor · Made by Norrawat Nakphut & Krittanun Boonman",
   "วันนี้": "Today",
   "เครื่อง": "Gym",
   "วิ่ง": "Run",
