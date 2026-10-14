@@ -8,31 +8,9 @@
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
 <style>
-  /* Same tokens as the app (index.html). Chart blue is validated for both surfaces. */
-  :root {
-    --bg: #EDF0F4; --card: #FFFFFF; --sunk: #F3F5F8; --ink: #12161F; --soft: #5B6577; --muted: #7A8494; --line: #E1E5EC;
-    --hero: #071A30; --blue: #1F6FB8; --blue-bg: #E2EEF9; --mark: #1F6FB8; --red: #C93434; --red-bg: #FCE3E3;
-    --shadow: 0 1px 2px rgba(18,22,31,.05), 0 8px 24px rgba(18,22,31,.06);
-    --head: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
-    --body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --muted: #8590A2; --line: #262D38;
-      --hero: #0A2240; --blue: #6FB3EC; --blue-bg: #14304D; --mark: #4E9BDE; --red: #F07070; --red-bg: #3A1B1D;
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --muted: #8590A2; --line: #262D38;
-    --hero: #0A2240; --blue: #6FB3EC; --blue-bg: #14304D; --mark: #4E9BDE; --red: #F07070; --red-bg: #3A1B1D;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
-    color-scheme: dark;
-  }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
@@ -42,21 +20,21 @@
   .brand svg { height: 18px; width: auto; align-self: center; }
   .brand span { font-family: var(--head); font-weight: 600; font-size: 1.05rem; color: var(--soft); }
   .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .seg { display: inline-flex; background: var(--card); border-radius: 999px; padding: 3px; box-shadow: var(--shadow); }
+  .seg { display: inline-flex; background: var(--sunk); border-radius: 999px; padding: 4px; gap: 4px; }
   .seg button { border: 0; background: transparent; color: var(--soft); font: 500 .9rem var(--body); padding: 6px 14px; border-radius: 999px; cursor: pointer; min-height: 36px; }
-  .seg button[aria-pressed="true"] { background: var(--blue); color: var(--card); }
+  .seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--blue); }
   .ghost { border: 0; background: var(--card); color: var(--blue); font: 500 .9rem var(--body); padding: 8px 14px; border-radius: 999px; cursor: pointer; box-shadow: var(--shadow); min-height: 36px; }
   .sub { color: var(--soft); margin: 2px 2px 14px; font-size: .9rem; }
-  .card { background: var(--card); border-radius: 22px; padding: 18px 20px; box-shadow: var(--shadow); margin: 14px 0; }
+  .card { background: var(--card); border-radius: var(--card-radius); padding: var(--card-padding); box-shadow: var(--home-shadow); margin: 20px 0; }
   h2 { font-family: var(--head); font-weight: 700; font-size: 1.08rem; margin: 0 0 2px; }
   .card > .hint { color: var(--soft); font-size: .86rem; margin: 0 0 12px; }
   .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
-  .tile { background: var(--card); border-radius: 20px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
+  .tile { background: var(--card); border-radius: 24px; padding: 20px 18px; box-shadow: var(--home-shadow); min-width: 0; }
   .tile .lb { color: var(--soft); font-size: .84rem; }
-  .tile .v { font-family: var(--head); font-weight: 600; font-size: 2rem; line-height: 1.15; margin-top: 4px; }
+  .tile .v { font-family: var(--body); font-weight: 300; font-size: 2.6rem; line-height: 1.15; margin-top: 8px; }
   .tile .d { color: var(--muted); font-size: .8rem; margin-top: 2px; }
-  .tile.hero { background: var(--hero); color: #fff; }
-  .tile.hero .lb, .tile.hero .d { color: #A8C1DA; }
+  .tile.hero { background: linear-gradient(180deg, var(--home-top), var(--home-mid)); color: var(--ink); }
+  .tile.hero .lb, .tile.hero .d { color: var(--soft); }
   .tile.hero .v { font-size: 2.6rem; }
   .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 14px; }
   @media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid2 { grid-template-columns: minmax(0, 1fr); } }
@@ -99,6 +77,7 @@
   .empty { color: var(--soft); text-align: center; padding: 28px 8px; }
   .demo { background: var(--blue-bg); color: var(--ink); border-radius: 14px; padding: 8px 14px; font-size: .88rem; margin-top: 10px; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 </style>
 </head>
 <body>
