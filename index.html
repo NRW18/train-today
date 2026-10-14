@@ -331,6 +331,10 @@
   .toggle input { width: 22px; height: 22px; accent-color: var(--blue); flex: none; }
   .toggle .lbl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
   .grp { font-family: var(--head); font-weight: 700; margin: 14px 0 2px; color: var(--soft); font-size: 0.85rem; letter-spacing: .04em; }
+  .equip-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 44px; margin-top: 10px; padding: 10px 12px; text-align: left; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; font-family: var(--head); font-weight: 700; }
+  .equip-head span { min-width: 0; overflow-wrap: anywhere; }
+  .equip-head svg { width: 18px; height: 18px; flex: none; }
+  .equip-head[aria-expanded="true"] svg { transform: rotate(180deg); }
   /* photo cards: the whole scan frame opens the camera */
   .shoot .sub { margin: -6px 0 0; color: var(--blue); font-size: .95rem; }
   .shot-btn { display: block; margin: 18px auto 4px; max-width: 300px; text-align: center; cursor: pointer; border-radius: 28px; color: var(--blue); -webkit-user-select: none; user-select: none; }
@@ -1735,15 +1739,54 @@
   }
 
   /* ---------- render: gym (equipment list) ---------- */
+  var GYM_GROUP_KEY = "kryvos-gym-groups";
+  var gymGroups = readGymGroups();
+  function readGymGroups() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(GYM_GROUP_KEY) || "{}");
+      var groups = {};
+      ORDER.concat(["custom"]).forEach(function (group) {
+        if (saved && typeof saved[group] === "boolean") groups[group] = saved[group];
+      });
+      return groups;
+    } catch (e) { return {}; }
+  }
+  function gymGroupOpen(group) {
+    return typeof gymGroups[group] === "boolean" ? gymGroups[group] : EX.length <= 8;
+  }
+  function gymGroupItems(group) {
+    return EX.filter(function (e) { return group === "custom" ? e.ai : !e.ai && e.day === group; });
+  }
+  function gymGroupLabel(group, items) {
+    var on = items.filter(function (e) { return S.off.indexOf(e.id) < 0; }).length;
+    return (group === "custom" ? t("กำหนดเอง") : DAYS[group].name) + " · " + tf(t("{on}/{total} เปิดอยู่"), { on: on, total: items.length });
+  }
+  function toggleGymGroup(button) {
+    var group = button.dataset.gymGroup, open = button.getAttribute("aria-expanded") !== "true";
+    gymGroups[group] = open;
+    try { localStorage.setItem(GYM_GROUP_KEY, JSON.stringify(gymGroups)); } catch (e) {}
+    button.setAttribute("aria-expanded", String(open));
+    $("equip-group-" + group).hidden = !open;
+    track("gym_group_toggle");
+  }
+  function updateGymCounts() {
+    $("equip").querySelectorAll("[data-gym-group]").forEach(function (button) {
+      var group = button.dataset.gymGroup;
+      button.querySelector("span").textContent = gymGroupLabel(group, gymGroupItems(group));
+    });
+  }
   function renderGym() {
     var h = "";
-    ORDER.forEach(function (d) {
-      h += '<div class="grp">' + DAYS[d].name + "</div>";
-      EX.filter(function (e) { return e.day === d; }).forEach(function (e) {
+    ORDER.concat(["custom"]).forEach(function (d) {
+      var items = gymGroupItems(d), open = gymGroupOpen(d);
+      if (!items.length) return;
+      h += '<button type="button" class="equip-head" data-gym-group="' + d + '" aria-expanded="' + open + '" aria-controls="equip-group-' + d + '"><span>' + esc(gymGroupLabel(d, items)) + '</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="equip-group-' + d + '"' + (open ? "" : " hidden") + '>';
+      items.forEach(function (e) {
         var tags = (S.seen.indexOf(e.id) >= 0 ? t(' <span class="ai-tag">สแกนเจอ</span>') : "") + (e.ai ? t(' <span class="newtag">AI เพิ่ม</span>') : "");
         var del = e.ai ? ' <button type="button" class="del" data-del="' + e.id + t('">ลบ</button>') : "";
         h += '<label class="toggle"><span class="lbl">' + esc(e.name) + tags + del + '</span><input type="checkbox" data-ex="' + e.id + '"' + (S.off.indexOf(e.id) < 0 ? " checked" : "") + "></label>";
       });
+      h += "</div>";
     });
     $("equip").innerHTML = h;
     $("howto-out").innerHTML = howtoHtml($("howto-q").value);
@@ -2564,9 +2607,11 @@
     var id = ev.target.dataset.ex; if (!id) return;
     S.off = S.off.filter(function (x) { return x !== id; });
     if (!ev.target.checked) S.off.push(id);
-    save(); renderPlan();
+    save(); updateGymCounts(); renderPlan();
   });
   $("equip").addEventListener("click", function (ev) {
+    var header = ev.target.closest("[data-gym-group]");
+    if (header) { toggleGymGroup(header); return; }
     var b = ev.target.closest("[data-del]"); if (!b) return;
     ev.preventDefault();
     var id = b.dataset.del, e = EXBY[id];

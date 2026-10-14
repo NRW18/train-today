@@ -94,7 +94,7 @@ const EVENTS = [
   "open", "install",
   "tab_today", "tab_gym", "tab_run", "tab_food", "tab_history", "tab_settings",
   "checkin", "set_done", "workout_done", "ex_skip", "ex_add",
-  "howto_open", "video_open", "scan_machine",
+  "howto_open", "video_open", "scan_machine", "gym_group_toggle",
   "food_photo", "food_manual", "food_quick",
   "run_log", "shoe_finder", "shoe_set",
   "weight_log", "goal_set", "ai_summary", "ai_explain",
