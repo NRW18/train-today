@@ -52,3 +52,9 @@
       color-scheme: dark;
     }
 :root { --card-radius: 30px; --card-padding: 24px 20px; --overlay: rgba(8,10,14,.5); --sheet-shadow: 0 -10px 40px rgba(0,0,0,.16); --muted: var(--soft); --mark: var(--blue); }
+/* Onboarding: navy, sky blue and silver from the existing KRYVOS assets. */
+:root { --setup-start: #267CC3; --setup-end: #114F87; --setup-selected: #E3F0FC; --setup-silver: #CAD5E1; --setup-body: #E0E7EF; --setup-muscle: #9DB1C5; --setup-highlight: #2377B9; --setup-check: #FFFFFF; --setup-logo-shadow: rgba(7,26,48,.22); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --setup-start: #246BA9; --setup-end: #163C65; --setup-selected: #193451; --setup-silver: #8EA4BB; --setup-body: #35475B; --setup-muscle: #71869E; --setup-highlight: #77BCEF; --setup-logo-shadow: rgba(0,0,0,.35); }
+}
+:root[data-theme="dark"] { --setup-start: #246BA9; --setup-end: #163C65; --setup-selected: #193451; --setup-silver: #8EA4BB; --setup-body: #35475B; --setup-muscle: #71869E; --setup-highlight: #77BCEF; --setup-logo-shadow: rgba(0,0,0,.35); }

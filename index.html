@@ -549,6 +549,81 @@
   .quick-actions { display: grid; gap: 12px; margin: 18px 0; }
   .quick-actions button { margin: 0; text-align: left; }
   .day-history { padding: 16px 0; border-top: 1px solid var(--line); }
+  .profile-setup { position: fixed; inset: 0; z-index: 24; background: var(--bg); overflow: hidden; }
+  .setup-page { max-width: 560px; height: 100%; margin: auto; padding: 16px 20px 0; display: flex; flex-direction: column; background: linear-gradient(180deg, var(--home-mid), var(--bg) 320px); }
+  .setup-top { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 14px; }
+  .setup-top button { min-height: 44px; border: 0; background: none; cursor: pointer; color: var(--soft); }
+  .setup-top button:disabled { opacity: 0; }
+  .setup-top [role="progressbar"] { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .setup-top i { display: block; height: 100%; background: var(--blue); }
+  .setup-top { flex: none; }
+  .setup-content { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 2px 20px; animation: rise .2s ease-out; scrollbar-width: thin; }
+  .setup-content h2 { font-size: clamp(1.6rem, 7vw, 2.2rem); line-height: 1.3; }
+  .setup-content > .hint { margin: 10px 0 20px; line-height: 1.6; }
+  .setup-options { display: grid; gap: 12px; margin-top: 20px; }
+  .setup-options button { position: relative; display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 76px; border: 2px solid var(--line); border-radius: 24px; padding: 16px; text-align: left; background: var(--card); color: var(--ink); cursor: pointer; box-shadow: var(--home-shadow); }
+  .setup-options button[aria-pressed="true"] { background: linear-gradient(135deg, var(--setup-start), var(--setup-end)); color: var(--hero-ink); border-color: var(--blue); }
+  .setup-options .setup-icon { width: 30px; height: 30px; flex: none; color: var(--blue); }
+  .setup-options button[aria-pressed="true"] .setup-icon { color: var(--hero-ink); }
+  .setup-option-text { flex: 1; min-width: 0; font-weight: 600; line-height: 1.45; }
+  .setup-check { display: grid; place-items: center; width: 24px; height: 24px; flex: none; border: 1px solid var(--set-border); border-radius: 50%; }
+  .setup-check svg { width: 16px; height: 16px; visibility: hidden; }
+  [aria-pressed="true"] > .setup-check { background: var(--setup-check); color: var(--setup-end); border-color: var(--setup-check); }
+  [aria-pressed="true"] > .setup-check svg { visibility: visible; }
+  .setup-options small { display: block; font-size: .8rem; opacity: .8; margin-top: 4px; }
+  .setup-logo { margin: 0 0 24px; width: fit-content; color: var(--ink); }
+  .setup-logo .wordmark { display: block; height: 26px; max-width: 100%; }
+  .setup-brand-image { display: block; width: 100%; max-height: 290px; aspect-ratio: 1.4; object-fit: contain; margin: 24px 0 12px; filter: drop-shadow(0 2px 2px var(--setup-logo-shadow)); }
+  [data-step="welcome"] .setup-content { display: flex; flex-direction: column; justify-content: center; }
+  [data-step="welcome"] .linkbtn { align-self: center; min-height: 44px; }
+  [data-step="language"] .setup-content { display: flex; flex-direction: column; justify-content: center; }
+  [data-step="language"] .setup-options button { min-height: 96px; font-size: 1.35rem; }
+  [data-step="language"] .setup-content > .hint { display: none; }
+  .setup-photo { display: block; object-fit: cover; flex: none; }
+  .setup-goals button { padding: 0 0 0 16px; min-height: 112px; gap: 10px; overflow: hidden; }
+  .setup-goals .setup-photo, .setup-goal-art { width: 100px; height: 112px; object-position: 60% center; }
+  .setup-goals .setup-check { position: absolute; right: 10px; top: 10px; background: var(--card); color: var(--ink); }
+  .setup-goals .setup-icon { width: 24px; height: 24px; }
+  .setup-goal-art { background: var(--blue-bg); color: var(--blue); padding: 15px; flex: none; }
+  .setup-sex { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .setup-sex button:not([data-option="u"]) { display: grid; gap: 0; padding: 0; overflow: hidden; }
+  .setup-sex .setup-photo { width: 100%; height: clamp(170px, 50vw, 245px); object-position: 55% center; }
+  .setup-sex .setup-option-text { padding: 14px; }
+  .setup-sex .setup-check { position: absolute; right: 10px; bottom: 15px; }
+  .setup-sex [data-option="u"] { grid-column: 1 / -1; min-height: 64px; }
+  .setup-sex [data-option="u"] .setup-check { position: static; }
+  .setup-stepper { display: block; margin: 22px 0; }
+  .setup-stepper > span { color: var(--soft); font-size: .86rem; }
+  .setup-stepper > div { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; margin-top: 8px; border-radius: 22px; padding: 10px; background: var(--sunk); }
+  .setup-stepper button { width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--card); color: var(--blue); font-size: 1.6rem; cursor: pointer; }
+  .setup-stepper input { min-width: 0; width: 100%; font-size: 2.4rem; font-weight: 300; border: 0; background: transparent; text-align: center; }
+  .setup-bottom { flex: none; padding: 8px 0 calc(16px + env(safe-area-inset-bottom)); background: var(--bg); border-top: 1px solid var(--line); }
+  .setup-bottom #setup-error { margin: 0; color: var(--red); font-size: .8rem; }
+  .setup-bottom #setup-error:not(:empty) { margin-bottom: 8px; }
+  .setup-bottom .btn { min-height: 54px; margin: 0; background: linear-gradient(110deg, var(--setup-start), var(--setup-end)); color: var(--hero-ink); }
+  .setup-bottom .btn:disabled { background: var(--line); color: var(--soft); cursor: default; }
+  .setup-summary { display: grid; text-align: center; margin: 40px 0; }
+  .setup-summary strong { font-size: 3.8rem; font-weight: 300; line-height: 1.2; margin-top: 20px; }
+  .setup-summary span { color: var(--soft); }
+  .setup-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 20px 0; font-size: .65rem; text-align: center; }
+  .setup-week span { display: grid; gap: 8px; background: var(--sunk); border-radius: 12px; padding: 10px 2px; overflow-wrap: anywhere; }
+  .setup-anatomy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 12px 4px; border-radius: 26px; background: var(--card); }
+  .setup-anatomy figure { margin: 0; min-width: 0; text-align: center; }
+  .setup-anatomy svg { display: block; width: 100%; max-height: 250px; }
+  .setup-anatomy figcaption { color: var(--soft); font-size: .75rem; }
+  .setup-body { fill: var(--setup-body); stroke: var(--setup-silver); stroke-width: 1.2; }
+  .body-region { fill: var(--setup-muscle); stroke: var(--card); stroke-width: 1; }
+  .body-region.on { fill: var(--setup-highlight); }
+  .body-leader { stroke: var(--soft); stroke-width: .8; fill: none; }
+  .body-label { fill: var(--soft); font-size: 9px; font-family: var(--body); }
+  .setup-focus .setup-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+  .setup-focus .setup-options button { min-height: 50px; padding: 10px; gap: 8px; font-size: .85rem; }
+  .setup-focus .setup-icon { display: none; }
+  #setup-title:focus { outline: none; }
+  .profile-setup .linkbtn { color: var(--blue); }
+  .profile-setup button:focus-visible, .profile-setup input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
+  @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
 </head>
 <body class="home">
@@ -570,6 +645,7 @@
       <p class="home-label" id="home-label"></p>
       <div class="home-metrics" id="home-metrics"></div>
     </section>
+    <section class="card" id="today-run-summary" hidden><h2>สรุปการวิ่ง 7 วัน</h2><div id="today-run-numbers"></div></section>
     <div class="today-heading"><h2>วันนี้</h2><button type="button" class="pill-btn" id="act-more">ดูเพิ่มเติม</button></div>
     <div class="seg today-sections" id="today-sections" role="group" aria-label="ส่วนของวันนี้">
       <button type="button" data-v="plan" aria-pressed="true" aria-controls="today-plan">แผน</button>
@@ -810,6 +886,7 @@
       <h2>เครื่องที่ยิมคุณมี</h2>
       <p class="hint" style="margin:0 0 6px">ท่าที่เปิดไว้คือท่าที่แอปเลือกให้ได้ <span class="ai-tag">สแกนเจอ</span> คือเครื่องที่ AI เห็นในรูป</p>
       <button class="btn line" type="button" id="only-seen" hidden>ใช้เฉพาะเครื่องที่สแกนเจอ</button>
+      <div class="seg" id="place-seg" role="group" aria-label="สถานที่ฝึก"><button type="button" data-v="gym">ยิมที่มีเครื่อง</button><button type="button" data-v="home">ที่บ้าน (ไม่มีเครื่อง)</button><button type="button" data-v="both">ทั้งสองแบบ</button></div>
       <div id="equip"></div>
     </section>
   </main>
@@ -850,6 +927,7 @@
       <h2>วิธีใช้แอป</h2>
       <p class="hint" style="margin:0">ดูหน้าแนะนำการใช้งานอีกครั้ง</p>
       <button class="btn line" type="button" id="show-onb">ดูวิธีใช้แอป</button>
+      <button class="btn line" type="button" id="setup-again">ตั้งค่าโปรไฟล์ใหม่</button>
     </section>
     <section class="card">
       <h2>เวลาพักระหว่างเซ็ต</h2>
@@ -932,10 +1010,11 @@
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
      that needs a different English word). A saved choice wins; otherwise a phone set to Thai gets Thai, everyone else English. */
   var LANG_KEY = "kryvos-lang";
-  var LANG = (function () {
+  function detectLanguage() {
     try { var l = localStorage.getItem(LANG_KEY); if (l === "th" || l === "en") return l; } catch (e) {}
     return /^th/i.test(navigator.language || "") ? "th" : "en";
-  })();
+  }
+  var LANG = detectLanguage();
   var LOCALE = LANG === "en" ? "en-GB" : "th-TH", AI_LANG = LANG === "en" ? "English" : "Thai";
   function t(s) { return LANG === "en" && typeof EN !== "undefined" && EN[s] != null ? EN[s] : s; }
   function tf(s, o) { return String(s).replace(/\{(\w+)\}/g, function (m, k) { return o[k] != null ? o[k] : m; }); }
@@ -950,7 +1029,8 @@
       ["placeholder", "aria-label", "title", "alt"].forEach(function (at) { var x = el.getAttribute(at), v = x && tr(x); if (v != null) el.setAttribute(at, v); });
     });
   }
-  function setLang(l) { try { localStorage.setItem(LANG_KEY, l); } catch (e) {} location.reload(); }
+  function saveLanguage(l) { if (l !== "th" && l !== "en") return; try { localStorage.setItem(LANG_KEY, l); } catch (e) {} }
+  function setLang(l) { saveLanguage(l); location.reload(); }
   document.documentElement.lang = LANG;
   translateDom(document.body);
   document.getElementById("nav-food-label").textContent = LANG === "en" ? t("เมนูอาหาร") : t("นับแคล");
@@ -1143,10 +1223,10 @@
   function cleanProfile(p) {
     var d = { sex: null, age: null, h: null, act: 1.55 };
     if (!p || typeof p !== "object") return d;
-    if (p.sex === "m" || p.sex === "f") d.sex = p.sex;
+    if (p.sex === "m" || p.sex === "f" || p.sex === "u") d.sex = p.sex;
     if (+p.age >= 13 && +p.age <= 90) d.age = Math.round(+p.age);
     if (+p.h >= 120 && +p.h <= 230) d.h = Math.round(+p.h);
-    if ([1.375, 1.55, 1.725].indexOf(+p.act) >= 0) d.act = +p.act;
+    if ([1.2, 1.375, 1.55, 1.725].indexOf(+p.act) >= 0) d.act = +p.act;
     return d;
   }
   function cleanShoe(x) {
@@ -1185,6 +1265,13 @@
     if (+p.kcal >= 1000 && +p.kcal <= 6000) d.kcal = Math.round(+p.kcal);
     if (+p.protein >= 30 && +p.protein <= 400) d.protein = Math.round(+p.protein);
     if (+p.goalKg > 30 && +p.goalKg < 250) d.goalKg = +p.goalKg;
+    if (typeof p.runFocus === "boolean") d.runFocus = p.runFocus;
+    if (Number.isInteger(p.level) && p.level >= 0 && p.level <= 3) d.level = p.level;
+    if (["gym", "home", "both"].indexOf(p.place) >= 0) d.place = p.place;
+    if (Number.isInteger(p.days) && p.days >= 2 && p.days <= 6) d.days = p.days;
+    if ([30, 45, 60, 90].indexOf(p.minutes) >= 0) d.minutes = p.minutes;
+    if (Array.isArray(p.focus)) d.focus = p.focus.filter(function (key, i, all) { return ["whole", "arms", "chest", "core", "legs", "back"].indexOf(key) >= 0 && all.indexOf(key) === i; });
+    if (Array.isArray(p.homeAutoOff)) d.homeAutoOff = p.homeAutoOff.filter(function (id, i, all) { return typeof id === "string" && all.indexOf(id) === i; });
     return d;
   }
   function load() {
@@ -1271,6 +1358,40 @@
   }
 
   /* ---------- the decision ---------- */
+  function firstWeekLevel() {
+    if (!S.prefs || !Number.isInteger(S.prefs.level)) return null;
+    return !S.log.length || Date.now() - S.log[0].ts < 7 * 864e5 ? S.prefs.level : null;
+  }
+  function capPlanMinutes(items, minutes, rest) {
+    if (!minutes) return items;
+    var used = 5, out = [];
+    items.filter(function (it) { return it.added; }).concat(items.filter(function (it) { return !it.added; })).forEach(function (it) { var cost = it.sets * (40 + rest) / 60; if (used + cost <= minutes) { out.push(it); used += cost; } });
+    return out;
+  }
+  function focusRank(e) {
+    var focus = S.prefs && S.prefs.focus || [], map = { arms: ["biceps", "triceps", "shoulders"], chest: ["chest"], core: ["core"], legs: ["quads", "hamstrings", "glutes", "calves"], back: ["back"] };
+    return focus.some(function (key) { return map[key] && e.m.some(function (m) { return map[key].indexOf(m) >= 0; }); }) ? 1 : 0;
+  }
+  function homePlan() {
+    var lt = lastTrained();
+    var items = EX.filter(function (e) { return e.t !== "kg" && S.off.indexOf(e.id) < 0 && !exStatus(e).out && !isPainful(e) && !e.m.some(function (m) { return lt[m] && hoursSince(lt[m]) < RECOVER_H; }) && S.today.skip.indexOf(e.id) < 0; }).map(function (e) {
+      return { e: e, sets: S.energy === "tired" || firstWeekLevel() === 0 ? 2 : 3, sug: suggest(e, S.energy === "tired") };
+    });
+    items = capPlanMinutes(items.concat(extraItems(items, S.energy === "tired").filter(function (it) { return it.e.t !== "kg"; })), S.prefs.minutes, S.prefs.rest);
+    return items.length ? { rest: false, day: items[0].e.day, items: items, why: [t("ฝึกที่บ้านด้วยท่าน้ำหนักตัว")], cut: [], skipped: skippedToday() } : { rest: true, why: [] };
+  }
+  function placeOff(place, off, exercises, autoOff) {
+    var machineIds = exercises.filter(function (e) { return e.t === "kg"; }).map(function (e) { return e.id; });
+    autoOff = autoOff || [];
+    return place === "home" ? off.concat(machineIds.filter(function (id) { return off.indexOf(id) < 0; })) : off.filter(function (id) { return autoOff.indexOf(id) < 0; });
+  }
+  function setTrainingPlace(place) {
+    var autoOff = S.prefs.homeAutoOff || [];
+    if (place === "home") autoOff = autoOff.concat(EX.filter(function (e) { return e.t === "kg" && S.off.indexOf(e.id) < 0 && autoOff.indexOf(e.id) < 0; }).map(function (e) { return e.id; }));
+    S.off = placeOff(place, S.off, EX, autoOff);
+    S.prefs.homeAutoOff = place === "home" ? autoOff : [];
+    S.prefs.place = place;
+  }
   function bodyState(kind, key) { return S.body[kind + ":" + key] || null; }
   function exStatus(e) {
     // returns {out: reason} or {light: reason} or {}
@@ -1282,6 +1403,7 @@
   }
 
   function plan() {
+    if (S.prefs.place === "home") return homePlan();
     var lt = lastTrained(), why = [], skipped = [];
     var lastDay = S.log.length ? S.log[S.log.length - 1].day : null;
     var startIdx = lastDay ? (ORDER.indexOf(lastDay) + 1) % 3 : 0;
@@ -1310,7 +1432,7 @@
     var pick = open[0];
     if (!pick || pick.notReady.length === DAYS[pick.d].main.length) {
       if (pick) why.push(DAYS[pick.d].name + t(" ยังฟื้นไม่ครบ ") + RECOVER_H + t(" ชม. (") + names(pick.notReady, MUSCLES) + ")");
-      var extra = extraItems([], S.energy === "tired");
+      var extra = capPlanMinutes(extraItems([], S.energy === "tired"), S.prefs.minutes, S.prefs.rest);
       if (extra.length) {
         why.unshift(t("แอปแนะนำให้พักวันนี้ แต่คุณเพิ่มท่าเอง เล่นเบา ๆ และหยุดถ้ารู้สึกผิดปกติ"));
         return { rest: false, restAdvice: true, day: extra[0].e.day, items: extra, why: why.concat(skipped), cut: [], skipped: skippedToday() };
@@ -1344,14 +1466,14 @@
 
     var items = pick.avail.map(function (e) {
       var st = exStatus(e);
-      var sets = 3;
+      var sets = firstWeekLevel() === 0 ? 2 : 3;
       if (tired) sets = 2;
       if (st.light) sets = Math.max(2, sets - 1);
       if (e.m.some(function (m) { return pick.notReady.indexOf(m) >= 0; })) sets = Math.max(2, sets - 1);
       if (runTired) sets = Math.max(2, sets - 1);
       return { e: e, sets: sets, light: st.light || null, sug: suggest(e, tired) };
     }).filter(function (it) { return S.today.skip.indexOf(it.e.id) < 0; });
-    items = items.concat(extraItems(items, tired));
+    items = capPlanMinutes(items.concat(extraItems(items, tired)), S.prefs.minutes, S.prefs.rest);
     return { rest: false, day: pick.d, items: items, why: why, cut: cut, skipped: skippedToday() };
   }
 
@@ -1382,6 +1504,11 @@
     // older saves may hold sets logged at 0 kg: treat them like a first time rather than "add 2.5 kg to 0"
     if (last && e.t === "kg" && !last.sets.some(function (s) { return s.kg > 0; })) last = null;
     if (!last) {
+      var level = S.prefs && S.prefs.level;
+      if (Number.isInteger(level) && (!S.log.length || Date.now() - S.log[0].ts < 7 * 864e5)) {
+        var startReps = e.t === "sec" ? [15, 20, 30, 40][level] : e.t === "kg" ? [8, 10, 12, 12][level] : [3, 5, 10, 12][level];
+        return { kg: "", reps: startReps, tip: e.t === "kg" ? tf(t("เลือกน้ำหนักเบาที่ทำได้ {n} ครั้งแบบยังเหลือแรง 2 ครั้ง"), { n: startReps }) : tf(t("เริ่มที่ {n} และหยุดเมื่อท่าเสีย"), { n: startReps + " " + unit(e) }) };
+      }
       if (e.t === "kg") return { kg: "", reps: HI, tip: t("ครั้งแรก: เลือกน้ำหนักที่ทำได้ ") + HI + t(" ครั้งแบบยังเหลือแรงอีก 2 ครั้ง") };
       if (e.t === "sec") return { kg: "", reps: 30, tip: t("เริ่มที่ 30 วินาที ลำตัวตรง") };
       return { kg: "", reps: 10, tip: t("เริ่มที่ 10 ครั้ง ลงให้อกเกือบแตะพื้น") };
@@ -1500,6 +1627,9 @@
       return '<div class="recovery-row"><div class="recovery-label"><span>' + esc(MUSCLES[row.muscle]) + '</span><span class="recovery-status ' + row.status + '"><i class="status-dot" aria-hidden="true"></i>' + esc(labels[row.status]) + '</span></div><div class="recovery-track" style="--pct:' + row.pct + '" aria-hidden="true"><i></i></div><span class="recovery-pct">' + row.pct + "%</span></div>";
     }).join("");
     renderTodayMeals();
+    $("today-run-summary").hidden = !S.prefs.runFocus;
+    var runs = S.runs.filter(function (r) { return r.ts >= Date.now() - 7 * 864e5 && r.ts <= Date.now(); });
+    $("today-run-numbers").innerHTML = '<div class="big-n">' + r1(runs.reduce(function (sum, r) { return sum + r.km; }, 0)) + ' ' + t("กม.") + '</div><p class="hint">' + tf(t("วิ่ง {n} ครั้ง"), { n: runs.length }) + '</p>';
   }
   function renderTodayMeals() {
     $("today-meals").innerHTML = mealsHtml();
@@ -1584,7 +1714,7 @@
     }
     // the first-time weight tip is the same for every new exercise: say it once, not on every card
     var firsts = current.items.filter(isFirstKg);
-    if (firsts.length) h += t('<p class="first-tip">ท่าที่เล่นครั้งแรก: เลือกน้ำหนักที่ทำได้ ') + HI + t(" ครั้งแบบยังเหลือแรงอีก 2 ครั้ง แล้วแอปจะคิดน้ำหนักครั้งต่อไปให้</p>");
+    if (firsts.length) h += t('<p class="first-tip">ท่าที่เล่นครั้งแรก: เลือกน้ำหนักที่ทำได้ ') + firsts[0].sug.reps + t(" ครั้งแบบยังเหลือแรงอีก 2 ครั้ง แล้วแอปจะคิดน้ำหนักครั้งต่อไปให้</p>");
     h += t('<ol class="exl" aria-label="โปรแกรมวันนี้">') + current.items.map(exHtml).join("") + "</ol>";
     h += skippedBlock() + recBlock(current.items) + addBlock(current.items.map(function (it) { return it.e.id; }));
     h += '<button class="btn" type="button" id="finish">' + finishLabel() + t('</button><p class="hint finish-note">บันทึกเฉพาะเซ็ตที่กดติ๊กแล้ว</p>');
@@ -1683,7 +1813,7 @@
       // ~10 sets per muscle per week is a common minimum for growth, so only suggest muscles below it
       return S.off.indexOf(e.id) < 0 && inPlan.indexOf(e.id) < 0 && S.today.skip.indexOf(e.id) < 0 && !planMain[m] && !isPainful(e) && !exStatus(e).out &&
         !(lt[m] && hoursSince(lt[m]) < RECOVER_H) && (wk[m] || 0) < 10;
-    }).sort(function (a, b) { return (wk[a.m[0]] || 0) - (wk[b.m[0]] || 0); }).forEach(function (e) {
+    }).sort(function (a, b) { return focusRank(b) - focusRank(a) || (wk[a.m[0]] || 0) - (wk[b.m[0]] || 0); }).forEach(function (e) {
       if (out.length >= 3 || used[e.m[0]]) return;
       used[e.m[0]] = 1;
       var n = wk[e.m[0]] || 0;
@@ -1711,8 +1841,11 @@
     var h = '<button type="button" class="add-btn" id="add-toggle" aria-expanded="' + (S.picker ? "true" : "false") + '">' + (S.picker ? t("ปิดรายการท่า") : t("+ เพิ่มท่าวันนี้")) + "</button>";
     if (!S.picker) return h;
     h += '<div class="picker">';
-    ORDER.forEach(function (d) {
-      var list = EX.filter(function (e) { return e.day === d && S.off.indexOf(e.id) < 0 && inPlan.indexOf(e.id) < 0; });
+    ORDER.slice().sort(function (a, b) {
+      function rank(day) { return EX.some(function (e) { return e.day === day && S.off.indexOf(e.id) < 0 && inPlan.indexOf(e.id) < 0 && focusRank(e); }) ? 1 : 0; }
+      return rank(b) - rank(a);
+    }).forEach(function (d) {
+      var list = EX.filter(function (e) { return e.day === d && S.off.indexOf(e.id) < 0 && inPlan.indexOf(e.id) < 0; }).sort(function (a, b) { return focusRank(b) - focusRank(a); });
       if (!list.length) return;
       h += '<div class="grp">' + DAYS[d].name + '</div><div class="pick-row">' + list.map(function (e) {
         var pain = isPainful(e), st = exStatus(e);
@@ -1933,6 +2066,7 @@
       h += "</div>";
     });
     $("equip").innerHTML = h;
+    pressed("place-seg", S.prefs && S.prefs.place || "gym");
     $("howto-out").innerHTML = howtoHtml($("howto-q").value);
     $("only-seen").hidden = !S.seen.length;
     var k = getKey();
@@ -2243,9 +2377,9 @@
   var GOAL_KCAL = { gain: 300, keep: 0, lose: -500 };
   function energyPlan(pf, w, goal) {
     if (!pf || !pf.sex || !pf.age || !pf.h || !w) return null;
-    var bmr = 10 * w + 6.25 * pf.h - 5 * pf.age + (pf.sex === "m" ? 5 : -161);
+    var bmr = 10 * w + 6.25 * pf.h - 5 * pf.age + (pf.sex === "m" ? 5 : pf.sex === "u" ? -78 : -161);
     var tdee = bmr * pf.act;
-    var floor = Math.max(bmr, pf.sex === "m" ? 1500 : 1200);
+    var floor = Math.max(bmr, pf.sex === "m" ? 1500 : pf.sex === "u" ? 1350 : 1200);
     var kcal = Math.max(goal === "lose" ? floor : 0, tdee + GOAL_KCAL[goal]);
     return { bmr: Math.round(bmr), tdee: Math.round(tdee / 10) * 10, kcal: Math.round(kcal / 10) * 10, p: Math.round(w * PROTEIN_PER_KG[goal]) };
   }
@@ -2752,8 +2886,13 @@
   });
 
   $("howto-q").addEventListener("input", function () { $("howto-out").innerHTML = howtoHtml(this.value); });
+  $("place-seg").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    setTrainingPlace(b.dataset.v); save(); renderGym(); renderPlan();
+  });
   $("equip").addEventListener("change", function (ev) {
     var id = ev.target.dataset.ex; if (!id) return;
+    if (S.prefs.homeAutoOff) S.prefs.homeAutoOff = S.prefs.homeAutoOff.filter(function (x) { return x !== id; });
     S.off = S.off.filter(function (x) { return x !== id; });
     if (!ev.target.checked) S.off.push(id);
     save(); updateGymCounts(); renderPlan();
@@ -2770,6 +2909,7 @@
   $("only-seen").addEventListener("click", function () {
     if (!confirm(t("ปิดทุกท่าที่ยังไม่เคยสแกนเจอ? (วิดพื้นกับแพลงก์ไม่ต้องใช้เครื่อง จะเปิดไว้)"))) return;
     S.off = EX.filter(function (e) { return S.seen.indexOf(e.id) < 0 && e.t === "kg"; }).map(function (e) { return e.id; });
+    S.prefs.homeAutoOff = [];
     save(); renderGym(); renderPlan(); toast(t("ใช้เฉพาะเครื่องที่สแกนเจอแล้ว"));
   });
 
@@ -2992,6 +3132,7 @@
     if ("shoe" in d) S.shoe = cleanShoe(d.shoe);
     if ("shoeQ" in d) S.shoeQ = cleanShoeQ(d.shoeQ);
     S.summary = null; // it described the data that was just replaced
+    if (typeof setupWrap !== "undefined" && setupWrap) { closeProfileSetup(); S.onboarded = true; }
     S.draft = {}; save(); renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว")); track("import");
   }
   $("sample").addEventListener("click", useSample);
@@ -3119,16 +3260,185 @@
     { i: "run", t: t("วิ่งแล้วบันทึก"), p: t("แท็บ \"วิ่ง\" ดูระยะรายสัปดาห์ นับระยะรองเท้า และหารองเท้าวิ่งตามเท้าและงบ"), b: [t("วิ่งตั้งแต่ 5 กม. แอปลดเซ็ตวันขาให้เอง")] },
     { i: "chart", t: t("ดูความก้าวหน้า"), p: t("แท็บ \"ประวัติ\" มีกราฟน้ำหนักแต่ละท่า และสรุป 7 วันพร้อมคำแนะนำจาก AI"), b: [t("สำรองข้อมูลที่แท็บ \"อื่นๆ\" สัปดาห์ละครั้ง")] }
   ];
-  function showOnboarding() {
+  var setupWrap = null;
+  var setupBackground = [];
+  function closeProfileSetup() {
+    if (setupWrap) setupWrap.remove();
+    setupWrap = null;
+    setupBackground.forEach(function (entry) { entry.el.inert = entry.inert; });
+    setupBackground = [];
+  }
+  function setupGoal(choice) { return { goal: choice === "lose" ? "lose" : choice === "gain" ? "gain" : "keep", runFocus: choice === "run" }; }
+  function setupWeekPreview(days, place, runFocus) {
+    var start = new Date(weekStart(Date.now())), nth = 0, out = [];
+    for (var i = 0; i < 7; i++) {
+      var day = new Date(start); day.setDate(start.getDate() + i);
+      var train = Math.floor((i + 1) * days / 7) > Math.floor(i * days / 7);
+      var label = train ? runFocus && nth % 2 === 0 ? "RUN" : place === "home" ? t("ฝึก") : ["PUSH", "PULL", "LEGS"][nth % 3] : t("พัก");
+      if (train) nth++;
+      out.push('<span><small>' + esc(day.toLocaleDateString(LOCALE, { weekday: "narrow" })) + '</small>' + esc(label) + '</span>');
+    }
+    return '<p class="hint">' + t("ตัวอย่างสัปดาห์ ปรับตามการฟื้นตัว") + '</p><div class="setup-week">' + out.join("") + '</div>';
+  }
+  function setupIcon(key, value) {
+    var paths = {
+      lose: 'M5 5h14v14H5zM9 9a3 3 0 0 1 6 0M12 9l2-2',
+      gain: 'M3 8v8M6 6v12M6 12h12M18 6v12M21 8v8',
+      keep: 'm12 20-8-8C-2 5 7 1 12 7c5-6 14-2 8 5Z',
+      run: 'M14 3h.01M9 9l4-3 4 4h4M13 6l-3 7 5 3-2 5M10 13l-5 5H2',
+      gym: 'M3 21V6l9-3 9 3v15M8 21v-6h8v6M7 8h2M15 8h2M7 11h2M15 11h2',
+      home: 'm2 11 10-8 10 8M5 9v12h14V9M10 21v-7h4v7',
+      both: 'M2 10 8 5l6 5M4 9v12h9V9M16 21V3h6v18M18 7h2M18 11h2M18 15h2',
+      u: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21v-2a8 8 0 0 1 16 0v2',
+      whole: 'M12 3h.01M5 8h14M12 6v8m0 0-5 7m5-7 5 7',
+      arms: 'M5 18 2 12l3-6 4 2-2 4 5 1 3-3 5 4-3 6H8Z',
+      chest: 'M7 3 3 8l2 9 7 3 7-3 2-9-4-5M12 7v13M5 11h14',
+      core: 'M7 3 5 10l2 11h10l2-11-2-7M12 8v11M8 11h8M8 15h8',
+      legs: 'M6 3h12l-2 8 2 10h-5l-1-10-1 10H6l2-10Z',
+      back: 'M7 3 3 8l3 7 2 6h8l2-6 3-7-4-5M12 5v14m-6-9 6 4 6-4',
+      yes: 'm12 2 8 3v7c0 5-8 10-8 10S4 17 4 12V5ZM8 12l3 3 5-6',
+      no: 'm12 2 8 3v7c0 5-8 10-8 10S4 17 4 12V5ZM8 8l8 8M16 8l-8 8'
+    };
+    var path = paths[value] || paths.whole;
+    if (key === 'privacy') path = paths[value ? 'yes' : 'no'];
+    if (key === 'level') path = [
+      'M12 21V11M12 14C4 14 3 8 3 5c6 0 9 3 9 9ZM12 11c0-6 3-8 9-8 0 6-3 8-9 8M8 21h8',
+      'M3 8v8M6 7v10M6 12h12M18 7v10M21 8v8',
+      'M2 6v12M5 5v14M5 12h14M19 5v14M22 6v12',
+      'M5 3h14v5c0 7-14 7-14 0ZM5 5H2v3a4 4 0 0 0 4 4M19 5h3v3a4 4 0 0 1-4 4M12 13v6M7 21h10'
+    ][value];
+    if (key === 'activity') path = {
+      '1.2': 'M9 3h.01M8 7v7h7l3 6M3 10v7h9M3 21v-4M12 21v-4M15 9h7M20 9v12',
+      '1.375': 'M13 3h.01M7 11l4-5 4 5h5M11 6v8l-4 7M11 14l6 7',
+      '1.55': 'M9 3h.01M6 7h6v7H6ZM9 14v7M3 10h3M12 10h3M19 8h.01M17 12h4v5h-4M19 17v4',
+      '1.725': 'M12 3h.01M8 7h8l3 6M8 7l-3 6M10 10v5l-4 6M14 10v5l4 6M2 12h5v5H2ZM17 12h5v5h-5'
+    }[value];
+    return '<svg class="setup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + path + '"/></svg>';
+  }
+  function setupBody(focus) {
+    function region(key, path) { return '<path data-body-region="' + key + '" class="body-region' + (focus.indexOf('whole') >= 0 || focus.indexOf(key) >= 0 ? ' on' : '') + '" d="' + path + '"/>'; }
+    function figure(back) {
+      var h = '<svg viewBox="0 0 180 290" aria-hidden="true"><g transform="translate(20 0)"><circle class="setup-body" cx="70" cy="25" r="16"/><path class="setup-body" d="M60 41v9l-18 7q-8 3-11 16l-12 67q-1 9 6 10 7 1 9-8l12-48 3 59-5 49-4 69q0 9 8 9 7 0 8-8l12-70h4l12 70q1 8 8 8 8 0 8-9l-4-69-5-49 3-59 12 48q2 9 9 8 7-1 6-10l-12-67q-3-13-11-16l-18-7v-9Z"/>';
+      h += region('arms','M41 60q-8 2-10 15l-5 26 10 3 10-27ZM25 105l-6 35q-1 8 6 8l10-40ZM99 60q8 2 10 15l5 26-10 3-10-27ZM115 105l6 35q1 8-6 8l-10-40Z');
+      h += region('legs','M49 157h19l-4 44-9 34-10-2ZM72 157h19l4 76-10 2-9-34ZM45 239l-5 31q0 8 8 8l7-36ZM85 242l7 36q8 0 8-8l-5-31Z');
+      if (back) h += region('back','M49 61l15-6 6 6 6-6 15 6-2 38-10 27-9 18-9-18-10-27Z');
+      else h += region('chest','M49 65l15-8 5 8v28l-20-4ZM71 65l5-8 15 8v24l-20 4Z') + region('core','M51 98l18 2v46H58ZM71 100l18-2-7 48H71Z');
+      h += '</g>';
+      if (back) h += '<path class="body-leader" d="M90 94h32l14-12h38"/><text class="body-label" x="174" y="77" text-anchor="end">' + esc(t('หลัง')) + '</text>';
+      else h += '<path class="body-leader" d="M78 77H50L34 67H4M50 112H4M82 124H55L33 147H4M77 206H48L31 227H4"/><text class="body-label" x="4" y="62">' + esc(t('อก')) + '</text><text class="body-label" x="4" y="107">' + esc(t('แขน')) + '</text><text class="body-label" x="4" y="158">' + esc(t('หน้าท้อง')) + '</text><text class="body-label" x="4" y="238">' + esc(t('ขา')) + '</text>';
+      return h + '</svg>';
+    }
+    return '<div class="setup-anatomy"><figure>' + figure(false) + '<figcaption>' + t('ด้านหน้า') + '</figcaption></figure><figure>' + figure(true) + '<figcaption>' + t('ด้านหลัง') + '</figcaption></figure></div>';
+  }
+  function setupOptionArt(key, value) {
+    var photos = { m: 'athlete-male', f: 'athlete-female', gain: 'athlete-male', keep: 'athlete-female', run: 'runner' };
+    if ((key === 'sex' || key === 'goal') && photos[value]) return '<img class="setup-photo" src="assets/onboarding/' + photos[value] + '.webp" alt="" width="800" height="800">';
+    if (key === 'goal' && value === 'lose') return '<svg class="setup-goal-art" viewBox="0 0 100 112" aria-hidden="true"><rect x="14" y="22" width="72" height="78" rx="18" fill="var(--card)" stroke="currentColor" stroke-width="2"/><path d="M32 47a18 18 0 0 1 36 0" fill="none" stroke="currentColor" stroke-width="3"/><path d="m50 47 10-12M26 77h48M32 85h5m8 0h5m8 0h5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+    return '';
+  }
+  function showProfileSetup() {
+    if (setupWrap) return;
+    var rerun = S.onboarded, step = 0, answered = {}, prefs = cleanPrefs(S.prefs), profile = cleanProfile(S.profile);
+    if (!rerun) step = -1; // Language is a prelude; the original eleven-step profile flow stays intact.
+    var draft = { goal: prefs.runFocus ? "run" : prefs.goal, sex: profile.sex || "u", age: profile.age || 25, h: profile.h || 170, kg: latestWeight() || 65, target: prefs.goalKg || null, level: prefs.level == null ? 0 : prefs.level, place: prefs.place || "gym", days: prefs.days || 3, minutes: prefs.minutes || 45, focus: prefs.focus || ["whole"], act: profile.act, consent: rerun && statsOn() };
+    if (rerun) ["goal", "sex", "body", "target", "level", "place", "schedule", "activity", "privacy"].forEach(function (key) { answered[key] = true; });
+    var screens = ["welcome", "goal", "sex", "body", "target", "level", "place", "schedule", "focus", "activity", "privacy"];
+    var titles = { welcome: t("โค้ชซ้อมส่วนตัวของคุณ"), goal: t("เป้าหมายหลักของคุณคืออะไร"), sex: t("เพศที่ใช้คำนวณแคลอรี่"), body: t("ข้อมูลร่างกายของคุณ"), target: t("น้ำหนักเป้าหมายของคุณ"), level: t("เล่นเวทมานานแค่ไหน"), place: t("คุณจะฝึกที่ไหน"), schedule: t("เวลาที่คุณมีให้การฝึก"), focus: t("บริเวณที่อยากเน้น"), activity: t("กิจกรรมนอกเวลาออกกำลังกาย"), privacy: t("ความเป็นส่วนตัวของคุณ"), summary: t("แผนของคุณ") };
+    var hints = { welcome: t("รู้จักคุณสักนิด เพื่อวางแผนที่เหมาะกับคุณ"), goal: t("ใช้ตั้งเป้าพลังงานและการฝึก"), sex: t("ใช้คำนวณแคลอรี่เท่านั้น"), body: t("อายุ 13–90 ปี สูง 120–230 ซม. หนัก 31–249 กก."), target: t("ค่อย ๆ เปลี่ยนน้ำหนักประมาณ 0.25–0.75 กก./สัปดาห์"), level: t("เริ่มจากสิ่งที่ทำได้ ไม่ต้องทดสอบวิดพื้นตอนนี้"), place: t("เลือกท่าจากอุปกรณ์ที่คุณมี เปลี่ยนได้ที่แท็บเครื่อง"), schedule: t("จำกัดจำนวนท่าให้เหมาะกับเวลาต่อครั้ง"), focus: t("เลือกได้หลายบริเวณ หรือข้ามเพื่อฝึกทั้งตัว"), activity: t("ใช้ปรับเป้าแคลอรี่ตามกิจกรรมประจำวัน"), privacy: t("กล้องและ GPS จะขออนุญาตเฉพาะตอนใช้ครั้งแรก") };
+    var options = {
+      goal: [["lose", t("ลดไขมัน")], ["gain", t("สร้างกล้าม")], ["keep", t("แข็งแรงและฟิต")], ["run", t("วิ่งให้ดีขึ้น")]],
+      sex: [["m", t("ชาย")], ["f", t("หญิง")], ["u", t("ไม่ระบุ")]],
+      level: [[0, t("ยังไม่เคย"), t("วิดพื้นประมาณ 3–5 ครั้ง")], [1, t("ไม่ถึง 6 เดือน"), t("วิดพื้นประมาณ 5–10 ครั้ง")], [2, t("6 เดือน–2 ปี"), t("วิดพื้นประมาณ 10 ครั้งขึ้นไป")], [3, t("มากกว่า 2 ปี"), t("วิดพื้นประมาณ 10 ครั้งขึ้นไป")]],
+      place: [["gym", t("ยิมที่มีเครื่อง")], ["home", t("ที่บ้าน (ไม่มีเครื่อง)")], ["both", t("ทั้งสองแบบ")]],
+      focus: [["whole", t("ทั้งตัว")], ["arms", t("แขน")], ["chest", t("อก")], ["core", t("หน้าท้อง")], ["legs", t("ขา")], ["back", t("หลัง")]],
+      activity: [[1.2, t("นั่งทำงานเป็นส่วนใหญ่")], [1.375, t("เดินบ้าง")], [1.55, t("ยืนเดินทั้งวัน")], [1.725, t("ใช้แรงมาก")]],
+      privacy: [[true, t("ใช่ ส่งสถิติแบบไม่ระบุตัวตน")], [false, t("ไม่ส่งสถิติ")]]
+    };
+    var wrap = setupWrap = document.createElement("div"); wrap.className = "profile-setup"; wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true"); wrap.setAttribute("aria-labelledby", "setup-title");
+    function activeKey() { return step < 0 ? "language" : step >= screens.length ? "summary" : screens[step]; }
+    function bilingual(th) { return '<span lang="th">' + esc(th) + '</span> / <span lang="en">' + esc(EN[th]) + '</span>'; }
+    function valueKey(key) { return { activity: "act", privacy: "consent" }[key] || key; }
+    function valid(key) {
+      if (key === "body") return draft.age >= 13 && draft.age <= 90 && draft.h >= 120 && draft.h <= 230 && draft.kg >= 31 && draft.kg <= 249;
+      if (key === "target") return draft.target >= 31 && draft.target <= 249 && (draft.goal === "lose" ? draft.target < draft.kg : draft.target > draft.kg);
+      if (key === "schedule") return draft.days >= 2 && draft.days <= 6 && [30,45,60,90].indexOf(draft.minutes) >= 0;
+      return true;
+    }
+    function seedTarget() { if (!draft.target) draft.target = Math.max(31, Math.min(249, draft.kg + (draft.goal === "lose" ? -5 : 5))); }
+    function move(delta) {
+      step += delta;
+      if (screens[step] === "target" && draft.goal !== "lose" && draft.goal !== "gain") step += delta;
+      if (screens[step] === "target") seedTarget();
+      draw();
+    }
+    function stepper(key, label, min, max, increment) {
+      return '<div class="setup-stepper"><span>' + esc(label) + '</span><div><button type="button" data-step="' + key + '" data-delta="-' + increment + '" aria-label="' + esc(t("ลด") + " " + label) + '">−</button><input id="setup-' + key + '" aria-label="' + esc(label) + '" type="number" inputmode="decimal" min="' + min + '" max="' + max + '" step="' + increment + '" data-value="' + key + '" value="' + (draft[key] == null ? "" : draft[key]) + '"><button type="button" data-step="' + key + '" data-delta="' + increment + '" aria-label="' + esc(t("เพิ่ม") + " " + label) + '">+</button></div></div>';
+    }
+    function summary() {
+      var mapping = setupGoal(draft.goal), energy = energyPlan({sex:draft.sex,age:draft.age,h:draft.h,act:draft.act},draft.kg,mapping.goal);
+      return '<div class="setup-summary"><strong>' + energy.kcal.toLocaleString(LOCALE) + '</strong><span>' + t("kcal ต่อวัน") + '</span><strong>' + energy.p + '</strong><span>' + t("โปรตีน (g)") + '</span></div><p>' + tf(t("ฝึก {days} วัน/สัปดาห์ ครั้งละ {minutes} นาที"), {days:draft.days,minutes:draft.minutes}) + '</p><p class="hint">' + (draft.place === "home" ? t("ท่าน้ำหนักตัวสลับวันพัก") : mapping.runFocus ? t("สลับวิ่ง เวท และวันพักตามการฟื้นตัว") : t("PUSH → PULL → LEGS สลับวันพักตามการฟื้นตัว")) + '</p>';
+    }
+    function draw() {
+      var key = activeKey(); wrap.dataset.step = key;
+      var progress = Math.max(0, Math.min(11, step));
+      var h = '<div class="setup-page"><header class="setup-top"><button type="button" data-back aria-label="' + t("ย้อนกลับ") + '"' + (step > 0 ? "" : " disabled") + '>←</button><div role="progressbar" aria-label="' + t("ความคืบหน้า") + '" aria-valuemin="0" aria-valuemax="11" aria-valuenow="' + progress + '"><i style="width:' + progress / 11 * 100 + '%"></i></div>' + (key === "summary" || key === "language" ? '<span></span>' : '<button type="button" data-skip>' + t("ข้าม") + '</button>') + '</header><div class="setup-content">' + (key === 'welcome' || key === 'language' ? '<div class="setup-logo">' + document.querySelector('.wordmark').outerHTML + '</div>' : '') + '<h2 id="setup-title" tabindex="-1">' + (key === 'language' ? bilingual("เลือกภาษา") : titles[key]) + '</h2><p class="hint">' + (hints[key] || "") + '</p>';
+      if (key === "language") h += '<div class="setup-options" role="group" aria-labelledby="setup-title">' + [["th","ไทย"],["en","English"]].map(function (option) { return '<button type="button" data-setup-lang="' + option[0] + '" aria-pressed="' + (LANG === option[0]) + '"><span class="setup-option-text" lang="' + option[0] + '">' + option[1] + '</span><span class="setup-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span></button>'; }).join("") + '</div>';
+      else if (key === "welcome") h += '<img class="setup-brand-image" src="assets/onboarding/runner-mark.png" alt="' + esc(t('โลโก้ KRYVOS รูปคนกำลังวิ่ง')) + '" width="665" height="537"><button type="button" class="linkbtn" data-import>' + t("มีไฟล์สำรอง? นำเข้า") + '</button>';
+      else if (key === "summary") h += summary() + setupWeekPreview(draft.days,draft.place,draft.goal === "run");
+      else if (key === "body") h += stepper("age",t("อายุ ปี"),13,90,1) + stepper("h",t("ส่วนสูง เซนติเมตร"),120,230,1) + stepper("kg",t("น้ำหนักตัว กิโลกรัม"),31,249,0.5);
+      else if (key === "target") h += stepper("target",t("น้ำหนักเป้าหมาย กิโลกรัม"),31,249,0.5) + '<p id="setup-difference">' + tf(t("ต่างจากตอนนี้ {kg} กก."), {kg:r1(draft.target-draft.kg)}) + '</p>';
+      else if (key === "schedule") h += stepper("days",t("วันต่อสัปดาห์"),2,6,1) + '<div class="setup-options">' + [30,45,60,90].map(function (mins) { return '<button type="button" data-minutes="' + mins + '" aria-pressed="' + (draft.minutes===mins) + '">' + mins + ' ' + t("นาที") + '</button>'; }).join("") + '</div>';
+      else {
+        if (key === "focus") h += '<div class="setup-focus">';
+        if (key === "focus") h += setupBody(draft.focus);
+        h += '<div class="setup-options' + (key === 'sex' ? ' setup-sex' : key === 'goal' ? ' setup-goals' : '') + '" role="group" aria-label="' + esc(titles[key]) + '">' + options[key].map(function (option) {
+          var selected = key === "focus" ? draft.focus.indexOf(option[0]) >= 0 : answered[key] && draft[valueKey(key)] === option[0];
+          var art = setupOptionArt(key, option[0]), check = '<span class="setup-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>';
+          return '<button type="button" data-option="' + option[0] + '" aria-pressed="' + !!selected + '">' + (key === 'sex' ? art : setupIcon(key,option[0])) + '<span class="setup-option-text">' + esc(option[1]) + (option[2] ? '<small>' + esc(option[2]) + '</small>' : '') + '</span>' + check + (key === 'goal' ? art : '') + '</button>';
+        }).join("") + '</div>';
+        if (key === "focus") h += '</div>';
+        if(key === "privacy") h += '<p class="hint">' + t("ส่งแค่ชื่อฟีเจอร์ รหัสสุ่ม ภาษา และชนิดมือถือ ไม่ส่งข้อมูลร่างกาย อาหาร หรือการซ้อม") + '</p>';
+      }
+      h += '</div><footer class="setup-bottom"><p id="setup-error" role="status"></p><button type="button" class="btn" data-next' + ((!valid(key) || !answered[key]) && ["language","welcome","summary","focus"].indexOf(key)<0 ? ' disabled' : '') + '>' + (key === "language" ? bilingual("ต่อไป") : key === "welcome" ? t("เริ่มเลย") : key === "summary" ? t("เริ่มซ้อม") : t("ถัดไป")) + '</button></footer></div>';
+      wrap.innerHTML = h; wrap.querySelector('#setup-title').focus();
+    }
+    function commit() {
+      var mapped = setupGoal(draft.goal); S.prefs = cleanPrefs(Object.assign({},S.prefs,mapped,{level:draft.level,place:draft.place,days:draft.days,minutes:draft.minutes,focus:draft.focus,goalKg:mapped.goal === "keep" ? null : draft.target}));
+      S.profile = cleanProfile({sex:draft.sex,age:draft.age,h:draft.h,act:draft.act});
+      S.weights = S.weights.filter(function(w){return !sameDay(w.ts);}); S.weights.push({ts:Date.now(),kg:draft.kg});
+      var energy = energyPlan(S.profile,draft.kg,mapped.goal); S.prefs.kcal=energy.kcal; S.prefs.protein=energy.p;
+      if (!rerun || S.prefs.place !== prefs.place) setTrainingPlace(S.prefs.place);
+      try { if(draft.consent) localStorage.removeItem(STATS_OFF); else {localStorage.setItem(STATS_OFF,"1");localStorage.removeItem(STATS_Q);} } catch(e){}
+      S.onboarded=true; save(); closeProfileSetup();renderAll();track("onb_done");showOnboarding(true);
+    }
+    wrap.addEventListener('input',function(ev){var field=ev.target.dataset.value;if(!field)return;draft[field]=num(ev.target.value);answered[activeKey()]=true;if(field==="target")wrap.querySelector("#setup-difference").textContent=tf(t("ต่างจากตอนนี้ {kg} กก."),{kg:r1(draft.target-draft.kg)});wrap.querySelector('[data-next]').disabled=!valid(activeKey());wrap.querySelector('#setup-error').textContent=valid(activeKey())?"":t("ตรวจช่วงตัวเลขและน้ำหนักเป้าหมายอีกครั้ง");});
+    wrap.addEventListener('click',function(ev){
+      var b=ev.target.closest('button');if(!b)return;var key=activeKey();
+      if(b.hasAttribute('data-setup-lang')){var lang=b.dataset.setupLang;saveLanguage(lang);if(lang!==LANG){track('lang_'+lang);setLang(lang);}return;}
+      if(b.hasAttribute('data-import')){$('import').click();return;}
+      if(b.hasAttribute('data-back')){if(step>0)move(-1);return;}
+      if(b.hasAttribute('data-option')){var optionValue=b.dataset.option,value=optionValue;if(key==='level'||key==='activity')value=+value;if(key==='privacy')value=value==='true';if(key==='focus'){draft.focus=value==='whole'?['whole']:draft.focus.filter(function(x){return x!=='whole'&&x!==value;}).concat(draft.focus.indexOf(value)<0?[value]:[]);if(!draft.focus.length)draft.focus=['whole'];}else draft[valueKey(key)]=value;answered[key]=true;draw();wrap.querySelector('[data-option="'+optionValue+'"]').focus();return;}
+      if(b.hasAttribute('data-minutes')){var mins=b.dataset.minutes;draft.minutes=+mins;answered.schedule=true;draw();wrap.querySelector('[data-minutes="'+mins+'"]').focus();return;}
+      if(b.hasAttribute('data-step')){var field=b.dataset.step,delta=b.dataset.delta,input=wrap.querySelector('#setup-'+field),value=(+draft[field]||+input.min)+(+delta);draft[field]=r1(Math.max(+input.min,Math.min(+input.max,value)));answered[key]=true;draw();wrap.querySelector('[data-step="'+field+'"][data-delta="'+delta+'"]').focus();return;}
+      if(b.hasAttribute('data-skip')){if(key==='target')draft.target=null;if(!valid(key)&&key==='body'){draft.age=25;draft.h=170;draft.kg=65;}answered[key]=true;track('onb_skip');move(1);return;}
+      if(b.hasAttribute('data-next')){if(key==='summary'){commit();return;}if(key==='language')saveLanguage(LANG);if(!valid(key))return;move(1);}
+    });
+    wrap.addEventListener('keydown',function(ev){if(ev.key!=='Tab')return;var fields=[...wrap.querySelectorAll('button:not(:disabled),input')];if(ev.shiftKey&&(document.activeElement===fields[0]||fields.indexOf(document.activeElement)<0)){ev.preventDefault();fields[fields.length-1].focus();}else if(!ev.shiftKey&&document.activeElement===fields[fields.length-1]){ev.preventDefault();fields[0].focus();}});
+    setupBackground = [...document.body.children].filter(function (el) { return !['SCRIPT','STYLE'].includes(el.tagName); }).map(function (el) { var entry = { el: el, inert: el.inert }; el.inert = true; return entry; });
+    document.body.appendChild(wrap);draw();
+  }
+  $('setup-again').addEventListener('click',showProfileSetup);
+  function showOnboarding(short) {
+    var steps = short === true ? [STEPS[1], STEPS[2], STEPS[4]] : STEPS;
     var i = 0, wrap = document.createElement("div");
     wrap.className = "onb"; wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true"); wrap.setAttribute("aria-label", t("วิธีใช้แอป"));
-    function done(how) { S.onboarded = true; save(); wrap.remove(); track(how === "end" ? "onb_done" : "onb_skip"); }
+    function done(how) { S.onboarded = true; save(); wrap.remove(); if (short !== true) track(how === "end" ? "onb_done" : "onb_skip"); }
     function draw() {
-      var s = STEPS[i], last = i === STEPS.length - 1;
+      var s = steps[i], last = i === steps.length - 1;
       wrap.innerHTML = '<div class="sheet">' + (s.img ? '<img class="cover" src="' + s.img + t('" alt="โลโก้ KRYVOS รูปคนกำลังวิ่ง" width="900" height="900">') :
         '<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[s.i] + "</svg></div>") +
         "<h3>" + s.t + "</h3><p>" + s.p + "</p><ul>" + s.b.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" +
-        '<div class="dots" aria-hidden="true">' + STEPS.map(function (_, k) { return '<i class="' + (k === i ? "on" : "") + '"></i>'; }).join("") + "</div>" +
+        '<div class="dots" aria-hidden="true">' + steps.map(function (_, k) { return '<i class="' + (k === i ? "on" : "") + '"></i>'; }).join("") + "</div>" +
         '<div class="acts">' + (last ? "<span></span>" : '<button type="button" class="skip" data-o="skip">' + t("ข้าม") + "</button>") + '<button type="button" class="btn" data-o="next">' + (last ? t("เริ่มใช้เลย") : t("ถัดไป")) + "</button></div></div>";
       var nb = wrap.querySelector('[data-o="next"]'); if (nb) nb.focus();
     }
@@ -3136,7 +3446,7 @@
       var o = ev.target.closest("[data-o]");
       if (!o) { if (ev.target === wrap) done(); return; }
       if (o.dataset.o === "skip") return done();
-      if (i < STEPS.length - 1) { i++; draw(); } else done("end");
+      if (i < steps.length - 1) { i++; draw(); } else done("end");
     });
     wrap.addEventListener("keydown", function (ev) { if (ev.key === "Escape") done(); });
     document.body.appendChild(wrap); draw();
@@ -3203,7 +3513,7 @@
   $("today-date").innerHTML = "<b>" + nowD.toLocaleDateString(LOCALE, { weekday: "long" }) + "</b>" + nowD.toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
   load();
   renderAll();
-  if (!S.onboarded) showOnboarding();
+  if (!S.onboarded) { try { localStorage.setItem(STATS_OFF, "1"); } catch (e) {} showProfileSetup(); }
   track("open");
   setTimeout(flushStats, 4000); // send what is queued from last time, after the app has settled
 })();
