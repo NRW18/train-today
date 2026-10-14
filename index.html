@@ -804,7 +804,7 @@
     </section>
     <section class="card">
       <h2>ข้อมูล</h2>
-      <p class="hint" style="margin:0">ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น สำรองไว้เป็นไฟล์ได้ เผื่อเปลี่ยนมือถือ</p>
+      <p class="hint" style="margin:0">ข้อมูลการซ้อม อาหาร และน้ำหนักเก็บไว้ในเครื่องนี้เท่านั้น สำรองไว้เป็นไฟล์ได้ เผื่อเปลี่ยนมือถือ</p>
       <div class="row2">
         <button class="btn line" type="button" id="export">สำรองข้อมูล</button>
         <button class="btn line" type="button" id="import-btn">นำเข้าข้อมูล</button>
@@ -812,6 +812,11 @@
       <input type="file" id="import" accept="application/json,.json" hidden>
       <button class="btn line" type="button" id="sample">ลองด้วยข้อมูลตัวอย่าง 6 วัน</button>
       <button class="btn danger" type="button" id="clear">ลบข้อมูลทั้งหมด</button>
+    </section>
+    <section class="card" aria-labelledby="stats-h">
+      <h2 id="stats-h">สถิติการใช้งาน</h2>
+      <label class="toggle"><span class="lbl">ส่งสถิติการใช้งานแบบไม่ระบุตัวตน</span><input type="checkbox" id="stats-on"></label>
+      <p class="hint">แอปนับแค่ว่าแต่ละฟีเจอร์ถูกใช้กี่ครั้ง เพื่อให้ทีมรู้ว่าควรพัฒนาส่วนไหน ไม่ส่งชื่อ น้ำหนัก อาหาร หรือข้อมูลการซ้อม</p>
     </section>
     <section class="card">
       <h2>แอปนี้ตัดสินใจอย่างไร</h2>
@@ -1686,7 +1691,7 @@
     S.log.push({ ts: Date.now(), day: current.day, energy: S.energy, entries: entries });
     S.draft = {}; S.today = { skip: [], add: [] }; S.picker = false; stopRest();
     save();
-    toast(t("บันทึก ") + DAYS[current.day].name + t(" แล้ว ") + entries.length + t(" ท่า"));
+    toast(t("บันทึก ") + DAYS[current.day].name + t(" แล้ว ") + entries.length + t(" ท่า")); track("workout_done");
     renderPlan();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -2429,7 +2434,7 @@
   function weekAI() {
     var w = weekStats(), btn = $("week-ai");
     if (!w.sessions && !w.foodDays && !w.runs && !w.weighIns) { toast(t("ยังไม่มีข้อมูล 7 วันที่ผ่านมา บันทึกก่อนแล้วค่อยให้ AI สรุป")); return; }
-    btn.disabled = true; btn.textContent = t("AI กำลังสรุป…");
+    btn.disabled = true; btn.textContent = t("AI กำลังสรุป…"); track("ai_summary");
     var p = [
       "You are a supportive strength coach. Summarise this user's last 7 days. Their goal: " + { gain: "build muscle and gain weight slowly", keep: "get stronger and keep their weight", lose: "lose fat while keeping muscle" }[S.prefs.goal] + ".",
       "Data (JSON, computed by the app; P/P/L = push/pull/legs sessions; foodDays = days with food logged, today excluded):",
@@ -2470,7 +2475,7 @@
   function seg(id, key) {
     $(id).addEventListener("click", function (ev) {
       var b = ev.target.closest("button"); if (!b) return;
-      S[key] = b.dataset.v; save(); renderCheckin(); renderPlan();
+      S[key] = b.dataset.v; save(); renderCheckin(); renderPlan(); trackOnce("checkin");
     });
   }
   seg("slot", "slot"); seg("energy", "energy");
@@ -2480,7 +2485,7 @@
     var k = b.dataset.kind + ":" + b.dataset.key, cur = S.body[k];
     var next = b.dataset.kind === "j" ? (cur ? null : "pain") : (!cur ? "sore" : cur === "sore" ? "pain" : null);
     if (next) S.body[k] = next; else delete S.body[k];
-    save(); renderCheckin(); renderPlan();
+    save(); renderCheckin(); renderPlan(); trackOnce("checkin");
     var again = document.querySelector('.chip[data-kind="' + b.dataset.kind + '"][data-key="' + b.dataset.key + '"]');
     if (again) again.focus();
   }
@@ -2516,7 +2521,7 @@
     var el = ev.target.closest("[data-skip],[data-unskip],[data-addex],[data-unadd]");
     if (el) {
       var d = el.dataset, nm;
-      if (d.skip) { S.today.skip.push(d.skip); nm = EXBY[d.skip].name; toast(t("ข้าม ") + nm + t(" วันนี้")); }
+      if (d.skip) { S.today.skip.push(d.skip); nm = EXBY[d.skip].name; toast(t("ข้าม ") + nm + t(" วันนี้")); track("ex_skip"); }
       if (d.unskip) S.today.skip = S.today.skip.filter(function (x) { return x !== d.unskip; });
       if (d.unadd) S.today.add = S.today.add.filter(function (x) { return x !== d.unadd; });
       if (d.addex) {
@@ -2524,22 +2529,22 @@
         if ((st.out || st.light) && !confirm(e.name + t(" โดนส่วนที่เมื่อยอยู่ เพิ่มไหม? ถ้าเพิ่มควรเล่นเบา ๆ"))) return;
         S.today.skip = S.today.skip.filter(function (x) { return x !== d.addex; });
         if (S.today.add.indexOf(d.addex) < 0) S.today.add.push(d.addex);
-        S.picker = false; toast(t("เพิ่ม ") + e.name + t(" แล้ว"));
+        S.picker = false; toast(t("เพิ่ม ") + e.name + t(" แล้ว")); track("ex_add");
       }
       save(); renderPlan(); return;
     }
     var ex = ev.target.closest("[data-explain]");
-    if (ex) { explain(ex.dataset.explain, ex); return; }
+    if (ex) { track("ai_explain"); explain(ex.dataset.explain, ex); return; }
     var b = ev.target.closest(".tick"); if (!b) return;
     var miss = tickSet(b.dataset.ex, +b.dataset.i);
     if (miss) { toast(miss); return; }
     var done = S.draft[b.dataset.ex][+b.dataset.i].done;
     b.setAttribute("aria-pressed", done ? "true" : "false");
     save(); refreshProgress(b.dataset.ex);
-    if (done) startRest();
+    if (done) { startRest(); track("set_done"); }
   });
   $("plan").addEventListener("toggle", function (ev) {
-    var d = ev.target; if (d.dataset && d.dataset.g) openGuides[d.dataset.g] = d.open;
+    var d = ev.target; if (d.dataset && d.dataset.g) { openGuides[d.dataset.g] = d.open; if (d.open) track("howto_open"); }
   }, true);
 
   $("rest-minus").addEventListener("click", function () { restEnd = Math.max(Date.now(), restEnd - 15000); restTotal = Math.max(1, restTotal - 15); drawRest(); });
@@ -2588,7 +2593,7 @@
   });
   $("scan-input").addEventListener("change", function () {
     var f = this.files && this.files[0];
-    if (f) scan(f);
+    if (f) { track("scan_machine"); scan(f); }
     this.value = "";
   });
   $("scan-results").addEventListener("click", function (ev) {
@@ -2622,14 +2627,14 @@
     if (runType) run.t = runType;
     S.runs.push(run); runType = null;
     $("run-km").value = ""; $("run-min").value = ""; $("run-pace").textContent = t("ใส่ระยะกับเวลา แล้วแอปคำนวณ pace ให้");
-    save(); renderRun(); renderPlan(); toast(t("บันทึกวิ่ง ") + r1(r.km) + t(" กม. แล้ว"));
+    save(); renderRun(); renderPlan(); toast(t("บันทึกวิ่ง ") + r1(r.km) + t(" กม. แล้ว")); track("run_log");
   });
   $("shoe-now").addEventListener("click", function (ev) {
     if (ev.target.closest("#shoe-set")) {
       var n = $("shoe-name").value.trim();
       if (!n) { toast(t("ใส่ชื่อรุ่นรองเท้าก่อน")); $("shoe-name").focus(); return; }
       S.shoe = cleanShoe({ name: n, ts: Date.now(), base: num($("shoe-base").value) || 0 });
-      save(); renderRun(); toast(t("เริ่มนับระยะ ") + n + t(" แล้ว"));
+      save(); renderRun(); toast(t("เริ่มนับระยะ ") + n + t(" แล้ว")); track("shoe_set");
     } else if (ev.target.closest("#shoe-clear")) {
       if (!confirm(t("เริ่มนับคู่ใหม่? ระยะของคู่เดิมจะไม่ถูกนับต่อ (การวิ่งที่บันทึกไว้ยังอยู่ครบ)"))) return;
       S.shoe = null; save(); renderRun();
@@ -2638,12 +2643,12 @@
   [["sf-use", "use"], ["sf-sex", "sex"], ["sf-width", "width"], ["sf-arch", "arch"]].forEach(function (p) {
     $(p[0]).addEventListener("click", function (ev) {
       var b = ev.target.closest("button"); if (!b) return;
-      S.shoeQ[p[1]] = b.dataset.v; save(); renderRun();
+      S.shoeQ[p[1]] = b.dataset.v; save(); renderRun(); trackOnce("shoe_finder");
     });
   });
   $("sf-budget-q").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
-    S.shoeQ.budget = +b.dataset.v; save(); renderRun();
+    S.shoeQ.budget = +b.dataset.v; save(); renderRun(); trackOnce("shoe_finder");
   });
   $("sf-budget").addEventListener("change", function () {
     var v = num(this.value);
@@ -2658,7 +2663,7 @@
   });
 
   // food
-  $("food-input").addEventListener("change", function () { var f = this.files && this.files[0]; if (f) foodScan(f); this.value = ""; });
+  $("food-input").addEventListener("change", function () { var f = this.files && this.files[0]; if (f) { track("food_photo"); foodScan(f); } this.value = ""; });
   $("quick").addEventListener("click", function (ev) {
     var pb = ev.target.closest("#portion button");
     if (pb) { portion = +pb.dataset.v; $("quick").innerHTML = quickHtml(); return; }
@@ -2668,11 +2673,11 @@
     var lab = { 0.5: "½", 1.5: "1½", 2: "2" }[portion];
     addFood(f.n + (lab ? " ×" + lab : ""), Math.round(f.k * portion), Math.round(f.p * portion), portion);
     toast(t("เพิ่ม ") + f.n + (lab ? " ×" + lab : "") + " " + Math.round(f.k * portion) + t(" kcal แล้ว"));
-    portion = 1; $("quick").innerHTML = quickHtml();
+    portion = 1; $("quick").innerHTML = quickHtml(); track("food_quick");
   });
   $("goal").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
-    S.prefs.goal = b.dataset.v; save(); renderFood();
+    S.prefs.goal = b.dataset.v; save(); renderFood(); trackOnce("goal_set");
   });
   $("pf-sex").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; S.profile.sex = b.dataset.v; save(); renderFood(); });
   $("pf-act").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; S.profile.act = +b.dataset.v; save(); renderFood(); });
@@ -2687,7 +2692,7 @@
     if (!S.profile.sex || !S.profile.age || !S.profile.h) { toast(t("เลือกเพศ ใส่อายุและส่วนสูงให้ครบก่อน")); return; }
     if (!w) { toast(t("บันทึกน้ำหนักตัวที่การ์ดด้านบนก่อน")); $("bw-input").focus(); return; }
     var e = energyPlan(S.profile, w, S.prefs.goal);
-    S.prefs.kcal = e.kcal; S.prefs.protein = e.p; save(); renderFood();
+    S.prefs.kcal = e.kcal; S.prefs.protein = e.p; save(); renderFood(); trackOnce("goal_set");
     $("pf-out").textContent = t("ร่างกายใช้พลังงานราว ") + e.tdee.toLocaleString(LOCALE) + t(" kcal ต่อวัน เป้า") + { gain: t("เพิ่มกล้าม +300"), keep: t("คงน้ำหนัก"), lose: t("ลดน้ำหนัก −500") }[S.prefs.goal] +
       " = " + e.kcal.toLocaleString(LOCALE) + t(" kcal และโปรตีน ") + e.p + t(" g ต่อวัน (ค่าประมาณ ปรับตามน้ำหนักจริงทุก 2–3 สัปดาห์)");
   });
@@ -2699,7 +2704,7 @@
     var k = num($("m-kcal").value), p = num($("m-p").value);
     if (!$("m-name").value.trim() || (k == null && p == null)) { toast(t("ใส่ชื่ออาหาร และแคลอรี่หรือโปรตีนอย่างน้อย 1 อย่าง")); return; }
     addFood($("m-name").value.trim(), k, p);
-    $("m-name").value = ""; $("m-kcal").value = ""; $("m-p").value = ""; toast(t("เพิ่มแล้ว"));
+    $("m-name").value = ""; $("m-kcal").value = ""; $("m-p").value = ""; toast(t("เพิ่มแล้ว")); track("food_manual");
   });
   $("meals").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-delfood]"); if (!b) return;
@@ -2713,7 +2718,7 @@
     if (!k || k < 25 || k > 250) { toast(t("ใส่น้ำหนักเป็นกิโลกรัม เช่น 59.5")); return; }
     S.weights = S.weights.filter(function (w) { return !sameDay(w.ts); }); // one entry per day
     S.weights.push({ ts: Date.now(), kg: r1(k) });
-    $("bw-input").value = ""; save(); renderFood(); toast(t("บันทึกน้ำหนัก ") + r1(k) + t(" กก. แล้ว"));
+    $("bw-input").value = ""; save(); renderFood(); toast(t("บันทึกน้ำหนัก ") + r1(k) + t(" กก. แล้ว")); track("weight_log");
   });
   // The goal buttons save on tap; "save goal" stores the numbers and must keep the rest of prefs (goal, rest time).
   function withGoals(prefs, kcal, protein, goalKg) {
@@ -2721,7 +2726,7 @@
   }
   $("g-save").addEventListener("click", function () {
     S.prefs = withGoals(S.prefs, num($("g-kcal").value), num($("g-p").value), num($("g-kg").value));
-    save(); renderFood(); toast(t("บันทึกเป้าหมายแล้ว"));
+    save(); renderFood(); toast(t("บันทึกเป้าหมายแล้ว")); trackOnce("goal_set");
   });
   $("week-ai").addEventListener("click", weekAI);
 
@@ -2733,6 +2738,7 @@
     a.download = "train-today-" + new Date().toISOString().slice(0, 10) + ".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    track("backup");
   });
   $("import-btn").addEventListener("click", function () { $("import").click(); });
   $("import").addEventListener("change", function () {
@@ -2775,7 +2781,7 @@
     if ("shoe" in d) S.shoe = cleanShoe(d.shoe);
     if ("shoeQ" in d) S.shoeQ = cleanShoeQ(d.shoeQ);
     S.summary = null; // it described the data that was just replaced
-    S.draft = {}; save(); renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว"));
+    S.draft = {}; save(); renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว")); track("import");
   }
   $("sample").addEventListener("click", useSample);
   function useSample() {
@@ -2787,7 +2793,7 @@
     S.runs = [{ ts: now - 3.5 * 24 * H, km: 4, min: 26 }];
     S.weights = [{ ts: now - 13 * 24 * H, kg: 58.6 }, { ts: now - 9 * 24 * H, kg: 58.8 }, { ts: now - 6 * 24 * H, kg: 59.0 }, { ts: now - 2 * 24 * H, kg: 59.3 }];
     S.food = [1, 2, 3, 4].map(function (d) { return { ts: now - d * 24 * H, name: t("ตัวอย่าง (3 มื้อ)"), kcal: 2400 + d * 60, p: 95 + d * 4 }; });
-    save(); renderAll(); toast(t("ใส่ข้อมูลตัวอย่างแล้ว"));
+    save(); renderAll(); toast(t("ใส่ข้อมูลตัวอย่างแล้ว")); track("sample");
   }
   $("clear").addEventListener("click", function () {
     if (!confirm(t("ลบข้อมูลทั้งหมดในเครื่องนี้? การซ้อม วิ่ง อาหาร น้ำหนักตัว เป้าหมาย รองเท้า ท่าที่ AI เพิ่ม เครื่องที่สแกน และท่าที่ปิดไว้ จะหายหมด กู้คืนไม่ได้ถ้าไม่ได้สำรองไว้\n\nที่ยังอยู่: ภาษาที่เลือก และ Gemini key ของคุณ (ถ้าใส่ไว้)"))) return;
@@ -2809,6 +2815,7 @@
       if (b.dataset.tab === "settings") renderSettings();
       if (b.dataset.tab === "today") renderPlan();
       window.scrollTo(0, 0);
+      track("tab_" + b.dataset.tab);
     });
   });
 
@@ -2820,6 +2827,65 @@
 
   var tt;
   function toast(msg) { var t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("show"); }, 2600); }
+
+  /* ---------- anonymous usage stats ----------
+     Counts which features are used (event names only) so the team knows what to improve.
+     Sent: a random id made on this phone, app language, phone type, installed or not, and event names.
+     Never sent: names, weights, food, workouts, runs or anything typed. Off switch in Settings.
+     Events wait in a small queue and go out in one request when there are 10, or when the app is hidden. */
+  var STATS_OFF = "kryvos-stats-off", STATS_ID = "kryvos-anon", STATS_Q = "kryvos-stats-q";
+  var statsLive = !!PROXY_URL && location.hostname === "nrw18.github.io";
+  var trackedOnce = {};
+  function statsOn() { try { return localStorage.getItem(STATS_OFF) !== "1"; } catch (e) { return false; } }
+  function anonId() {
+    try {
+      var id = localStorage.getItem(STATS_ID);
+      if (!id || !/^[A-Za-z0-9-]{8,40}$/.test(id)) {
+        id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+        localStorage.setItem(STATS_ID, id);
+      }
+      return id;
+    } catch (e) { return null; }
+  }
+  function statsQueue() { try { var q = JSON.parse(localStorage.getItem(STATS_Q) || "[]"); return Array.isArray(q) ? q : []; } catch (e) { return []; } }
+  function track(name) {
+    if (!statsOn()) return;
+    try {
+      var q = statsQueue(); q.push([name, Date.now()]);
+      localStorage.setItem(STATS_Q, JSON.stringify(q.slice(-200)));
+      if (q.length >= 10) flushStats();
+    } catch (e) {}
+  }
+  function trackOnce(name) { if (!trackedOnce[name]) { trackedOnce[name] = true; track(name); } }
+  function statsPlatform() {
+    var ua = navigator.userAgent || "";
+    return /android/i.test(ua) ? "android" : /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "ios" : /windows|macintosh|linux|cros/i.test(ua) ? "desktop" : "other";
+  }
+  function flushStats() {
+    if (!statsLive || !statsOn() || !navigator.onLine) return;
+    var q = statsQueue(); if (!q.length) return;
+    var id = anonId(); if (!id) return;
+    var inst = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+    var body = JSON.stringify({ a: id, l: LANG, p: statsPlatform(), i: inst ? 1 : 0, e: q.slice(0, 40) });
+    var sent = false;
+    try { sent = navigator.sendBeacon && navigator.sendBeacon(PROXY_URL + "e", body); } catch (e) { sent = false; }
+    if (!sent) { try { fetch(PROXY_URL + "e", { method: "POST", body: body, keepalive: true, headers: { "Content-Type": "text/plain" } }).catch(function () {}); sent = true; } catch (e) {} }
+    if (sent) { try { localStorage.setItem(STATS_Q, JSON.stringify(q.slice(40))); } catch (e) {} }
+  }
+  document.addEventListener("visibilitychange", function () { if (document.hidden) flushStats(); });
+  window.addEventListener("pagehide", flushStats);
+  // YouTube how-to links are plain links, so count them where they are clicked
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest && ev.target.closest('a[href*="youtube.com"]'); if (a) track("video_open");
+  }, true);
+  window.addEventListener("appinstalled", function () { track("install"); flushStats(); });
+  $("stats-on").checked = statsOn();
+  $("stats-on").addEventListener("change", function () {
+    try {
+      if (this.checked) localStorage.removeItem(STATS_OFF);
+      else { localStorage.setItem(STATS_OFF, "1"); localStorage.removeItem(STATS_Q); }
+    } catch (e) {}
+  });
 
   function renderAll() { renderCheckin(); renderPlan(); renderHistory(); renderGym(); renderRun(); renderFood(); renderSettings(); }
 
@@ -2833,7 +2899,7 @@
     run: '<circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>'
   };
   var STEPS = [
-    { img: "cover.jpg", t: t("ยินดีต้อนรับสู่ KRYVOS"), p: t("โค้ชซ้อมรายวัน ยกเวท วิ่ง และการกิน อยู่ในแอปเดียว"), b: [t("บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ"), t("ข้อมูลทั้งหมดเก็บไว้ในเครื่องคุณเท่านั้น")] },
+    { img: "cover.jpg", t: t("ยินดีต้อนรับสู่ KRYVOS"), p: t("โค้ชซ้อมรายวัน ยกเวท วิ่ง และการกิน อยู่ในแอปเดียว"), b: [t("บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ"), t("ข้อมูลส่วนตัวเก็บไว้ในเครื่องคุณเท่านั้น")] },
     { i: "check", t: t("เช็กอินแล้วได้โปรแกรมทันที"), p: t("บอกแอปว่าซ้อมช่วงไหน แรงวันนี้เป็นยังไง และเมื่อยหรือเจ็บตรงไหน"), b: [t("แอปเลือก PUSH / PULL / LEGS หรือวันพัก จากการฟื้นตัวของกล้าม"), t("บอกเครื่อง เซ็ต ครั้ง และน้ำหนัก พร้อมเหตุผล"), t("ข้ามท่าที่ไม่อยากเล่น หรือเพิ่มท่าจากคำแนะนำได้")] },
     { i: "timer", t: t("ระหว่างเล่น กด ✓ ทีละเซ็ต"), p: t("ตัวจับเวลาพักเริ่มเอง ครบแล้วมือถือสั่น"), b: [t("ใส่น้ำหนักกับจำนวนครั้งที่ทำได้จริง"), t("กด \"วิธีเล่น\" ดูท่าที่ถูกต้อง"), t("จบแล้วกด \"บันทึกการซ้อม\" ครั้งหน้าน้ำหนักจะปรับให้เอง")] },
     { i: "scan", t: t("สแกนเครื่องในยิมด้วย AI"), p: t("แท็บ \"เครื่อง\" ถ่ายรูปเครื่อง แล้ว AI บอกว่าเล่นท่าไหนได้"), b: [PROXY_URL ? t("ใช้ได้เลย ไม่ต้องตั้งค่าอะไร") : t("ใส่ Gemini API key ฟรีครั้งเดียว"), t("ปิดท่าที่ยิมไม่มีเครื่องได้")] },
@@ -2844,7 +2910,7 @@
   function showOnboarding() {
     var i = 0, wrap = document.createElement("div");
     wrap.className = "onb"; wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true"); wrap.setAttribute("aria-label", t("วิธีใช้แอป"));
-    function done() { S.onboarded = true; save(); wrap.remove(); }
+    function done(how) { S.onboarded = true; save(); wrap.remove(); track(how === "end" ? "onb_done" : "onb_skip"); }
     function draw() {
       var s = STEPS[i], last = i === STEPS.length - 1;
       wrap.innerHTML = '<div class="sheet">' + (s.img ? '<img class="cover" src="' + s.img + t('" alt="โลโก้ KRYVOS รูปคนกำลังวิ่ง" width="900" height="900">') :
@@ -2858,7 +2924,7 @@
       var o = ev.target.closest("[data-o]");
       if (!o) { if (ev.target === wrap) done(); return; }
       if (o.dataset.o === "skip") return done();
-      if (i < STEPS.length - 1) { i++; draw(); } else done();
+      if (i < STEPS.length - 1) { i++; draw(); } else done("end");
     });
     wrap.addEventListener("keydown", function (ev) { if (ev.key === "Escape") done(); });
     document.body.appendChild(wrap); draw();
@@ -2867,7 +2933,7 @@
   // the round profile button opens the settings tab (the language switch lives there)
   $("me-btn").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="settings"]').click(); });
   pressed("lang-seg", LANG);
-  $("lang-seg").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (b && b.dataset.v !== LANG) setLang(b.dataset.v); });
+  $("lang-seg").addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (b && b.dataset.v !== LANG) { track("lang_" + b.dataset.v); setLang(b.dataset.v); } });
 
   /* ---------- install as an app ---------- */
   var promptEv = null;
@@ -2926,6 +2992,8 @@
   load();
   renderAll();
   if (!S.onboarded) showOnboarding();
+  track("open");
+  setTimeout(flushStats, 4000); // send what is queued from last time, after the app has settled
 })();
 </script>
 </body>

@@ -45,7 +45,7 @@ export function varSource(name) {
 // Build a sandbox with the given globals, then the one-line vars and functions from index.html.
 export function load(names, globals = {}, vars = []) {
   // the app's language helpers, in Thai (the language the code is written in); a test can override them
-  const lang = { t: (x) => x, tf: (x, o) => String(x).replace(/\{(\w+)\}/g, (m, k) => (o[k] != null ? o[k] : m)), LANG: "th", LOCALE: "th-TH", AI_LANG: "Thai" };
+  const lang = { t: (x) => x, tf: (x, o) => String(x).replace(/\{(\w+)\}/g, (m, k) => (o[k] != null ? o[k] : m)), LANG: "th", LOCALE: "th-TH", AI_LANG: "Thai", track: () => {}, trackOnce: () => {} };
   const ctx = vm.createContext({ ...lang, ...globals });
   vm.runInContext(vars.map(anyVar).concat(names.map(fnSource)).join("\n"), ctx);
   return ctx;

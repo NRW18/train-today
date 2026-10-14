@@ -1,6 +1,6 @@
 // Offline support: keep the app shell cached so it opens in the gym without internet.
 // Bump VERSION whenever index.html changes so phones pick up the new version.
-var VERSION = "train-today-v36";
+var VERSION = "train-today-v37";
 var SHELL = ["./", "index.html", "en.js", "manifest.json", "cover.jpg", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", function (e) {
@@ -20,7 +20,10 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
 
-  // Pages: try the network first so updates show up, fall back to the cache offline.
+  // Other pages (like stats.html) go straight to the network and are never stored as the app.
+  if (req.mode === "navigate" && !/\/(index\.html)?$/.test(url.pathname)) return;
+
+  // The app page: try the network first so updates show up, fall back to the cache offline.
   if (req.mode === "navigate") {
     e.respondWith(
       fetch(req).then(function (res) {
