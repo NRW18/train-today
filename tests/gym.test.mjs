@@ -12,7 +12,7 @@ function app(count = 9, stored = null, blocked = false) {
     ORDER: ["push", "pull", "legs"], DAYS: { push: { name: "PUSH" }, pull: { name: "PULL" }, legs: { name: "LEGS" } },
     S: { off: ["ex0"], seen: ["ex1"], scanned: false }, localStorage: storage,
     $: (id) => nodes[id] ||= { value: "", hidden: false },
-    howtoHtml: () => "", getKey: () => "", hasAI: () => false, ownKeyOpen: false, PROXY_URL: "",
+    howtoHtml: () => "", getKey: () => "", hasAI: () => false, ownKeyOpen: false, PROXY_URL: "", pressed: () => {},
     track: (event) => events.push(event)
   }, ["GYM_GROUP_KEY", "gymGroups"]);
   return { a, nodes, storage, events };
