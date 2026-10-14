@@ -1,4 +1,4 @@
-// Cloudflare Worker: lets the วันนี้ฝึกอะไร app use Gemini without each user entering a key.
+// Cloudflare Worker: lets the KRYVOS app use Gemini without each user entering a key.
 // The Gemini key lives only in this worker as a secret (GEMINI_KEY) and is never sent to the app.
 //
 // Deploy: in this folder run  npx wrangler login  then  npx wrangler deploy  (settings in wrangler.toml,

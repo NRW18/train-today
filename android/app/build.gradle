@@ -1,4 +1,4 @@
-// Android wrapper (Trusted Web Activity) around the วันนี้ฝึกอะไร web app.
+// Android wrapper (Trusted Web Activity) around the KRYVOS web app.
 // Built by .github/workflows/android.yml. Signing comes from environment variables:
 //   KS_PATH, KS_PASS (store + key password), KS_ALIAS (default "upload").
 plugins {
