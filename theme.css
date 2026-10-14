@@ -1,0 +1,54 @@
+  /* ---------- design tokens: navy and blue come from the KRYVOS logo; green ready/done, yellow sore, red pain ---------- */
+  :root {
+    --bg: #EDF0F4; --card: #FFFFFF; --sunk: #F3F5F8; --ink: #12161F; --soft: #5B6577; --line: #E1E5EC;
+    --hero: #071A30; --hero-ink: #FFFFFF; --hero-soft: #A8C1DA; --brand-ink: #0B2545;
+    --blue: #1F6FB8; --blue-bg: #E2EEF9;
+    --green: #1F8A4E; --green-bg: #DDF3E6;
+    --yellow: #A87700; --yellow-solid: #E8B422; --yellow-bg: #FBF1D3;
+    --red: #C93434; --red-bg: #FCE3E3; --red-ink: #7A1D1D; --yellow-ink: #5C4300;
+    --violet: #6342C9; --violet-bg: #EDE7FB;
+    --shadow: 0 1px 2px rgba(18,22,31,.05), 0 8px 24px rgba(18,22,31,.06);
+    --nav: rgba(255,255,255,.82);
+    --home-top: #A9D3F8; --home-mid: #D7E9FA; --home-glass: rgba(255,255,255,.58); --home-glass-line: rgba(255,255,255,.76);
+    --set-pending: #DCE5EF; --set-border: #BCCCDD;
+    --home-pill: rgba(255,255,255,.4); --home-shadow: 0 10px 36px rgba(11,37,69,.04);
+    --quick-bg: #071A30; --quick-ink: #FFFFFF; --recovery-start: #DBE9F9; --recovery-end: #63BCAA;
+    --head: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --line: #262D38;
+      --hero: #0A2240; --hero-ink: #FFFFFF; --hero-soft: #A8C1DA; --brand-ink: #8FF5F5;
+      --blue: #6FB3EC; --blue-bg: #14304D;
+      --green: #4CC283; --green-bg: #143224;
+      --yellow: #F0C24A; --yellow-solid: #E8B422; --yellow-bg: #3A2F12;
+      --red: #F07070; --red-bg: #3A1B1D; --red-ink: #FFC9C9; --yellow-ink: #FBE3A1;
+      --violet: #A994F2; --violet-bg: #29224A;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+      --nav: rgba(22,27,35,.82);
+      --home-top: #102E50; --home-mid: #102137; --home-glass: rgba(29,44,62,.72); --home-glass-line: rgba(168,193,218,.18);
+      --set-pending: #293C50; --set-border: #49637D;
+      --home-pill: rgba(168,193,218,.12); --home-shadow: 0 10px 36px rgba(0,0,0,.16);
+      --quick-bg: #071A30; --quick-ink: #FFFFFF; --recovery-start: #253A50; --recovery-end: #4CC283;
+      color-scheme: dark;
+    }
+  }
+    :root[data-theme="dark"] {
+      --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --line: #262D38;
+      --hero: #0A2240; --hero-ink: #FFFFFF; --hero-soft: #A8C1DA; --brand-ink: #8FF5F5;
+      --blue: #6FB3EC; --blue-bg: #14304D;
+      --green: #4CC283; --green-bg: #143224;
+      --yellow: #F0C24A; --yellow-solid: #E8B422; --yellow-bg: #3A2F12;
+      --red: #F07070; --red-bg: #3A1B1D; --red-ink: #FFC9C9; --yellow-ink: #FBE3A1;
+      --violet: #A994F2; --violet-bg: #29224A;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+      --nav: rgba(22,27,35,.82);
+      --home-top: #102E50; --home-mid: #102137; --home-glass: rgba(29,44,62,.72); --home-glass-line: rgba(168,193,218,.18);
+      --set-pending: #293C50; --set-border: #49637D;
+      --home-pill: rgba(168,193,218,.12); --home-shadow: 0 10px 36px rgba(0,0,0,.16);
+      --quick-bg: #071A30; --quick-ink: #FFFFFF; --recovery-start: #253A50; --recovery-end: #4CC283;
+      color-scheme: dark;
+    }
+:root { --card-radius: 30px; --card-padding: 24px 20px; --overlay: rgba(8,10,14,.5); --sheet-shadow: 0 -10px 40px rgba(0,0,0,.16); --muted: var(--soft); --mark: var(--blue); }
