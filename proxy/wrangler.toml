@@ -15,3 +15,10 @@ enabled = true
 
 [observability.logs]
 enabled = true
+
+# Usage stats (anonymous feature counts). Table is created by the worker on first use.
+# STATS_KEY (password for stats.html) is a secret: npx wrangler secret put STATS_KEY
+[[d1_databases]]
+binding = "DB"
+database_name = "kryvos-stats"
+database_id = "42f9249b-1181-4c6f-9514-4d474ca54efc"

@@ -8,6 +8,12 @@
 // Limits: each visitor (by IP) gets PER_IP_DAILY calls a day, and the whole app gets GLOBAL_DAILY.
 // Only requests from ALLOWED_ORIGINS are accepted from browsers. This keeps casual abuse away;
 // it is not bank-grade security, so keep the limits low and watch your Gemini usage.
+//
+// Usage stats (optional, needs the D1 binding DB and the secret STATS_KEY):
+//   POST /e      the app sends anonymous feature counts: a random device id, app language, phone type
+//                and event names from EVENTS below. No IP, no names, no workout or food data is stored.
+//   GET  /stats  totals for the stats page (stats.html); needs the header X-Stats-Key = STATS_KEY.
+// Set the key once from this folder:  npx wrangler secret put STATS_KEY
 
 const ALLOWED_ORIGINS = ["https://nrw18.github.io"];
 const MODELS = ["gemini-3-flash-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
@@ -21,8 +27,8 @@ function cors(origin) {
   const ok = ALLOWED_ORIGINS.includes(origin);
   return {
     "Access-Control-Allow-Origin": ok ? origin : ALLOWED_ORIGINS[0],
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Stats-Key",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
@@ -81,12 +87,142 @@ async function countAndCheck(env, ip) {
   return { ok: true, left: PER_IP_DAILY - a - 1 };
 }
 
+/* ---------- usage stats (D1) ---------- */
+
+// The only event names the app may send. Anything else is dropped.
+const EVENTS = [
+  "open", "install",
+  "tab_today", "tab_gym", "tab_run", "tab_food", "tab_history", "tab_settings",
+  "checkin", "set_done", "workout_done", "ex_skip", "ex_add",
+  "howto_open", "video_open", "scan_machine",
+  "food_photo", "food_manual", "food_quick",
+  "run_log", "shoe_finder", "shoe_set",
+  "weight_log", "goal_set", "ai_summary", "ai_explain",
+  "lang_en", "lang_th", "backup", "import", "sample", "onb_done", "onb_skip"
+];
+const EVENT_SET = new Set(EVENTS);
+const MAX_BATCH = 40;          // events per request
+const PER_DEVICE_DAILY = 400;  // events kept per device per day (free D1: 100,000 rows written/day)
+const PLATFORMS = ["android", "ios", "desktop", "other"];
+
+const SCHEMA = [
+  "CREATE TABLE IF NOT EXISTS ev (id INTEGER PRIMARY KEY, day TEXT NOT NULL, ts INTEGER NOT NULL, anon TEXT NOT NULL, ev TEXT NOT NULL, lang TEXT, plat TEXT, inst INTEGER, ver TEXT)",
+  "CREATE INDEX IF NOT EXISTS ev_day ON ev(day)",
+  "CREATE INDEX IF NOT EXISTS ev_anon_day ON ev(anon, day)"
+];
+// The table is created on first use, once per worker instance (no separate setup step).
+const schemaReady = new WeakMap();
+function ensureSchema(db) {
+  let p = schemaReady.get(db);
+  if (!p) {
+    p = db.batch(SCHEMA.map((q) => db.prepare(q))).catch((e) => { schemaReady.delete(db); throw e; });
+    schemaReady.set(db, p);
+  }
+  return p;
+}
+
+// Days are counted in Thai time (UTC+7).
+function bkkDay(ts) { return new Date(ts + 7 * 3600e3).toISOString().slice(0, 10); }
+
+// Turn the app's batch into rows, or null if the batch is not in the expected shape.
+function cleanEvents(body, now) {
+  if (!body || typeof body !== "object") return null;
+  const anon = typeof body.a === "string" && /^[A-Za-z0-9-]{8,40}$/.test(body.a) ? body.a : null;
+  if (!anon || !Array.isArray(body.e)) return null;
+  const lang = body.l === "en" || body.l === "th" ? body.l : null;
+  const plat = PLATFORMS.includes(body.p) ? body.p : "other";
+  const inst = body.i === 1 || body.i === true ? 1 : 0;
+  const ver = typeof body.v === "string" ? body.v.slice(0, 24) : null;
+  const rows = [];
+  for (const item of body.e.slice(0, MAX_BATCH)) {
+    if (!Array.isArray(item) || !EVENT_SET.has(item[0])) continue;
+    let ts = Number(item[1]);
+    // Queued events can arrive a few days late; anything odd is filed under now.
+    if (!Number.isFinite(ts) || ts < now - 8 * 864e5 || ts > now + 36e5) ts = now;
+    rows.push({ day: bkkDay(ts), ts: Math.round(ts), anon, ev: item[0], lang, plat, inst, ver });
+  }
+  return rows;
+}
+
+async function handleEvents(request, env, origin) {
+  // Stats must never break the app: every failure here still answers 204.
+  if (!env.DB) return new Response(null, { status: 204, headers: cors(origin) });
+  let body;
+  try { body = JSON.parse(await request.text()); } catch (e) { return json({ error: "bad_json" }, 400, origin); }
+  const now = Date.now();
+  const rows = cleanEvents(body, now);
+  if (!rows) return json({ error: "bad_request" }, 400, origin);
+  if (!rows.length) return new Response(null, { status: 204, headers: cors(origin) });
+  try {
+    await ensureSchema(env.DB);
+    const seen = await env.DB.prepare("SELECT COUNT(*) AS n FROM ev WHERE anon = ? AND day = ?").bind(rows[0].anon, bkkDay(now)).first();
+    const room = PER_DEVICE_DAILY - ((seen && seen.n) || 0);
+    if (room > 0) {
+      const ins = env.DB.prepare("INSERT INTO ev (day, ts, anon, ev, lang, plat, inst, ver) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+      await env.DB.batch(rows.slice(0, room).map((r) => ins.bind(r.day, r.ts, r.anon, r.ev, r.lang, r.plat, r.inst, r.ver)));
+    }
+  } catch (e) {
+    console.log("stats write failed:", e && e.message);
+  }
+  return new Response(null, { status: 204, headers: cors(origin) });
+}
+
+function sameKey(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+async function handleStats(request, env, origin) {
+  if (!env.DB || !env.STATS_KEY) return json({ error: "not_configured" }, 503, origin);
+  if (!sameKey(request.headers.get("X-Stats-Key") || "", env.STATS_KEY)) return json({ error: "key" }, 401, origin);
+  const url = new URL(request.url);
+  const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get("days") || "14", 10) || 14));
+  const now = Date.now();
+  const from = bkkDay(now - (days - 1) * 864e5);
+  try {
+    await ensureSchema(env.DB);
+    const q = (sql, ...args) => env.DB.prepare(sql).bind(...args);
+    const r = await env.DB.batch([
+      q("SELECT day, COUNT(DISTINCT anon) AS devices, SUM(ev = 'open') AS opens, COUNT(*) AS events FROM ev WHERE day >= ? GROUP BY day ORDER BY day", from),
+      q("SELECT ev, COUNT(*) AS n, COUNT(DISTINCT anon) AS devices FROM ev WHERE day >= ? GROUP BY ev ORDER BY n DESC", from),
+      q("SELECT plat AS k, COUNT(DISTINCT anon) AS devices FROM ev WHERE day >= ? GROUP BY plat ORDER BY devices DESC", from),
+      q("SELECT lang AS k, COUNT(DISTINCT anon) AS devices FROM ev WHERE day >= ? GROUP BY lang ORDER BY devices DESC", from),
+      q("SELECT COUNT(DISTINCT anon) AS devices FROM ev WHERE day >= ?", from),
+      q("SELECT COUNT(DISTINCT anon) AS devices FROM ev WHERE day >= ? AND inst = 1", from),
+      q("SELECT n AS days, COUNT(*) AS devices FROM (SELECT anon, COUNT(DISTINCT day) AS n FROM ev WHERE day >= ? GROUP BY anon) GROUP BY n ORDER BY n", from),
+      q("SELECT d AS day, COUNT(*) AS devices FROM (SELECT anon, MIN(day) AS d FROM ev GROUP BY anon) WHERE d >= ? GROUP BY d ORDER BY d", from),
+      q("SELECT COUNT(DISTINCT anon) AS devices, COUNT(*) AS events, MIN(day) AS first FROM ev")
+    ]);
+    const rows = (i) => (r[i] && r[i].results) || [];
+    return json({
+      days, from, today: bkkDay(now),
+      daily: rows(0), features: rows(1), platforms: rows(2), langs: rows(3),
+      devices: (rows(4)[0] || {}).devices || 0,
+      installed: (rows(5)[0] || {}).devices || 0,
+      activeDays: rows(6), newDevices: rows(7),
+      allTime: rows(8)[0] || { devices: 0, events: 0, first: null }
+    }, 200, origin);
+  } catch (e) {
+    console.log("stats read failed:", e && e.message);
+    return json({ error: "db" }, 500, origin);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
+    const path = new URL(request.url).pathname;
+    if (path === "/stats") {
+      if (request.method !== "GET") return json({ error: "method" }, 405, origin);
+      if (!ALLOWED_ORIGINS.includes(origin)) return json({ error: "origin" }, 403, origin);
+      return handleStats(request, env, origin);
+    }
     if (request.method !== "POST") return json({ error: "method" }, 405, origin);
     if (!ALLOWED_ORIGINS.includes(origin)) return json({ error: "origin" }, 403, origin);
+    if (path === "/e") return handleEvents(request, env, origin);
     if (!env.GEMINI_KEY) return json({ error: "not_configured" }, 500, origin);
 
     let body;

@@ -19,6 +19,7 @@
 | `sw.js` | Service Worker ทำให้ใช้ออฟไลน์ได้ |
 | `manifest.json` + `icon-*.png` | ข้อมูลสำหรับติดตั้งเป็นแอป |
 | `proxy/worker.js` | ตัวกลาง AI บน Cloudflare (เก็บคีย์ Gemini ไว้เป็นความลับ) |
+| `stats.html` | หน้าหลังบ้าน ดูว่าคนใช้ฟีเจอร์ไหนกี่ครั้ง (ต้องใช้รหัส `STATS_KEY`) |
 | `android/` + `.github/workflows/android.yml` | ห่อเว็บเป็นแอป Android (สร้าง APK อัตโนมัติบน GitHub) |
 
 ## โค้ดใน index.html

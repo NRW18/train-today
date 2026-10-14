@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>KRYVOS Stats</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Same tokens as the app (index.html). Chart blue is validated for both surfaces. */
+  :root {
+    --bg: #EDF0F4; --card: #FFFFFF; --sunk: #F3F5F8; --ink: #12161F; --soft: #5B6577; --muted: #7A8494; --line: #E1E5EC;
+    --hero: #071A30; --blue: #1F6FB8; --blue-bg: #E2EEF9; --mark: #1F6FB8; --red: #C93434; --red-bg: #FCE3E3;
+    --shadow: 0 1px 2px rgba(18,22,31,.05), 0 8px 24px rgba(18,22,31,.06);
+    --head: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --muted: #8590A2; --line: #262D38;
+      --hero: #0A2240; --blue: #6FB3EC; --blue-bg: #14304D; --mark: #4E9BDE; --red: #F07070; --red-bg: #3A1B1D;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0C0F14; --card: #161B23; --sunk: #1D232D; --ink: #EAEEF4; --soft: #98A2B3; --muted: #8590A2; --line: #262D38;
+    --hero: #0A2240; --blue: #6FB3EC; --blue-bg: #14304D; --mark: #4E9BDE; --red: #F07070; --red-bg: #3A1B1D;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .app { max-width: 980px; margin: 0 auto; padding: 0 16px 48px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 2px 6px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: baseline; gap: 8px; margin: 0; color: var(--ink); }
+  .brand svg { height: 18px; width: auto; align-self: center; }
+  .brand span { font-family: var(--head); font-weight: 600; font-size: 1.05rem; color: var(--soft); }
+  .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .seg { display: inline-flex; background: var(--card); border-radius: 999px; padding: 3px; box-shadow: var(--shadow); }
+  .seg button { border: 0; background: transparent; color: var(--soft); font: 500 .9rem var(--body); padding: 6px 14px; border-radius: 999px; cursor: pointer; min-height: 36px; }
+  .seg button[aria-pressed="true"] { background: var(--blue); color: var(--card); }
+  .ghost { border: 0; background: var(--card); color: var(--blue); font: 500 .9rem var(--body); padding: 8px 14px; border-radius: 999px; cursor: pointer; box-shadow: var(--shadow); min-height: 36px; }
+  .sub { color: var(--soft); margin: 2px 2px 14px; font-size: .9rem; }
+  .card { background: var(--card); border-radius: 22px; padding: 18px 20px; box-shadow: var(--shadow); margin: 14px 0; }
+  h2 { font-family: var(--head); font-weight: 700; font-size: 1.08rem; margin: 0 0 2px; }
+  .card > .hint { color: var(--soft); font-size: .86rem; margin: 0 0 12px; }
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+  .tile { background: var(--card); border-radius: 20px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
+  .tile .lb { color: var(--soft); font-size: .84rem; }
+  .tile .v { font-family: var(--head); font-weight: 600; font-size: 2rem; line-height: 1.15; margin-top: 4px; }
+  .tile .d { color: var(--muted); font-size: .8rem; margin-top: 2px; }
+  .tile.hero { background: var(--hero); color: #fff; }
+  .tile.hero .lb, .tile.hero .d { color: #A8C1DA; }
+  .tile.hero .v { font-size: 2.6rem; }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 14px; }
+  @media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid2 { grid-template-columns: minmax(0, 1fr); } }
+
+  /* column chart */
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: 220px; overflow: visible; }
+  .chart .ax { fill: var(--muted); font: 11px var(--body); font-variant-numeric: tabular-nums; }
+  .chart .grid { stroke: var(--line); stroke-width: 1; }
+  .chart .col { fill: var(--mark); pointer-events: none; }
+  .chart .hit { fill: transparent; cursor: default; }
+  .chart .hit:hover + .col, .chart .col.on { opacity: .82; }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--card); border-radius: 10px; padding: 8px 10px; font-size: .8rem; line-height: 1.4; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); opacity: 0; transition: opacity .12s; z-index: 3; }
+  .tip.show { opacity: 1; }
+  .tip b { font-weight: 600; }
+
+  /* bar lists */
+  .bars { list-style: none; margin: 0; padding: 0; }
+  .bars li { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 4px 12px; align-items: center; padding: 6px 0; }
+  .bars .nm { font-size: .88rem; overflow-wrap: anywhere; }
+  .bars .nm small { display: block; color: var(--muted); font-size: .74rem; }
+  .bars .tr { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .bars .b { height: 16px; min-width: 3px; background: var(--mark); border-radius: 0 4px 4px 0; flex: none; }
+  .bars .val { color: var(--soft); font-size: .82rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  @media (max-width: 480px) { .bars li { grid-template-columns: minmax(0, 1fr); } }
+
+  table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--soft); font-weight: 500; }
+  .link { border: 0; background: none; color: var(--blue); font: 500 .86rem var(--body); padding: 6px 0; cursor: pointer; }
+
+  .gate { max-width: 420px; margin: 40px auto; }
+  .gate label { display: block; color: var(--soft); font-size: .88rem; margin: 10px 0 6px; }
+  .gate input { width: 100%; font: 16px var(--body); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--sunk); color: var(--ink); }
+  .btn { display: block; width: 100%; margin-top: 12px; border: 0; background: var(--ink); color: var(--card); font: 600 1rem var(--head); padding: 12px; border-radius: 999px; cursor: pointer; }
+  .msg { border-radius: 14px; padding: 10px 14px; font-size: .9rem; margin: 12px 0 0; }
+  .msg.err { background: var(--red-bg); color: var(--red); }
+  .msg.info { background: var(--blue-bg); color: var(--ink); }
+  .empty { color: var(--soft); text-align: center; padding: 28px 8px; }
+  .demo { background: var(--blue-bg); color: var(--ink); border-radius: 14px; padding: 8px 14px; font-size: .88rem; margin-top: 10px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1 class="brand"><svg viewBox="100 250 1720 215" role="img" aria-label="KRYVOS"><path fill="currentColor" fill-rule="evenodd" d="M 207.7 259.3 L 107.1 415.6 L 160.3 415.6 L 262.6 259.3 Z M 381.2 259.3 L 229.8 340.7 L 310.8 415.6 L 424.2 459.9 L 298.4 333.7 L 437 259.3 Z M 599.1 362.4 C 609.2 361.9 631 359.2 651.8 343.8 C 657.8 339.4 678.3 323.9 684.6 297.8 C 686.1 291.6 687.1 286.8 685.5 281.4 C 681 267.2 660.6 258.3 633.6 257.9 L 487.1 259.3 L 469.8 267.7 L 460.5 286.3 L 633.2 287.4 L 633.2 325.7 L 497.3 325.7 L 601.3 417.8 L 661.5 417.8 L 599.1 362.4 M 723.1 259.3 L 794.8 341.2 L 765.2 417.8 L 814.3 417.8 L 853.3 320.8 L 960.4 259.3 L 916.6 259.3 L 838.7 303.5 L 793.5 257.9 Z M 983.5 257.9 L 1054.3 417.8 L 1083.1 417.8 L 1258 260.1 L 1197.8 257.9 L 1087.1 374.4 L 1039.7 257.9 Z M 1289 257.9 L 1208.9 417.8 L 1453.7 417.8 L 1527.7 257.9 Z M 1316.5 289.8 L 1271.3 384.6 L 1418.3 384.6 L 1464.8 289.8 Z M 1812.9 257.9 L 1567.5 257.9 L 1527.7 353.6 L 1707.9 355.8 L 1692.4 384.6 L 1542.7 384.6 L 1489.6 417.8 L 1693.3 417.8 L 1738 396.5 L 1772.6 320.8 L 1592.3 317.3 L 1606.5 289.8 L 1760.2 289.8 Z"/></svg><span>Stats</span></h1>
+    <div class="tools" id="tools" hidden>
+      <div class="seg" id="range" role="group" aria-label="ช่วงเวลา">
+        <button type="button" data-d="7">7 วัน</button>
+        <button type="button" data-d="14">14 วัน</button>
+        <button type="button" data-d="30">30 วัน</button>
+      </div>
+      <button type="button" class="ghost" id="reload">รีเฟรช</button>
+    </div>
+  </header>
+
+  <section class="card gate" id="gate" hidden>
+    <h2>หลังบ้าน KRYVOS</h2>
+    <p class="hint">ใส่รหัสที่ตั้งไว้ตอนสั่ง <code>wrangler secret put STATS_KEY</code> รหัสจะจำไว้ในเครื่องนี้เครื่องเดียว</p>
+    <form id="gate-form">
+      <label for="key">รหัสดูสถิติ</label>
+      <input id="key" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">เปิดดูสถิติ</button>
+    </form>
+    <div id="gate-msg"></div>
+  </section>
+
+  <div id="dash" hidden>
+    <p class="sub" id="sub"></p>
+    <div id="demo-note"></div>
+    <div class="tiles" id="tiles"></div>
+
+    <section class="card">
+      <h2>เครื่องที่เปิดแอปแต่ละวัน</h2>
+      <p class="hint">นับมือถือ 1 เครื่องต่อวัน ไม่ว่าจะเปิดกี่รอบ แตะแท่งเพื่อดูรายละเอียด</p>
+      <div class="chart" id="daily"></div>
+      <button type="button" class="link" id="daily-tbl-btn" aria-expanded="false">ดูเป็นตาราง</button>
+      <div id="daily-tbl" hidden></div>
+    </section>
+
+    <section class="card">
+      <h2>ฟีเจอร์ที่ถูกใช้</h2>
+      <p class="hint">จำนวนครั้งที่กดใช้ และจำนวนเครื่องที่ใช้ฟีเจอร์นั้น ในช่วงที่เลือก</p>
+      <ul class="bars" id="features"></ul>
+    </section>
+
+    <div class="grid2">
+      <section class="card">
+        <h2>แท็บที่เปิดดู</h2>
+        <p class="hint">จำนวนครั้งที่กดเข้าแต่ละแท็บ</p>
+        <ul class="bars" id="tabs"></ul>
+      </section>
+      <section class="card">
+        <h2>กลับมาใช้ซ้ำ</h2>
+        <p class="hint">แต่ละเครื่องเปิดแอปกี่วันในช่วงที่เลือก</p>
+        <ul class="bars" id="days"></ul>
+      </section>
+      <section class="card">
+        <h2>มือถือที่ใช้</h2>
+        <p class="hint">จำนวนเครื่อง แยกตามระบบ</p>
+        <ul class="bars" id="plat"></ul>
+      </section>
+      <section class="card">
+        <h2>ภาษาที่ใช้</h2>
+        <p class="hint">จำนวนเครื่อง แยกตามภาษาในแอป</p>
+        <ul class="bars" id="lang"></ul>
+      </section>
+    </div>
+
+    <p class="sub" style="margin-top:18px">แอปส่งแค่ชื่อฟีเจอร์ที่ถูกกด รหัสสุ่มของเครื่อง ภาษา และชนิดมือถือ ไม่มีชื่อ ไม่มี IP ไม่มีข้อมูลการซ้อมหรืออาหาร · <button type="button" class="link" id="logout">ออกจากหน้านี้ (ลืมรหัส)</button></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var API = "https://train-today-ai.nnrwachr.workers.dev/stats";
+  var KEY_STORE = "kryvos-stats-key", RANGE_STORE = "kryvos-stats-days";
+  var NAMES = {
+    open: "เปิดแอป", install: "ติดตั้งเป็นแอป",
+    checkin: "เช็กอิน (ช่วงซ้อม แรง เมื่อย/เจ็บ)", set_done: "กด ✓ ทีละเซ็ต", workout_done: "บันทึกการซ้อม",
+    ex_skip: "ข้ามท่า", ex_add: "เพิ่มท่าเอง", howto_open: "เปิดวิธีเล่น", video_open: "เปิดวิดีโอ YouTube",
+    scan_machine: "สแกนเครื่องเล่น (AI)", food_photo: "ถ่ายรูปอาหาร (AI)", food_manual: "เพิ่มอาหารเอง", food_quick: "เพิ่มเมนูเร็ว",
+    run_log: "บันทึกวิ่ง", shoe_finder: "ใช้ตัวหารองเท้า", shoe_set: "เริ่มนับระยะรองเท้า",
+    weight_log: "บันทึกน้ำหนักตัว", goal_set: "ตั้งเป้าหมาย", ai_summary: "AI สรุปสัปดาห์", ai_explain: "AI อธิบายท่า",
+    lang_en: "เปลี่ยนเป็นภาษาอังกฤษ", lang_th: "เปลี่ยนเป็นภาษาไทย", backup: "สำรองข้อมูล", import: "นำเข้าข้อมูล",
+    sample: "ลองข้อมูลตัวอย่าง", onb_done: "ดูวิธีใช้จนจบ", onb_skip: "ข้ามวิธีใช้"
+  };
+  var TABS = { tab_today: "วันนี้", tab_gym: "เครื่อง", tab_run: "วิ่ง", tab_food: "นับแคล", tab_history: "ประวัติ", tab_settings: "อื่นๆ" };
+  var PLAT = { android: "Android", ios: "iPhone / iPad", desktop: "คอมพิวเตอร์", other: "อื่นๆ" };
+  var LANGS = { en: "English", th: "ไทย" };
+  var TH_MON = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function fmt(n) { n = +n || 0; return n >= 10000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, "") + "K" : n.toLocaleString("th-TH"); }
+  function dayLabel(d, short) { var p = d.split("-"); return +p[2] + " " + TH_MON[+p[1] - 1] + (short ? "" : " " + (+p[0] + 543 - 2500)); }
+  function addDays(d, n) { var t = new Date(d + "T00:00:00Z"); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); }
+
+  var demo = /[?&]demo\b/.test(location.search);
+  var days = +(get(RANGE_STORE) || 14); if ([7, 14, 30].indexOf(days) < 0) days = 14;
+
+  function showGate(msg, kind) {
+    $("dash").hidden = true; $("tools").hidden = true; $("gate").hidden = false;
+    $("gate-msg").innerHTML = msg ? '<p class="msg ' + (kind || "err") + '">' + msg + "</p>" : "";
+    $("key").focus();
+  }
+
+  function load() {
+    var key = get(KEY_STORE);
+    if (!demo && !key) { showGate(""); return; }
+    $("reload").disabled = true; $("reload").textContent = "กำลังโหลด…";
+    var p = demo ? Promise.resolve(demoData(days)) : fetch(API + "?days=" + days, { headers: { "X-Stats-Key": key }, cache: "no-store" }).then(function (r) {
+      if (r.status === 401) { set(KEY_STORE, null); throw { gate: "รหัสไม่ถูก ลองใหม่อีกครั้ง" }; }
+      if (r.status === 503) throw { gate: "ตัวกลางยังไม่ได้ตั้งค่าฐานข้อมูลหรือรหัส (D1 / STATS_KEY) ทำตามขั้นตอนใน README ก่อน", kind: "info" };
+      if (!r.ok) throw { msg: "โหลดไม่สำเร็จ (" + r.status + ") ลองกดรีเฟรช" };
+      return r.json();
+    });
+    p.then(render).catch(function (e) {
+      if (e && e.gate) { showGate(e.gate, e.kind); return; }
+      $("gate").hidden = true; $("dash").hidden = false; $("tools").hidden = false;
+      $("sub").innerHTML = '<span class="msg err" style="display:inline-block">' + esc((e && e.msg) || "ต่อเน็ตไม่ได้ ลองกดรีเฟรช") + "</span>";
+    }).then(function () { $("reload").disabled = false; $("reload").textContent = "รีเฟรช"; });
+  }
+
+  function render(d) {
+    $("gate").hidden = true; $("dash").hidden = false; $("tools").hidden = false;
+    Array.prototype.forEach.call($("range").children, function (b) { b.setAttribute("aria-pressed", +b.dataset.d === days ? "true" : "false"); });
+    $("demo-note").innerHTML = demo ? '<div class="demo">นี่คือข้อมูลตัวอย่าง (โหมด demo) ไม่ใช่ตัวเลขจริง</div>' : "";
+    $("sub").textContent = dayLabel(d.from) + " – " + dayLabel(d.today) + " · อัปเดต " + new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+
+    // fill missing days so the chart shows quiet days as zero
+    var byDay = {}; d.daily.forEach(function (r) { byDay[r.day] = r; });
+    var newBy = {}; (d.newDevices || []).forEach(function (r) { newBy[r.day] = r.devices; });
+    var series = [];
+    for (var i = 0; i < d.days; i++) {
+      var day = addDays(d.from, i), r = byDay[day] || {};
+      series.push({ day: day, devices: r.devices || 0, opens: r.opens || 0, events: r.events || 0, fresh: newBy[day] || 0 });
+    }
+    var today = series[series.length - 1];
+    var featTotal = d.features.filter(function (f) { return NAMES[f.ev] && f.ev !== "open"; }).reduce(function (s, f) { return s + f.n; }, 0);
+    var instPct = d.devices ? Math.round(d.installed / d.devices * 100) : 0;
+    $("tiles").innerHTML =
+      tile("hero", "เครื่องที่ใช้ใน " + d.days + " วัน", fmt(d.devices), d.devices ? "มือถือที่เปิดแอปอย่างน้อย 1 ครั้ง" : "ยังไม่มีใครเปิดแอป") +
+      tile("", "เครื่องที่เปิดวันนี้", fmt(today.devices), today.fresh ? "เครื่องใหม่ " + today.fresh + " เครื่อง" : "ไม่มีเครื่องใหม่วันนี้") +
+      tile("", "ติดตั้งเป็นแอป", d.devices ? instPct + "%" : "–", d.installed + " จาก " + d.devices + " เครื่อง") +
+      tile("", "การใช้ฟีเจอร์", fmt(featTotal), "ทั้งหมดตั้งแต่ " + (d.allTime.first ? dayLabel(d.allTime.first) : "–") + ": " + fmt(d.allTime.devices) + " เครื่อง");
+
+    columns($("daily"), series);
+    $("daily-tbl").innerHTML = "<table><thead><tr><th>วันที่</th><th>เครื่อง</th><th>เครื่องใหม่</th><th>เปิดแอป</th><th>กดทั้งหมด</th></tr></thead><tbody>" +
+      series.slice().reverse().map(function (s) { return "<tr><td>" + dayLabel(s.day) + "</td><td>" + s.devices + "</td><td>" + s.fresh + "</td><td>" + s.opens + "</td><td>" + s.events + "</td></tr>"; }).join("") + "</tbody></table>";
+
+    var feats = d.features.filter(function (f) { return NAMES[f.ev] && f.ev !== "open"; });
+    bars($("features"), feats.map(function (f) { return { name: NAMES[f.ev], code: f.ev, v: f.n, label: fmt(f.n) + " ครั้ง · " + f.devices + " เครื่อง" }; }), "ยังไม่มีใครใช้ฟีเจอร์ในช่วงนี้");
+    var tabs = d.features.filter(function (f) { return TABS[f.ev]; });
+    bars($("tabs"), tabs.map(function (f) { return { name: TABS[f.ev], v: f.n, label: fmt(f.n) + " ครั้ง · " + f.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล");
+    bars($("days"), (d.activeDays || []).map(function (r) { return { name: r.days === 1 ? "เปิด 1 วัน" : "เปิด " + r.days + " วัน", v: r.devices, label: r.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล", true);
+    bars($("plat"), d.platforms.map(function (r) { return { name: PLAT[r.k] || "อื่นๆ", v: r.devices, label: r.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล");
+    bars($("lang"), d.langs.map(function (r) { return { name: LANGS[r.k] || "ไม่ทราบ", v: r.devices, label: r.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล");
+  }
+
+  function tile(cls, lb, v, sub) { return '<div class="tile ' + cls + '"><div class="lb">' + esc(lb) + '</div><div class="v">' + esc(v) + '</div><div class="d">' + esc(sub) + "</div></div>"; }
+
+  function bars(el, rows, empty, keepOrder) {
+    if (!rows.length) { el.innerHTML = '<li class="empty" style="display:block">' + esc(empty) + "</li>"; return; }
+    if (!keepOrder) rows = rows.slice().sort(function (a, b) { return b.v - a.v; });
+    var max = Math.max.apply(null, rows.map(function (r) { return r.v; })) || 1;
+    el.innerHTML = rows.map(function (r) {
+      var w = Math.max(1, Math.round(r.v / max * 100));
+      return '<li><span class="nm">' + esc(r.name) + (r.code ? "<small>" + esc(r.code) + "</small>" : "") + '</span><span class="tr"><span class="b" style="width:calc((100% - 9rem) * ' + (w / 100) + ')"></span><span class="val">' + esc(r.label) + "</span></span></li>";
+    }).join("");
+  }
+
+  // Column chart: one series (devices per day), 1px grid, columns <= 24px with a 4px rounded top.
+  function columns(el, series) {
+    var W = Math.max(280, el.clientWidth || 600), H = 220, L = 34, R = 6, T = 10, B = 26;
+    var max = Math.max(1, Math.max.apply(null, series.map(function (s) { return s.devices; })));
+    var step = max <= 4 ? 1 : max <= 10 ? 2 : max <= 25 ? 5 : max <= 50 ? 10 : Math.ceil(max / 5 / 10) * 10;
+    var top = Math.ceil(max / step) * step;
+    var n = series.length, band = (W - L - R) / n, bw = Math.min(24, Math.max(4, band - 2));
+    var y = function (v) { return T + (H - T - B) * (1 - v / top); };
+    var svg = '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="จำนวนเครื่องที่เปิดแอปแต่ละวัน">';
+    for (var g = 0; g <= top; g += step) svg += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '"/><text class="ax" x="' + (L - 8) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + fmt(g) + "</text>";
+    var every = Math.max(1, Math.ceil(46 / band)); // about one date label per 46px so they never touch
+    series.forEach(function (s, i) {
+      var cx = L + band * i + band / 2, x = cx - bw / 2, y0 = y(0), y1 = y(s.devices), h = y0 - y1, r = Math.min(4, h, bw / 2);
+      svg += '<rect class="hit" data-i="' + i + '" x="' + (L + band * i) + '" y="' + T + '" width="' + band + '" height="' + (H - T - B) + '"/>';
+      if (s.devices > 0) svg += '<path class="col" data-i="' + i + '" d="M' + x + " " + y0 + "V" + (y1 + r) + "Q" + x + " " + y1 + " " + (x + r) + " " + y1 + "H" + (x + bw - r) + "Q" + (x + bw) + " " + y1 + " " + (x + bw) + " " + (y1 + r) + "V" + y0 + 'Z"/>';
+      if ((n - 1 - i) % every === 0) svg += '<text class="ax" x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle">' + dayLabel(s.day, true) + "</text>";
+    });
+    svg += "</svg>";
+    el.innerHTML = svg + '<div class="tip" role="status" aria-live="polite"></div>';
+    var tip = el.querySelector(".tip"), on = null;
+    function show(i) {
+      var s = series[i], rect = el.getBoundingClientRect(), sx = rect.width / W;
+      if (on) on.classList.remove("on");
+      on = el.querySelector('.col[data-i="' + i + '"]'); if (on) on.classList.add("on");
+      tip.innerHTML = "<b>" + dayLabel(s.day) + "</b><br>" + s.devices + " เครื่อง" + (s.fresh ? " (ใหม่ " + s.fresh + ")" : "") + "<br>เปิดแอป " + s.opens + " ครั้ง · กดทั้งหมด " + s.events;
+      var cx = (L + band * i + band / 2) * sx;
+      tip.style.left = Math.min(rect.width - 90, Math.max(90, cx)) + "px";
+      tip.style.top = (y(s.devices) * (220 / H)) + "px";
+      tip.classList.add("show");
+    }
+    function hide() { tip.classList.remove("show"); if (on) on.classList.remove("on"); on = null; }
+    el.querySelectorAll(".hit").forEach(function (h) {
+      h.addEventListener("mouseenter", function () { show(+h.dataset.i); });
+      h.addEventListener("click", function () { show(+h.dataset.i); });
+    });
+    el.addEventListener("mouseleave", hide);
+  }
+
+  // Made-up numbers for previewing the page (open stats.html?demo)
+  function demoData(n) {
+    var today = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10), from = addDays(today, -(n - 1)), daily = [], nd = [], seed = 7;
+    function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    for (var i = 0; i < n; i++) { var dv = Math.round(2 + i * 0.7 + rnd() * 4); daily.push({ day: addDays(from, i), devices: dv, opens: dv * 3, events: dv * 22 }); if (rnd() > .4) nd.push({ day: addDays(from, i), devices: 1 + Math.round(rnd() * 2) }); }
+    var f = [["set_done", 412, 9], ["tab_today", 260, 14], ["run_log", 96, 10], ["checkin", 88, 12], ["food_quick", 75, 8], ["tab_run", 70, 11], ["workout_done", 41, 9], ["tab_food", 40, 9], ["howto_open", 37, 7], ["food_photo", 31, 7], ["video_open", 22, 6], ["scan_machine", 18, 6], ["shoe_finder", 15, 8], ["weight_log", 14, 5], ["tab_gym", 30, 7], ["tab_history", 21, 6], ["tab_settings", 12, 6], ["ai_summary", 9, 4], ["ex_skip", 8, 4], ["lang_en", 2, 2], ["install", 6, 6]];
+    return { days: n, from: from, today: today, daily: daily, newDevices: nd,
+      features: f.map(function (x) { return { ev: x[0], n: x[1], devices: x[2] }; }),
+      platforms: [{ k: "android", devices: 9 }, { k: "ios", devices: 5 }], langs: [{ k: "th", devices: 12 }, { k: "en", devices: 2 }],
+      devices: 14, installed: 8, activeDays: [{ days: 1, devices: 3 }, { days: 2, devices: 4 }, { days: 3, devices: 3 }, { days: 5, devices: 2 }, { days: 7, devices: 2 }],
+      allTime: { devices: 14, events: 1400, first: from } };
+  }
+
+  $("gate-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var k = $("key").value.trim(); if (!k) return;
+    set(KEY_STORE, k); $("key").value = ""; load();
+  });
+  $("range").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    days = +b.dataset.d; set(RANGE_STORE, String(days)); load();
+  });
+  $("reload").addEventListener("click", load);
+  $("logout").addEventListener("click", function () { set(KEY_STORE, null); showGate("ลืมรหัสในเครื่องนี้แล้ว", "info"); });
+  $("daily-tbl-btn").addEventListener("click", function () {
+    var open = $("daily-tbl").hidden; $("daily-tbl").hidden = !open;
+    this.setAttribute("aria-expanded", open ? "true" : "false"); this.textContent = open ? "ซ่อนตาราง" : "ดูเป็นตาราง";
+  });
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { if (!$("dash").hidden) load(); }, 300); });
+  load();
+})();
+</script>
+</body>
+</html>
