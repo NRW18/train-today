@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ---------- design tokens: navy and blue come from the KRYVOS logo; green ready/done, yellow sore, red pain ---------- */
   :root {
@@ -29,6 +29,10 @@
     --violet: #6342C9; --violet-bg: #EDE7FB;
     --shadow: 0 1px 2px rgba(18,22,31,.05), 0 8px 24px rgba(18,22,31,.06);
     --nav: rgba(255,255,255,.82);
+    --home-top: #A9D3F8; --home-mid: #D7E9FA; --home-glass: rgba(255,255,255,.58); --home-glass-line: rgba(255,255,255,.76);
+    --set-pending: #DCE5EF; --set-border: #BCCCDD;
+    --home-pill: rgba(255,255,255,.4); --home-shadow: 0 10px 36px rgba(11,37,69,.04);
+    --quick-bg: #071A30; --quick-ink: #FFFFFF; --recovery-start: #DBE9F9; --recovery-end: #63BCAA;
     --head: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
     --body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
     color-scheme: light;
@@ -44,6 +48,10 @@
       --violet: #A994F2; --violet-bg: #29224A;
       --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
       --nav: rgba(22,27,35,.82);
+      --home-top: #102E50; --home-mid: #102137; --home-glass: rgba(29,44,62,.72); --home-glass-line: rgba(168,193,218,.18);
+      --set-pending: #293C50; --set-border: #49637D;
+      --home-pill: rgba(168,193,218,.12); --home-shadow: 0 10px 36px rgba(0,0,0,.16);
+      --quick-bg: #071A30; --quick-ink: #FFFFFF; --recovery-start: #253A50; --recovery-end: #4CC283;
       color-scheme: dark;
     }
   }
@@ -243,8 +251,8 @@
   /* hero: one bar per set, grouped by exercise, fills as sets are ticked */
   .meter { display: flex; gap: 8px; margin-top: 18px; height: 20px; align-items: stretch; }
   .meter .mg { display: flex; gap: 3px; flex: var(--n) 1 0; min-width: 0; }
-  .meter i { flex: 1; border-radius: 4px; background: rgba(255,255,255,.14); transition: background .25s; }
-  .meter i.on { background: #4CC283; }
+  .meter i { flex: 1; border-radius: 4px; background: var(--set-pending); box-shadow: inset 0 0 0 1px var(--set-border); transition: background .25s; }
+  .meter i.on { background: var(--green); box-shadow: none; }
   .meter-t { display: flex; justify-content: space-between; margin-top: 8px; font-size: .86rem; color: var(--hero-soft); }
   .meter-t b { color: var(--hero-ink); font-family: var(--head); }
   @media (prefers-reduced-motion: reduce) { .meter i, .exh .num { transition: none; } }
@@ -409,10 +417,12 @@
 
   /* tab bar: white, rounded, icon over the name; the open tab is a raised white card with a blue border */
   nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; padding: 0 12px calc(10px + env(safe-area-inset-bottom)); z-index: 6; pointer-events: none; }
-  nav.tabs .in { pointer-events: auto; max-width: 536px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 6px; border-radius: 24px; background: var(--card); box-shadow: 0 8px 28px rgba(18,22,31,.16), inset 0 0 0 1px var(--line); }
+  nav.tabs .in { pointer-events: auto; max-width: 536px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 52px; gap: 2px; padding: 8px 6px; border-radius: 28px; background: var(--card); box-shadow: var(--shadow); align-items: center; }
   nav.tabs button { border: 0; background: transparent; border-radius: 18px; padding: 7px 0 6px; font-family: var(--head); font-weight: 700; font-size: 0.76rem; line-height: 1.25; color: var(--ink); cursor: pointer; display: grid; justify-items: center; align-content: center; gap: 3px; min-width: 0; white-space: nowrap; transition: transform .15s, box-shadow .15s, color .15s; }
   nav.tabs button svg { width: 24px; height: 24px; }
-  nav.tabs button[aria-current="page"] { color: var(--blue); background: var(--card); box-shadow: 0 0 0 3px var(--blue), 0 8px 18px rgba(18,22,31,.18); transform: translateY(-10px); }
+  nav.tabs button[aria-current="page"] { color: var(--blue); }
+  nav.tabs button svg { padding: 4px; width: 30px; height: 30px; border-radius: 10px; }
+  nav.tabs button[aria-current="page"] svg { background: var(--blue); color: var(--card); }
   @media (max-width: 370px) { nav.tabs .in { padding: 6px 4px; } nav.tabs button { font-size: .7rem; } }
   @media (prefers-reduced-motion: reduce) { nav.tabs button { transition: none; } }
 
@@ -513,9 +523,59 @@
     main:not([hidden]), .onb .sheet { animation: none; }
     .toast, .seg button, .chip, .tick, .rest .barl i, .onb .dots i { transition: none; }
   }
+  /* Today: a soft blue wash, quiet cards, and the existing workout controls. */
+  body.home { background: linear-gradient(180deg, var(--home-top), var(--home-mid) 220px, var(--bg) 550px) no-repeat, var(--bg); }
+  .home-hero { padding: 4px 0 22px; text-align: center; }
+  .home-week { margin: 0 0 22px; gap: 3px; min-height: 103px; align-items: start; }
+  .home-week .wd:nth-child(1), .home-week .wd:nth-child(7) { padding-top: 29px; }
+  .home-week .wd:nth-child(2), .home-week .wd:nth-child(6) { padding-top: 16px; }
+  .home-week .wd:nth-child(3), .home-week .wd:nth-child(5) { padding-top: 7px; }
+  .home-week button { width: 100%; border: 0; background: none; padding: 4px 0; cursor: pointer; }
+  .home-week button:disabled { opacity: 1; cursor: default; }
+  .home-week .dot { width: 36px; background: var(--home-pill); box-shadow: none; color: var(--ink); }
+  .home-week .dot svg { width: 18px; height: 18px; }
+  .home-week .now .dot { width: 46px; background: var(--blue); color: var(--card); font-size: 1.25rem; }
+  .home-week .wl { color: var(--soft); font-size: .7rem; border: 0; }
+  .home-mode { width: min(280px, 100%); margin: 0 auto; background: var(--home-pill); border: 1px solid var(--home-glass-line); }
+  .home-mode button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: var(--home-shadow); }
+  .home-number { font-family: var(--body); font-weight: 300; font-size: clamp(3.7rem, 16vw, 5.5rem); line-height: 1.1; letter-spacing: -.055em; margin: 24px 0 4px; }
+  .home-label { color: var(--soft); font-size: .85rem; margin: 0; }
+  .home-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
+  .home-metric { background: var(--card); border: 1px solid var(--home-glass-line); border-radius: 22px; padding: 16px 5px; box-shadow: var(--home-shadow); }
+  @supports ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) { .home-metric { background: var(--home-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); } }
+  .home-metric strong { display: block; font-size: clamp(1.7rem, 7vw, 2.2rem); font-weight: 300; line-height: 1.3; }
+  .home-metric span { color: var(--soft); font-size: .72rem; overflow-wrap: anywhere; }
+  .today-heading { display: flex; align-items: center; justify-content: space-between; margin: 8px 4px 16px; }
+  .today-heading h2 { font-size: 1.6rem; margin: 0; }
+  .today-sections { margin-bottom: 20px; background: var(--card); padding: 5px; }
+  .today-sections button[aria-pressed="true"] { background: var(--blue-bg); color: var(--blue); }
+  #v-today .card { border-radius: 30px; box-shadow: var(--home-shadow); padding: 24px 20px; margin: 20px 0; }
+  #v-today .plan { overflow: visible; }
+  #v-today .plan .hero { background: none; color: var(--ink); margin: 0 0 16px; padding: 0; }
+  #v-today .meter-t, #v-today .meter-t b { color: var(--soft); }
+  #v-today .ex { padding-top: 24px; }
+  .recovery-row { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .recovery-row:last-child { border: 0; }
+  .recovery-label { display: flex; justify-content: space-between; gap: 10px; align-items: center; font-size: .9rem; }
+  .recovery-status { display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--soft); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .recovery-status.recovering .status-dot { background: var(--blue); }
+  .recovery-status.sore .status-dot { background: var(--yellow); }
+  .recovery-status.pain .status-dot { background: var(--red); }
+  .recovery-track { position: relative; margin: 14px 5px 8px; height: 4px; background: linear-gradient(90deg, var(--recovery-start), var(--recovery-end)); border-radius: 99px; }
+  .recovery-track i { position: absolute; left: calc(var(--pct) * 1%); top: 50%; width: 10px; height: 10px; background: var(--ink); border: 2px solid var(--card); border-radius: 50%; transform: translate(-50%, -50%); }
+  .recovery-pct { color: var(--soft); font-size: .72rem; }
+  nav.tabs .quick-plus { width: 48px; height: 48px; justify-self: end; border: 1px solid var(--home-glass-line); border-radius: 50%; background: var(--quick-bg); color: var(--quick-ink); box-shadow: var(--shadow); font-size: 2rem; font-weight: 300; padding: 0; }
+  .app { padding-bottom: calc(148px + env(safe-area-inset-bottom)); }
+  body.resting .app { padding-bottom: calc(224px + env(safe-area-inset-bottom)); }
+  html { scroll-padding-bottom: calc(148px + env(safe-area-inset-bottom)); }
+  @media (max-width: 370px) { nav.tabs button { font-size: .58rem; white-space: nowrap; } }
+  .quick-actions { display: grid; gap: 12px; margin: 18px 0; }
+  .quick-actions button { margin: 0; text-align: left; }
+  .day-history { padding: 16px 0; border-top: 1px solid var(--line); }
 </style>
 </head>
-<body>
+<body class="home">
 <div class="app">
   <header class="top">
     <h1 class="brand"><svg class="wordmark" viewBox="100 250 1720 215" role="img" aria-label="KRYVOS"><path fill="currentColor" fill-rule="evenodd" d="M 207.7 259.3 L 107.1 415.6 L 160.3 415.6 L 262.6 259.3 Z M 381.2 259.3 L 229.8 340.7 L 310.8 415.6 L 424.2 459.9 L 298.4 333.7 L 437 259.3 Z M 599.1 362.4 C 609.2 361.9 631 359.2 651.8 343.8 C 657.8 339.4 678.3 323.9 684.6 297.8 C 686.1 291.6 687.1 286.8 685.5 281.4 C 681 267.2 660.6 258.3 633.6 257.9 L 487.1 259.3 L 469.8 267.7 L 460.5 286.3 L 633.2 287.4 L 633.2 325.7 L 497.3 325.7 L 601.3 417.8 L 661.5 417.8 L 599.1 362.4 M 723.1 259.3 L 794.8 341.2 L 765.2 417.8 L 814.3 417.8 L 853.3 320.8 L 960.4 259.3 L 916.6 259.3 L 838.7 303.5 L 793.5 257.9 Z M 983.5 257.9 L 1054.3 417.8 L 1083.1 417.8 L 1258 260.1 L 1197.8 257.9 L 1087.1 374.4 L 1039.7 257.9 Z M 1289 257.9 L 1208.9 417.8 L 1453.7 417.8 L 1527.7 257.9 Z M 1316.5 289.8 L 1271.3 384.6 L 1418.3 384.6 L 1464.8 289.8 Z M 1812.9 257.9 L 1567.5 257.9 L 1527.7 353.6 L 1707.9 355.8 L 1692.4 384.6 L 1542.7 384.6 L 1489.6 417.8 L 1693.3 417.8 L 1738 396.5 L 1772.6 320.8 L 1592.3 317.3 L 1606.5 289.8 L 1760.2 289.8 Z"/></svg><span class="edition">Essential</span></h1>
@@ -524,13 +584,23 @@
 
   <!-- TODAY -->
   <main id="v-today">
-    <section class="act" aria-labelledby="act-h">
-      <div class="act-top">
-        <div><h2 class="act-h" id="act-h">Your Activity</h2><p class="act-sub">สถิติของคุณ</p></div>
-        <button type="button" class="pill-btn" id="act-more">ดูเพิ่มเติม</button>
+    <section class="home-hero" aria-label="ภาพรวมวันนี้">
+      <ol class="week home-week" id="week-strip" aria-label="เจ็ดวันรอบวันนี้"></ol>
+      <div class="seg home-mode" id="home-mode" role="group" aria-label="ภาพรวมวันนี้">
+        <button type="button" data-v="training" aria-pressed="true">การฝึก</button>
+        <button type="button" data-v="nutrition" aria-pressed="false">โภชนาการ</button>
       </div>
-      <ol class="week" id="week-strip" aria-label="สัปดาห์นี้ วันจันทร์ถึงวันอาทิตย์"></ol>
+      <div class="home-number" id="home-value" aria-live="polite"></div>
+      <p class="home-label" id="home-label"></p>
+      <div class="home-metrics" id="home-metrics"></div>
     </section>
+    <div class="today-heading"><h2>วันนี้</h2><button type="button" class="pill-btn" id="act-more">ดูเพิ่มเติม</button></div>
+    <div class="seg today-sections" id="today-sections" role="group" aria-label="ส่วนของวันนี้">
+      <button type="button" data-v="plan" aria-pressed="true" aria-controls="today-plan">แผน</button>
+      <button type="button" data-v="meals" aria-pressed="false" aria-controls="today-meals-panel">มื้ออาหาร</button>
+      <button type="button" data-v="recovery" aria-pressed="false" aria-controls="today-recovery-panel">การฟื้นตัว</button>
+    </div>
+    <div id="today-plan">
     <section class="card install-bar" id="install-bar" hidden>
       <img src="icon-192.png" alt="" width="48" height="48">
       <div class="ib-txt"><strong>ติดตั้งเป็นแอป</strong><span id="ib-sub">เปิดจากหน้าจอได้ทันที ใช้ได้แม้ไม่มีเน็ต</span></div>
@@ -563,7 +633,16 @@
     </section>
 
     <section class="card plan" id="plan" aria-live="polite"></section>
-
+    </div>
+    <section class="card" id="today-meals-panel" hidden aria-label="มื้ออาหารวันนี้">
+      <div id="today-meals"></div>
+      <button type="button" class="btn line" id="today-food-add">เพิ่มอาหาร</button>
+      <div class="quick" id="today-quick"></div>
+    </section>
+    <section class="card" id="today-recovery-panel" hidden aria-label="การฟื้นตัว">
+      <p class="hint">ค่าประมาณจากเวลาพัก 48 ชั่วโมงและอาการที่คุณระบุ ไม่ใช่การวัดการฟื้นตัวจริง</p>
+      <div id="today-recovery"></div>
+    </section>
   </main>
 
   <!-- RUN: log, weekly distance, shoe mileage, shoe finder -->
@@ -852,11 +931,12 @@
     <button type="button" data-tab="run">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/></svg>วิ่ง</button>
     <button type="button" data-tab="food">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8.5 12h7"/></svg>นับแคล</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8.5 12h7"/></svg><span id="nav-food-label">นับแคล</span></button>
     <button type="button" data-tab="history">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M7 20v-7M11 20V6M15 20V9M19 20v-4"/></svg>ประวัติ</button>
     <button type="button" data-tab="settings">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>อื่นๆ</button>
+    <button type="button" class="quick-plus" id="quick-plus" aria-label="เพิ่มบันทึก" aria-haspopup="dialog">+</button>
   </div>
 </nav>
 <div class="rest" id="rest" hidden>
@@ -897,6 +977,7 @@
   function setLang(l) { try { localStorage.setItem(LANG_KEY, l); } catch (e) {} location.reload(); }
   document.documentElement.lang = LANG;
   translateDom(document.body);
+  document.getElementById("nav-food-label").textContent = LANG === "en" ? t("เมนูอาหาร") : t("นับแคล");
 
 (function () {
   "use strict";
@@ -1383,35 +1464,127 @@
     return out;
   }
   var DAY_ICON = {
+    rest: '<path d="M20.5 13A9 9 0 0 1 11 3.5 9 9 0 1 0 20.5 13Z"/>',
     push: '<path d="M12 3v7M9 6l3-3 3 3M4 17h16M6.5 14v6M17.5 14v6M3.5 15.5v3M20.5 15.5v3"/>',
     pull: '<path d="M4 6h16M6.5 3v6M17.5 3v6M3.5 4.5v3M20.5 4.5v3M12 11v9M9 17l3 3 3-3"/>',
     legs: '<path d="M9.5 3v8.5L7 18v3h8.5l-.5-2.5-2.8-1.3L14 11V3"/>',
     run: '<circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>'
   };
   function weekStripHtml(now) {
-    return weekActivity(now).map(function (a) {
+    return todayWeekActivity(now).map(function (a) {
       var d = new Date(a.ts), kind = a.lift || (a.run ? "run" : ""), inner = "", what = [];
       if (a.lift) what.push(DAYS[a.lift].name);
       if (a.run) what.push(t("วิ่ง"));
       if (kind) inner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + DAY_ICON[kind] + "</svg>" + (a.lift && a.run ? '<i class="rd"></i>' : "");
-      else if (a.today) { kind = "ask"; inner = "?"; }
+      else if (!a.future && !a.today) { kind = "restday"; inner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' + DAY_ICON.rest + "</svg>"; }
+      else inner = d.getDate();
       var label = d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "short" }) + ": " +
         (what.length ? what.join(", ") : a.today ? t("วันนี้ยังไม่ได้ซ้อม") : a.future ? t("ยังไม่ถึง") : t("ไม่มีกิจกรรม"));
-      return '<li class="wd' + (a.today ? " now" : "") + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + '><span class="dot ' + kind + '" aria-hidden="true">' + inner +
-        '</span><span class="wl" aria-hidden="true">' + d.toLocaleDateString(LOCALE, { weekday: "narrow" }) + "</span></li>";
+      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="dot ' + kind + '" aria-hidden="true">' + inner +
+        '</span><span class="wl" aria-hidden="true">' + (a.today ? t("วันนี้") : d.toLocaleDateString(LOCALE, { weekday: "short" })) + "</span></button></li>";
     }).join("");
+  }
+
+  // Seven local calendar days around today; setDate also handles month/year and DST boundaries.
+  function todayWeekActivity(now) {
+    var center = new Date(now), out = [];
+    center.setHours(0, 0, 0, 0);
+    for (var i = -3; i <= 3; i++) {
+      var d = new Date(center); d.setDate(center.getDate() + i);
+      var ts = d.getTime(), logs = S.log.filter(function (s) { return sameDay(s.ts, ts); });
+      out.push({ ts: ts, lift: logs.length ? logs[logs.length - 1].day : null, run: S.runs.some(function (r) { return sameDay(r.ts, ts); }), today: i === 0, future: i > 0 });
+    }
+    return out;
+  }
+  var homeMode = "training", todaySection = "plan";
+  function todayTotals(now) {
+    var eaten = 0, protein = 0;
+    S.food.forEach(function (f) { if (sameDay(f.ts, now)) { eaten += f.kcal; protein += f.p; } });
+    var items = current && current.items || [], sets = items.reduce(function (sum, it) { return sum + it.sets; }, 0);
+    return { eaten: Math.round(eaten), protein: Math.round(protein), left: Math.max(0, Math.round(S.prefs.kcal - eaten)), proteinGoal: Math.round(proteinTarget()), exercises: items.length, sets: sets, minutes: sets ? Math.round(sets * (40 + S.prefs.rest) / 60) + 5 : 0 };
+  }
+  function recoveryRows(now) {
+    var trained = lastTrained();
+    return Object.keys(MUSCLES).map(function (muscle) {
+      var hours = trained[muscle] ? Math.max(0, (now - trained[muscle]) / 36e5) : RECOVER_H;
+      var pct = Math.min(100, Math.round(hours / RECOVER_H * 100)), body = bodyState("m", muscle);
+      var status = body === "pain" ? "pain" : body === "sore" ? "sore" : hours < RECOVER_H ? "recovering" : "ready";
+      return { muscle: muscle, pct: pct, status: status };
+    });
+  }
+  function renderTodayOverview() {
+    if (!current) return;
+    var totals = todayTotals(Date.now()), nutrition = homeMode === "nutrition";
+    $("home-value").textContent = nutrition ? totals.left.toLocaleString(LOCALE) : current.rest || current.restAdvice ? t("พัก") : DAYS[current.day].name;
+    $("home-label").textContent = nutrition ? t("kcal ที่เหลือ") : t("โปรแกรมวันนี้");
+    var metrics = nutrition ? [[totals.eaten, t("kcal ที่กิน")], [totals.protein, t("โปรตีน (g)")], [totals.proteinGoal, t("เป้าโปรตีน (g)")]] : [[totals.exercises, t("ท่า")], [totals.minutes ? "≈" + totals.minutes : "0", t("นาที")], [totals.sets, t("เซ็ต")]];
+    $("home-metrics").innerHTML = metrics.map(function (metric) { return '<div class="home-metric"><strong>' + esc(metric[0]) + "</strong><span>" + esc(metric[1]) + "</span></div>"; }).join("");
+    var labels = { ready: t("พร้อม"), recovering: t("กำลังฟื้น"), sore: t("เมื่อย"), pain: t("เจ็บ") };
+    $("today-recovery").innerHTML = recoveryRows(Date.now()).map(function (row) {
+      return '<div class="recovery-row"><div class="recovery-label"><span>' + esc(MUSCLES[row.muscle]) + '</span><span class="recovery-status ' + row.status + '"><i class="status-dot" aria-hidden="true"></i>' + esc(labels[row.status]) + '</span></div><div class="recovery-track" style="--pct:' + row.pct + '" aria-hidden="true"><i></i></div><span class="recovery-pct">' + row.pct + "%</span></div>";
+    }).join("");
+    renderTodayMeals();
+  }
+  function renderTodayMeals() {
+    $("today-meals").innerHTML = mealsHtml();
+    $("today-quick").innerHTML = quickHtml("today-portion");
+  }
+  function setTodaySection(section) {
+    todaySection = section;
+    pressed("today-sections", section);
+    $("today-plan").hidden = section !== "plan";
+    $("today-meals-panel").hidden = section !== "meals";
+    $("today-recovery-panel").hidden = section !== "recovery";
+  }
+  function showDayActivity(ts, back) {
+    var logs = S.log.filter(function (s) { return sameDay(s.ts, ts); }), runs = S.runs.filter(function (r) { return sameDay(r.ts, ts); });
+    openSheet("", null, back);
+    var h = sheetHead(esc(fmtDate(ts)), false);
+    logs.forEach(function (session) {
+      h += '<section class="day-history"><h3>' + esc(DAYS[session.day].name) + " · " + esc(fmtTime(session.ts)) + "</h3><ul>" + session.entries.map(function (entry) {
+        var ex = EXBY[entry.ex];
+        return "<li>" + esc(ex ? ex.name : entry.ex) + " · " + entry.sets.length + " " + t("เซ็ต") + "</li>";
+      }).join("") + "</ul></section>";
+    });
+    runs.forEach(function (run) { h += '<section class="day-history"><h3>' + t("วิ่ง") + " · " + esc(fmtTime(run.ts)) + "</h3><p>" + run.km + " " + t("กม.") + " · " + run.min + " " + t("นาที") + "</p></section>"; });
+    if (!logs.length && !runs.length) h += '<p class="empty">' + t("ไม่มีกิจกรรม") + "</p>";
+    sheet.innerHTML = h;
+    sheet.onclick = function (ev) { if (ev.target.closest("[data-close]")) closeSheet(); };
+    sheet.focus(); track("today_day_open");
+  }
+  function quickAdd(action) {
+    var target = { run: "run", food: "food", scan: "gym", weight: "food" }[action];
+    if (!target) return;
+    document.querySelector('nav.tabs button[data-tab="' + target + '"]').click();
+    if (action === "scan") { $("scan-input").click(); return; }
+    if (action === "food") { $("manual").hidden = false; $("manual-toggle").setAttribute("aria-expanded", "true"); }
+    var input = $(action === "run" ? "run-km" : action === "weight" ? "bw-input" : "m-name");
+    input.scrollIntoView({ block: "center" }); input.focus();
+  }
+  function showQuickAdd() {
+    openSheet("", null, $("quick-plus"));
+    sheet.innerHTML = sheetHead(t("เพิ่มบันทึก"), false) + '<div class="quick-actions">' + [["run", t("บันทึกวิ่ง")], ["food", t("เพิ่มอาหาร")], ["scan", t("สแกนเครื่อง")], ["weight", t("บันทึกน้ำหนัก")]].map(function (action) {
+      return '<button type="button" class="btn line" data-quick-add="' + action[0] + '">' + esc(action[1]) + "</button>";
+    }).join("") + "</div>";
+    sheet.onclick = function (ev) {
+      if (ev.target.closest("[data-close]")) { closeSheet(); return; }
+      var b = ev.target.closest("[data-quick-add]");
+      if (b) { var action = b.dataset.quickAdd; closeSheet(true); quickAdd(action); }
+    };
+    sheet.focus(); track("quick_add_open");
   }
 
   function renderPlan() {
     $("week-strip").innerHTML = weekStripHtml(Date.now());
     current = plan();
+    renderTodayOverview();
     var el = $("plan"), h = "";
     var painKeys = Object.keys(S.body).filter(function (k) { return S.body[k] === "pain"; });
     var painAlert = painKeys.length ? t('<div class="alert red" style="margin-top:0;margin-bottom:12px"><strong>เจ็บ: ') + painKeys.map(function (k) { var p = k.split(":"); return (p[0] === "m" ? MUSCLES : JOINTS)[p[1]]; }).join(" ") + "</strong>" +
         t("ตัดทุกท่าที่โดนส่วนนี้ออกแล้ว ถ้าเจ็บแปลบ บวม ช้ำ หรือเจ็บที่ข้อต่อ ให้พักส่วนนั้น ประคบเย็นได้ ถ้าไม่ดีขึ้นใน 2–3 วัน เจ็บมากขึ้น หรือขยับไม่ได้ ควรพบแพทย์</div>") : "";
 
     if (current.rest) {
-      h += t('<div class="hero rest"><div class="eyebrow">โปรแกรมวันนี้</div><div class="day-name">พักฟื้น</div><div class="day-sub">วันนี้ให้ร่างกายซ่อมกล้าม</div></div>') + painAlert;
+      h += painAlert;
       var legsHurt = ["quads", "hamstrings", "calves"].some(function (m) { return bodyState("m", m) === "pain"; }) || bodyState("j", "knee") || bodyState("j", "ankle");
       h += '<ul class="rest-list">' +
         (legsHurt ? t("<li>ถ้าเดินแล้วไม่เจ็บ เดินเบา ๆ 15–20 นาที ถ้าเจ็บให้พักขา</li>") : t("<li>เดินหรือวิ่งเบา ๆ 20–30 นาที พูดได้ไม่หอบ</li>")) +
@@ -1424,12 +1597,7 @@
 
     var D = DAYS[current.day];
     current.items.forEach(prepDraft);
-    var totalSets = 0; current.items.forEach(function (it) { totalSets += it.sets; });
-    var mins = Math.round(totalSets * (40 + S.prefs.rest) / 60) + 5; // ~40 s per set + rest + warm-up
-    h += '<div class="hero' + (current.restAdvice ? " rest" : "") + t('"><div class="eyebrow">โปรแกรมวันนี้</div><div class="day-name">') + (current.restAdvice ? t("พักฟื้น +") : D.name) +
-      '</div><div class="day-sub">' + (current.restAdvice ? t("ท่าที่คุณเพิ่มเอง เล่นเบา ๆ") : D.th) + "</div>" +
-      (current.items.length ? '<div class="hero-stats"><span>' + current.items.length + t(" ท่า</span><span>≈ ") + mins + t(" นาที</span>") +
-        (S.energy === "tired" ? t("<span>โหมดเหนื่อย</span>") : "") + "</div>" + meterHtml() : "") + "</div>";
+    h += current.items.length ? '<div class="hero">' + meterHtml() + "</div>" : "";
     if (current.why.length) h += t('<details class="whyd"><summary>ทำไมวันนี้เป็น') + (current.restAdvice ? t("แบบนี้") : " " + D.name) + t('</summary><ul class="why" aria-label="เหตุผล">') +
       current.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></details>";
     h += painAlert;
@@ -2126,9 +2294,8 @@
     var kc = 0, pr = 0; today.forEach(function (f) { kc += f.kcal; pr += f.p; });
     $("meters").innerHTML = '<div class="rings">' + ring(t("แคลอรี่"), kc, S.prefs.kcal, "kcal", "var(--yellow-solid)", S.prefs.goal === "lose") + ring(t("โปรตีน"), pr, proteinTarget(), "g", "var(--blue)") + "</div>";
     $("quick").innerHTML = quickHtml();
-    $("meals").innerHTML = today.length ? today.slice().reverse().map(function (f) {
-      return '<div class="meal"><span class="t">' + fmtTime(f.ts) + "</span><span>" + esc(f.name) + '</span><span class="n">' + Math.round(f.kcal) + " kcal · " + Math.round(f.p) + 'g</span><button type="button" class="x" data-delfood="' + f.ts + t('" aria-label="ลบ ') + esc(f.name) + '">×</button></div>';
-    }).join("") : t('<p class="empty" style="padding:8px 0">ยังไม่ได้จดอาหารวันนี้</p>');
+    $("meals").innerHTML = mealsHtml();
+    renderTodayOverview();
     $("food-nokey").hidden = hasAI();
     $("food-label").style.display = hasAI() ? "" : "none";
 
@@ -2170,13 +2337,19 @@
     }
     return out;
   }
-  function quickHtml() {
+  function mealsHtml() {
+    var today = S.food.filter(function (f) { return sameDay(f.ts); });
+    return today.length ? today.slice().reverse().map(function (f) {
+      return '<div class="meal"><span class="t">' + fmtTime(f.ts) + "</span><span>" + esc(f.name) + '</span><span class="n">' + Math.round(f.kcal) + " kcal · " + Math.round(f.p) + 'g</span><button type="button" class="x" data-delfood="' + f.ts + t('" aria-label="ลบ ') + esc(f.name) + '">×</button></div>';
+    }).join("") : t('<p class="empty" style="padding:8px 0">ยังไม่ได้จดอาหารวันนี้</p>');
+  }
+  function quickHtml(portionId) {
     var rec = recentMeals(), recN = rec.map(function (x) { return x.n; });
     var common = FOODS.filter(function (x) { return recN.indexOf(x.n) < 0; });
     function chips(list, src) {
       return list.map(function (x, i) { return '<button type="button" class="qf" data-src="' + src + '" data-i="' + i + '">' + esc(x.n) + "<small>" + x.k + " kcal</small></button>"; }).join("");
     }
-    return t('<div class="quick-h"><span>เพิ่มเร็ว</span><div class="seg mini-seg" id="portion" role="group" aria-label="ขนาดที่กิน">') +
+    return t('<div class="quick-h"><span>เพิ่มเร็ว</span><div class="seg mini-seg" id="portion" role="group" aria-label="ขนาดที่กิน">').replace('id="portion"', 'id="' + (portionId || "portion") + '"') +
       [[0.5, "½"], [1, "1"], [1.5, "1½"], [2, "2"]].map(function (o) { return '<button type="button" data-v="' + o[0] + '" aria-pressed="' + (portion === o[0] ? "true" : "false") + '">' + o[1] + "</button>"; }).join("") + "</div></div>" +
       (rec.length ? t('<p class="q">ที่กินบ่อย</p><div class="qrow">') + chips(rec, "r") + "</div>" : "") +
       t('<p class="q">เมนูทั่วไป (ต่อ 1 จานหรือที่ระบุ)</p><div class="qrow">') + chips(common, "c") + "</div>";
@@ -2651,6 +2824,19 @@
     });
   });
   $("act-more").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="history"]').click(); });
+  $("home-mode").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    homeMode = b.dataset.v; pressed("home-mode", homeMode); renderTodayOverview(); track("today_mode_toggle");
+  });
+  $("today-sections").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    setTodaySection(b.dataset.v); track("today_section_toggle");
+  });
+  $("week-strip").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-history-day]"); if (b && !b.disabled) showDayActivity(+b.dataset.historyDay, b);
+  });
+  $("quick-plus").addEventListener("click", showQuickAdd);
+  $("today-food-add").addEventListener("click", function () { quickAdd("food"); });
   $("go-scan").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="gym"]').click(); });
 
   // running
@@ -2709,17 +2895,19 @@
 
   // food
   $("food-input").addEventListener("change", function () { var f = this.files && this.files[0]; if (f) { track("food_photo"); foodScan(f); } this.value = ""; });
-  $("quick").addEventListener("click", function (ev) {
-    var pb = ev.target.closest("#portion button");
-    if (pb) { portion = +pb.dataset.v; $("quick").innerHTML = quickHtml(); return; }
+  function quickFoodClick(ev) {
+    var pb = ev.target.closest(".mini-seg button");
+    if (pb) { portion = +pb.dataset.v; $("quick").innerHTML = quickHtml(); renderTodayMeals(); return; }
     var b = ev.target.closest(".qf"); if (!b) return;
     var list = b.dataset.src === "r" ? recentMeals() : FOODS.filter(function (x) { return recentMeals().map(function (r) { return r.n; }).indexOf(x.n) < 0; });
     var f = list[+b.dataset.i]; if (!f) return;
     var lab = { 0.5: "½", 1.5: "1½", 2: "2" }[portion];
     addFood(f.n + (lab ? " ×" + lab : ""), Math.round(f.k * portion), Math.round(f.p * portion), portion);
     toast(t("เพิ่ม ") + f.n + (lab ? " ×" + lab : "") + " " + Math.round(f.k * portion) + t(" kcal แล้ว"));
-    portion = 1; $("quick").innerHTML = quickHtml(); track("food_quick");
-  });
+    portion = 1; $("quick").innerHTML = quickHtml(); renderTodayMeals(); track("food_quick");
+  }
+  $("quick").addEventListener("click", quickFoodClick);
+  $("today-quick").addEventListener("click", quickFoodClick);
   $("goal").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
     S.prefs.goal = b.dataset.v; save(); renderFood(); trackOnce("goal_set");
@@ -2751,13 +2939,15 @@
     addFood($("m-name").value.trim(), k, p);
     $("m-name").value = ""; $("m-kcal").value = ""; $("m-p").value = ""; toast(t("เพิ่มแล้ว")); track("food_manual");
   });
-  $("meals").addEventListener("click", function (ev) {
+  function deleteMeal(ev) {
     var b = ev.target.closest("[data-delfood]"); if (!b) return;
     var meal = S.food.filter(function (f) { return String(f.ts) === b.dataset.delfood; })[0];
     if (!meal || !confirm(tf(t("ลบ \"{n}\" ออกจากอาหารวันนี้?"), { n: meal.name }))) return;
     S.food = S.food.filter(function (f) { return String(f.ts) !== b.dataset.delfood; });
     save(); renderFood();
-  });
+  }
+  $("meals").addEventListener("click", deleteMeal);
+  $("today-meals").addEventListener("click", deleteMeal);
   $("bw-save").addEventListener("click", function () {
     var k = num($("bw-input").value);
     if (!k || k < 25 || k > 250) { toast(t("ใส่น้ำหนักเป็นกิโลกรัม เช่น 59.5")); return; }
@@ -2846,11 +3036,12 @@
     renderAll(); toast(t("ลบข้อมูลแล้ว"));
   });
 
-  var tabs = document.querySelectorAll("nav.tabs button");
+  var tabs = document.querySelectorAll("nav.tabs button[data-tab]");
   Array.prototype.forEach.call(tabs, function (b) {
     b.addEventListener("click", function () {
       Array.prototype.forEach.call(tabs, function (x) { x.removeAttribute("aria-current"); });
       b.setAttribute("aria-current", "page");
+      document.body.classList.toggle("home", b.dataset.tab === "today");
       $("me-btn").setAttribute("aria-current", b.dataset.tab === "settings" ? "true" : "false");
       ["today", "gym", "run", "food", "history", "settings"].forEach(function (v) { $("v-" + v).hidden = v !== b.dataset.tab; });
       if (b.dataset.tab === "history") renderHistory();
