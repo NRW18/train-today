@@ -3361,8 +3361,13 @@
     function valid(key) {
       if (key === "body") return draft.age >= 13 && draft.age <= 90 && draft.h >= 120 && draft.h <= 230 && draft.kg >= 31 && draft.kg <= 249;
       if (key === "target") return draft.target >= 31 && draft.target <= 249 && (draft.goal === "lose" ? draft.target < draft.kg : draft.target > draft.kg);
-      if (key === "schedule") return draft.days >= 2 && draft.days <= 6 && [30,45,60,90].indexOf(draft.minutes) >= 0;
+      if (key === "schedule") return Number.isInteger(draft.days) && draft.days >= 2 && draft.days <= 6 && [30,45,60,90].indexOf(draft.minutes) >= 0;
       return true;
+    }
+    function validationMessage(key) {
+      if (valid(key)) return "";
+      if (key === "schedule" && (!Number.isInteger(draft.days) || draft.days < 2 || draft.days > 6)) return t("จำนวนวันต้องเป็นจำนวนเต็ม 2–6 วันต่อสัปดาห์");
+      return t("ตรวจช่วงตัวเลขและน้ำหนักเป้าหมายอีกครั้ง");
     }
     function seedTarget() { if (!draft.target) draft.target = Math.max(31, Math.min(249, draft.kg + (draft.goal === "lose" ? -5 : 5))); }
     function move(delta) {
@@ -3399,7 +3404,7 @@
         if (key === "focus") h += '</div>';
         if(key === "privacy") h += '<p class="hint">' + t("ส่งแค่ชื่อฟีเจอร์ รหัสสุ่ม ภาษา และชนิดมือถือ ไม่ส่งข้อมูลร่างกาย อาหาร หรือการซ้อม") + '</p>';
       }
-      h += '</div><footer class="setup-bottom"><p id="setup-error" role="status"></p><button type="button" class="btn" data-next' + ((!valid(key) || !answered[key]) && ["language","welcome","summary","focus"].indexOf(key)<0 ? ' disabled' : '') + '>' + (key === "language" ? bilingual("ต่อไป") : key === "welcome" ? t("เริ่มเลย") : key === "summary" ? t("เริ่มซ้อม") : t("ถัดไป")) + '</button></footer></div>';
+      h += '</div><footer class="setup-bottom"><p id="setup-error" role="status">' + validationMessage(key) + '</p><button type="button" class="btn" data-next' + ((!valid(key) || !answered[key]) && ["language","welcome","summary","focus"].indexOf(key)<0 ? ' disabled' : '') + '>' + (key === "language" ? bilingual("ต่อไป") : key === "welcome" ? t("เริ่มเลย") : key === "summary" ? t("เริ่มซ้อม") : t("ถัดไป")) + '</button></footer></div>';
       wrap.innerHTML = h; wrap.querySelector('#setup-title').focus();
     }
     function commit() {
@@ -3411,7 +3416,7 @@
       try { if(draft.consent) localStorage.removeItem(STATS_OFF); else {localStorage.setItem(STATS_OFF,"1");localStorage.removeItem(STATS_Q);} } catch(e){}
       S.onboarded=true; save(); closeProfileSetup();renderAll();track("onb_done");showOnboarding(true);
     }
-    wrap.addEventListener('input',function(ev){var field=ev.target.dataset.value;if(!field)return;draft[field]=num(ev.target.value);answered[activeKey()]=true;if(field==="target")wrap.querySelector("#setup-difference").textContent=tf(t("ต่างจากตอนนี้ {kg} กก."),{kg:r1(draft.target-draft.kg)});wrap.querySelector('[data-next]').disabled=!valid(activeKey());wrap.querySelector('#setup-error').textContent=valid(activeKey())?"":t("ตรวจช่วงตัวเลขและน้ำหนักเป้าหมายอีกครั้ง");});
+    wrap.addEventListener('input',function(ev){var field=ev.target.dataset.value;if(!field)return;draft[field]=num(ev.target.value);answered[activeKey()]=true;if(field==="target")wrap.querySelector("#setup-difference").textContent=tf(t("ต่างจากตอนนี้ {kg} กก."),{kg:r1(draft.target-draft.kg)});wrap.querySelector('[data-next]').disabled=!valid(activeKey());wrap.querySelector('#setup-error').textContent=validationMessage(activeKey());});
     wrap.addEventListener('click',function(ev){
       var b=ev.target.closest('button');if(!b)return;var key=activeKey();
       if(b.hasAttribute('data-setup-lang')){var lang=b.dataset.setupLang;saveLanguage(lang);if(lang!==LANG){track('lang_'+lang);setLang(lang);}return;}

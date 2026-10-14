@@ -2,6 +2,28 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
+test("schedule gate rejects fractional or out-of-range days with a clear validation message", () => {
+  const app=load(["valid","validationMessage"],{draft:{days:3,minutes:45}});
+  for(const days of [2.5,3.1,5.9,1,7,null,NaN]) {
+    app.draft.days=days;
+    assert.equal(app.valid("schedule"),false,`must block proceeding with ${days} days`);
+    assert.equal(app.validationMessage("schedule"),"จำนวนวันต้องเป็นจำนวนเต็ม 2–6 วันต่อสัปดาห์");
+  }
+  app.draft.days=3;assert.equal(app.valid("schedule"),true);assert.equal(app.validationMessage("schedule"),"");
+  app.draft.minutes=35;assert.equal(app.valid("schedule"),false);
+});
+
+test("every accepted integer day count survives preference save/reload without being dropped", () => {
+  const app=load(["valid","cleanPrefs"],{draft:{days:3,minutes:45}});
+  for(const days of [2,3,4,5,6]) for(const minutes of [30,45,60,90]) {
+    app.draft.days=days;app.draft.minutes=minutes;
+    assert.equal(app.valid("schedule"),true);
+    const saved=JSON.stringify({prefs:app.cleanPrefs({days,minutes})});
+    const reloaded=app.cleanPrefs(JSON.parse(saved).prefs);
+    assert.equal(reloaded.days,days);assert.equal(reloaded.minutes,minutes);
+  }
+});
+
 test("profile setup goal mappings preserve running focus separately", () => {
   const a = load(["setupGoal"]);
   for (const [choice, goal, runFocus] of [["lose","lose",false],["gain","gain",false],["keep","keep",false],["run","keep",true]]) assert.deepEqual({...a.setupGoal(choice)},{goal,runFocus});

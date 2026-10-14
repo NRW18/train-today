@@ -2,6 +2,7 @@
 // To change a word: edit the value here. To add text: write it in Thai in index.html as t("…"), then add it here.
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
+  "จำนวนวันต้องเป็นจำนวนเต็ม 2–6 วันต่อสัปดาห์": "Enter a whole number of days from 2 to 6 per week",
   "เลือกภาษา": "Choose your language",
   "ต่อไป": "Continue",
   "ด้านหน้า": "Front",
