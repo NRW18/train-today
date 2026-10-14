@@ -548,6 +548,14 @@
   @media (max-width: 370px) { nav.tabs button { font-size: .58rem; white-space: nowrap; } }
   .quick-actions { display: grid; gap: 12px; margin: 18px 0; }
   .quick-actions button { margin: 0; text-align: left; }
+  .permission-row { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .permission-row:last-child { border-bottom: 0; }
+  .permission-row p { margin: 6px 0 12px; }
+  .permission-icon { width: 48px; height: 48px; color: var(--blue); padding: 10px; background: var(--blue-bg); border-radius: 16px; margin: 16px 0; }
+  .permission-actions { display: grid; gap: 10px; margin-top: 20px; }
+  .permission-actions .btn { margin: 0; min-height: 48px; }
+  .photo-alternatives { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .photo-alternatives button { min-height: 44px; }
   .day-history { padding: 16px 0; border-top: 1px solid var(--line); }
   .profile-setup { position: fixed; inset: 0; z-index: 24; background: var(--bg); overflow: hidden; }
   .setup-page { max-width: 560px; height: 100%; margin: auto; padding: 16px 20px 0; display: flex; flex-direction: column; background: linear-gradient(180deg, var(--home-mid), var(--bg) 320px); }
@@ -777,6 +785,8 @@
         <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">(เปิดกล้อง)</span>
         <input type="file" id="food-input" accept="image/*" capture="environment" hidden>
       </label>
+      <div class="photo-alternatives"><button type="button" class="linkbtn" id="food-gallery">เลือกรูปจากแกลเลอรี</button></div>
+      <input type="file" id="food-gallery-input" accept="image/*" hidden>
       <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
     </section>
 
@@ -856,6 +866,8 @@
           <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">(เปิดกล้อง)</span>
           <input type="file" id="scan-input" accept="image/*" capture="environment" hidden>
         </label>
+        <div class="photo-alternatives"><button type="button" class="linkbtn" id="scan-gallery">เลือกรูปจากแกลเลอรี</button><button type="button" class="linkbtn" id="scan-manual">เลือกท่าเอง</button></div>
+        <input type="file" id="scan-gallery-input" accept="image/*" hidden>
         <p class="hint">ถ่ายรูปเครื่องทีละเครื่อง AI จะบอกว่าเป็นเครื่องอะไร เล่นท่าไหนได้ แล้วเพิ่มเข้าแอปให้</p>
         <p class="hint">ถ่ายให้เห็นทั้งเครื่อง เลี่ยงไม่ให้มีคนในภาพ รูปจะถูกส่งไปให้ Google Gemini วิเคราะห์ (แผนฟรี Google อาจนำไปปรับปรุงบริการ)</p>
         <div id="scan-results" aria-live="polite"></div>
@@ -949,6 +961,13 @@
       <input type="file" id="import" accept="application/json,.json" hidden>
       <button class="btn line" type="button" id="sample">ลองด้วยข้อมูลตัวอย่าง 6 วัน</button>
       <button class="btn danger" type="button" id="clear">ลบข้อมูลทั้งหมด</button>
+    </section>
+    <section class="card" aria-labelledby="permissions-h">
+      <h2 id="permissions-h">สิทธิ์การใช้งาน</h2>
+      <div class="permission-row"><strong>กล้อง</strong><p class="hint" id="permission-camera-status" role="status"></p><p class="hint">สถานะเบราว์เซอร์อาจต่างจากกล้องของโทรศัพท์</p><button type="button" class="linkbtn" id="permission-camera-help">วิธีเปิดกล้องและทางเลือก</button></div>
+      <div class="permission-row"><strong>ตำแหน่ง (GPS)</strong><p class="hint">ยังไม่พร้อมใช้งาน — ยังไม่มีการติดตาม GPS</p><p class="hint">เมื่อมี GPS ตำแหน่งจะเก็บในเครื่อง ไม่ส่งออก ตอนนี้บันทึกระยะและเวลาเองได้ที่แท็บวิ่ง</p><button type="button" class="linkbtn" id="permission-run-manual">บันทึกวิ่งด้วยตัวเอง</button></div>
+      <div class="permission-row"><strong>การสั่น</strong><p class="hint" id="permission-vibration-status" role="status"></p><label class="toggle"><span class="lbl">สั่นเมื่อหมดเวลาพัก</span><input type="checkbox" id="permission-vibration-on"></label><p class="hint">การสั่นไม่มีหน้าขอสิทธิ์ของเบราว์เซอร์ และแอปไม่เพิ่มการแจ้งเตือน</p></div>
+      <div class="permission-row"><strong>สถิติแบบไม่ระบุตัวตน</strong><label class="toggle"><span class="lbl">ส่งสถิติการใช้งานแบบไม่ระบุตัวตน</span><input type="checkbox" id="permission-stats-on"></label><p class="hint">ใช้การตั้งค่าเดียวกับสถิติการใช้งาน ไม่ส่งข้อมูลส่วนตัว</p></div>
     </section>
     <section class="card" aria-labelledby="stats-h">
       <h2 id="stats-h">สถิติการใช้งาน</h2>
@@ -1662,7 +1681,7 @@
     var target = { run: "run", food: "food", scan: "gym", weight: "food" }[action];
     if (!target) return;
     document.querySelector('nav.tabs button[data-tab="' + target + '"]').click();
-    if (action === "scan") { $("scan-input").click(); return; }
+    if (action === "scan") { requestPhoto("machine", false, $("quick-plus")); return; }
     if (action === "food") { $("manual").hidden = false; $("manual-toggle").setAttribute("aria-expanded", "true"); }
     var input = $(action === "run" ? "run-km" : action === "weight" ? "bw-input" : "m-name");
     input.scrollIntoView({ block: "center" }); input.focus();
@@ -1930,6 +1949,7 @@
     $("rest").hidden = false; $("rest").classList.remove("done"); document.body.classList.add("resting");
     $("rest-lb").textContent = t("พักก่อนเซ็ตต่อไป");
     clearInterval(restTick); restTick = setInterval(drawRest, 250); drawRest();
+    if (!explanationSeen("vibration")) explainOnce("vibration", function () { setVibrationChoice(true); }, document.activeElement);
   }
   function stopRest() {
     clearInterval(restTick); restTick = null; $("rest").hidden = true; document.body.classList.remove("resting");
@@ -1941,7 +1961,7 @@
     if (left === 0 && !restBuzzed) {
       restBuzzed = true;
       $("rest").classList.add("done"); $("rest-lb").textContent = t("ครบเวลาพัก ไปเซ็ตต่อไป");
-      try { if (navigator.vibrate) navigator.vibrate([250, 120, 250]); } catch (e) {}
+      vibrateRest();
       beep();
       setTimeout(function () { if (restBuzzed && Date.now() - restEnd > 4000) stopRest(); }, 6000);
     }
@@ -2219,7 +2239,7 @@
   /* ---------- bottom sheet (scan and food results) ----------
      One at a time. Esc, the close button or tapping outside closes it, focus stays inside while open
      and goes back to where it was after. */
-  var sheet = null, sheetBack = null, sheetOnClose = null;
+  var sheet = null, sheetBack = null, sheetOnClose = null, sheetBackground = [];
   var SHARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>';
   var CLOSE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   // back: where focus returns on close (the camera frame, since the file input itself is hidden)
@@ -2235,9 +2255,10 @@
       if (ev.key !== "Tab") return;
       var f = Array.prototype.filter.call(sheet.querySelectorAll("button, a[href], input, summary, [tabindex]:not([tabindex='-1'])"), function (x) { return !x.disabled && x.offsetParent; });
       if (!f.length) return;
-      if (ev.shiftKey && document.activeElement === f[0]) { ev.preventDefault(); f[f.length - 1].focus(); }
+      if (ev.shiftKey && (document.activeElement === f[0] || document.activeElement === sheet)) { ev.preventDefault(); f[f.length - 1].focus(); }
       else if (!ev.shiftKey && document.activeElement === f[f.length - 1]) { ev.preventDefault(); f[0].focus(); }
     });
+    sheetBackground = [...document.body.children].filter(function (el) { return !['SCRIPT','STYLE'].includes(el.tagName); }).map(function (el) { var entry = { el: el, inert: el.inert }; el.inert = true; return entry; });
     document.body.appendChild(wrap); document.body.classList.add("sheet-open");
     sheet = wrap.firstChild;
     return sheet;
@@ -2247,6 +2268,7 @@
     var wrap = sheet.parentNode, cb = sheetOnClose;
     sheet = null; sheetOnClose = null;
     wrap.remove(); document.body.classList.remove("sheet-open");
+    sheetBackground.forEach(function (entry) { entry.el.inert = entry.inert; }); sheetBackground = [];
     if (cb) cb();
     if (!quiet && sheetBack && document.contains(sheetBack)) sheetBack.focus();
   }
@@ -2259,6 +2281,105 @@
   function share(text) {
     try { navigator.share({ title: "KRYVOS", text: text }).catch(function () {}); } catch (e) {}
   }
+
+  /* ---------- feature explanations; these are not browser permission grants ---------- */
+  var EXPLANATION_KEY = "kryvos-permission-explanations-v1", VIBRATION_KEY = "kryvos-vibration-enabled";
+  var explainedHere = {}, vibrationHere = null, cameraState = "unknown";
+  function readExplanations() {
+    var out = {};
+    try { var data = JSON.parse(localStorage.getItem(EXPLANATION_KEY) || "{}"); if (data && typeof data === "object") ["machine", "food", "vibration"].forEach(function (key) { if (data[key] === true) out[key] = true; }); } catch (e) {}
+    return out;
+  }
+  function explanationSeen(feature) { return explainedHere[feature] === true || readExplanations()[feature] === true; }
+  function markExplanationShown(feature) {
+    explainedHere[feature] = true;
+    var data = Object.assign(readExplanations(), explainedHere);
+    try { localStorage.setItem(EXPLANATION_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+  function vibrationEnabled() {
+    try { var saved = localStorage.getItem(VIBRATION_KEY); if (saved !== null) return saved === "1"; } catch (e) {}
+    return vibrationHere === true;
+  }
+  function setVibrationChoice(enabled) {
+    vibrationHere = !!enabled && typeof navigator.vibrate === "function";
+    try { localStorage.setItem(VIBRATION_KEY, vibrationHere ? "1" : "0"); } catch (e) {}
+    renderPermissions();
+  }
+  function vibrateRest() {
+    if (!explanationSeen("vibration") || !vibrationEnabled() || typeof navigator.vibrate !== "function") return;
+    try { navigator.vibrate([250, 120, 250]); } catch (e) {}
+  }
+  function queryCameraPermission() {
+    try { return navigator.permissions && typeof navigator.permissions.query === "function" ? Promise.resolve(navigator.permissions.query({name:"camera"})).catch(function () { return null; }) : Promise.resolve(null); } catch (e) { return Promise.resolve(null); }
+  }
+  function refreshCameraPermission() {
+    return queryCameraPermission().then(function (status) {
+      function update() { cameraState = status && ["granted","denied","prompt"].includes(status.state) ? status.state : "unknown"; renderPermissions(); }
+      if (status) status.onchange = update;
+      update();
+    });
+  }
+  function cameraStatusText(state) {
+    return {granted:t("อนุญาตในเบราว์เซอร์"),denied:t("ไม่อนุญาตในเบราว์เซอร์"),prompt:t("ยังไม่ได้อนุญาตในเบราว์เซอร์"),unknown:t("ไม่ทราบสถานะ — เบราว์เซอร์ไม่รองรับการตรวจสอบนี้")}[state] || t("ไม่ทราบสถานะ — เบราว์เซอร์ไม่รองรับการตรวจสอบนี้");
+  }
+  function renderPermissions() {
+    $("permission-camera-status").textContent = cameraStatusText(cameraState);
+    var supported = typeof navigator.vibrate === "function";
+    $("permission-vibration-status").textContent = supported ? t("รองรับ API การสั่น แต่ไม่รับประกันว่าอุปกรณ์จะสั่น") : t("เบราว์เซอร์นี้ไม่รองรับการสั่น");
+    $("permission-vibration-on").disabled = !supported; $("permission-vibration-on").checked = supported && vibrationEnabled();
+    $("permission-stats-on").checked = $("stats-on").checked = statsOn();
+  }
+  function permissionIcon(feature) {
+    var path = feature === "vibration" ? '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 7v10M21 7v10M11 17h2"/>' : '<path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/>';
+    return '<svg class="permission-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>';
+  }
+  function explainOnce(feature, proceed, back) {
+    if (explanationSeen(feature)) { proceed(); return; }
+    var confirmed = false;
+    openSheet("", function () { if (!confirmed && feature === "vibration") setVibrationChoice(false); }, back);
+    var title = feature === "machine" ? t("ก่อนถ่ายรูปเครื่องเล่น") : feature === "food" ? t("ก่อนถ่ายรูปอาหาร") : t("การสั่นของตัวจับเวลาพัก");
+    var purpose = feature === "machine" ? t("ใช้รูปเครื่องเพื่อระบุท่าและเพิ่มเครื่องในยิมของคุณ") : feature === "food" ? t("ใช้รูปอาหารเพื่อประเมินแคลอรี่และโปรตีน ให้คุณแก้ไขก่อนบันทึก") : t("เมื่อหมดเวลาพัก แอปจะสั่นสั้น ๆ หากอุปกรณ์รองรับ ตัวจับเวลาและเสียงยังทำงานเมื่อปิดการสั่น");
+    var handling = feature === "vibration" ? t("การสั่นทำงานในเครื่อง ไม่มีหน้าขอสิทธิ์ของเบราว์เซอร์ ไม่ส่งข้อมูลออก และไม่เพิ่มการแจ้งเตือน") : t("ภาพที่เลือกจะส่งไป Google Gemini เพื่อวิเคราะห์ครั้งนี้ (แผนฟรี Google อาจนำไปปรับปรุงบริการ)");
+    sheet.innerHTML = sheetHead(title,false) + permissionIcon(feature) + '<p>' + purpose + '</p><p class="hint">' + handling + '</p>' + (feature === "vibration" ? '<p class="hint">' + t("หากไม่สั่น ให้ตรวจโหมดเงียบ โหมดห้ามรบกวน และการตั้งค่าการสั่นของโทรศัพท์") + '</p>' : '<p class="hint">' + t("ใช้รูปจากแกลเลอรีหรือกรอกเองได้ หากเปิดกล้องไม่ได้") + '</p>') + '<div class="permission-actions"><button type="button" class="btn" data-permission-continue>' + t("ดำเนินการต่อ") + '</button><button type="button" class="btn line" data-close>' + t("ไม่ตอนนี้") + '</button></div>';
+    sheet.onclick = function (ev) {
+      if (ev.target.closest('[data-close]')) { closeSheet(); return; }
+      if (ev.target.closest('[data-permission-continue]')) { confirmed = true; closeSheet(); proceed(); }
+    };
+    markExplanationShown(feature); track("permission_explain"); sheet.focus();
+  }
+  function photoFailureState(error) { return error && ["NotAllowedError","SecurityError"].includes(error.name) ? "denied" : "unknown"; }
+  function openPhotoPicker(feature, gallery) {
+    var prefix = feature === "machine" ? "scan" : "food";
+    try { $(prefix + (gallery ? "-gallery-input" : "-input")).click(); } catch (e) { showPhotoFallback(feature, photoFailureState(e)); }
+  }
+  function requestPhoto(feature, gallery, back) {
+    explainOnce(feature, function () { if (!gallery && cameraState === "denied") showPhotoFallback(feature,"denied",back); else openPhotoPicker(feature,gallery); },back);
+  }
+  function manualPhotoFallback(feature) {
+    if (feature === "food") { quickAdd("food"); return; }
+    document.querySelector('nav.tabs button[data-tab="gym"]').click(); $("equip").scrollIntoView({block:"center"}); var control = $("equip").querySelector('button,input'); if (control) control.focus();
+  }
+  function showPhotoFallback(feature, reason, back) {
+    openSheet("",null,back);
+    sheet.innerHTML = sheetHead(reason === "denied" ? t("กล้องถูกปิดไว้") : t("กล้องและทางเลือก"),false) + permissionIcon(feature) + '<p>' + t("เปิดการตั้งค่าเว็บไซต์ในเบราว์เซอร์ แล้วอนุญาตกล้อง หากยังใช้ไม่ได้ ให้ตรวจสิทธิ์กล้องของเบราว์เซอร์ในตั้งค่าโทรศัพท์ แล้วกลับมาลองใหม่") + '</p><p class="hint">' + t("ตัวเลือกไฟล์บางเครื่องไม่รายงานว่าปฏิเสธกล้อง การยกเลิกเลือกรูปไม่ได้แปลว่าปฏิเสธสิทธิ์") + '</p><div class="permission-actions"><button type="button" class="btn" data-gallery>' + t("เลือกรูปจากแกลเลอรี") + '</button><button type="button" class="btn line" data-manual>' + (feature === "food" ? t("กรอกอาหารเอง") : t("เลือกท่าเอง")) + '</button><button type="button" class="btn line" data-close>' + t("ไม่ตอนนี้") + '</button></div>';
+    sheet.onclick = function (ev) {
+      if (ev.target.closest('[data-close]')) { closeSheet(); return; }
+      if (ev.target.closest('[data-gallery]')) { closeSheet(); requestPhoto(feature,true,back); }
+      else if (ev.target.closest('[data-manual]')) { closeSheet(); manualPhotoFallback(feature); }
+    };
+    track("permission_fallback"); sheet.focus();
+  }
+  ["scan", "food"].forEach(function (prefix) {
+    var feature = prefix === "scan" ? "machine" : "food";
+    $(prefix + "-gallery").addEventListener("click",function () { requestPhoto(feature,true,this); });
+    $(prefix + "-input").addEventListener("cancel",function () { if (cameraState === "denied") showPhotoFallback(feature,"denied",$(prefix + "-label")); });
+  });
+  $("scan-manual").addEventListener("click",function () { manualPhotoFallback("machine"); });
+  $("permission-camera-help").addEventListener("click",function () { showPhotoFallback("machine",cameraState,this); });
+  $("permission-run-manual").addEventListener("click",function () { quickAdd("run"); });
+  $("permission-vibration-on").addEventListener("change",function () { if (this.checked) explainOnce("vibration",function () { setVibrationChoice(true); },this); else setVibrationChoice(false); });
+  document.addEventListener("visibilitychange",function () { if (!document.hidden) refreshCameraPermission(); });
+  window.addEventListener("storage",function (ev) { if (ev.key === STATS_OFF || ev.key === VIBRATION_KEY || ev.key === null) renderPermissions(); });
 
   /* ---------- scan results: a short row per photo on the Gym tab, the full result in a dark sheet ---------- */
   var shots = {}, shotSheet = null;
@@ -2333,7 +2454,7 @@
       if (ev.target.closest("[data-close]")) closeSheet();
       else if (ev.target.closest("[data-share]")) share(t("เครื่องเล่นที่คุณถ่าย") + ": " + shotTitle(s) + "\n" + shotItems(s.r).map(function (it) { return "• " + (it.fresh ? it.fresh.name : EXBY[it.id].name); }).join("\n"));
       else if (ev.target.closest("[data-apply]")) applyShot(id, sheet);
-      else if (ev.target.closest("[data-next]")) { closeSheet(true); $("scan-input").click(); }
+      else if (ev.target.closest("[data-next]")) { closeSheet(true); requestPhoto("machine", false, $("scan-label")); }
     };
   }
 
@@ -2408,6 +2529,7 @@
     renderTodayOverview();
     $("food-nokey").hidden = hasAI();
     $("food-label").style.display = hasAI() ? "" : "none";
+    $("food-gallery").hidden = !hasAI();
 
     var w = latestWeight();
     $("bw-now").innerHTML = w ? '<div class="big-n">' + w + t(' กก.</div><p class="hint" style="margin:0">ชั่งล่าสุด ') + fmtDate(S.weights[S.weights.length - 1].ts) +
@@ -2706,6 +2828,7 @@
   /* ---------- settings ---------- */
   function renderSettings() {
     Array.prototype.forEach.call($("rest-sec").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", +b.dataset.v === S.prefs.rest ? "true" : "false"); });
+    renderPermissions();
   }
 
   /* ---------- weekly summary ---------- */
@@ -2925,18 +3048,22 @@
     if (!confirm(t("ลบคีย์ออกจากเครื่องนี้?") + (PROXY_URL ? t(" แอปจะกลับไปใช้ AI ของแอปแทน") : ""))) return;
     setKey(""); renderGym();
   });
-  $("scan-input").addEventListener("change", function () {
+  ["scan-input", "scan-gallery-input"].forEach(function (id) { $(id).addEventListener("change", function () {
     var f = this.files && this.files[0];
     if (f) { track("scan_machine"); scan(f); }
     this.value = "";
-  });
+  }); });
   $("scan-results").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-open]"); if (b) openShot(b.dataset.open);
   });
   ["scan-label", "food-label"].forEach(function (id) {
+    $(id).addEventListener("click", function (ev) {
+      if (ev.target.tagName === "INPUT") return;
+      ev.preventDefault(); requestPhoto(id === "scan-label" ? "machine" : "food", false, this);
+    });
     $(id).addEventListener("keydown", function (ev) {
       if (ev.key !== "Enter" && ev.key !== " ") return;
-      ev.preventDefault(); this.querySelector("input").click();
+      ev.preventDefault(); this.click();
     });
   });
   $("act-more").addEventListener("click", function () { document.querySelector('nav.tabs button[data-tab="history"]').click(); });
@@ -3010,7 +3137,7 @@
   });
 
   // food
-  $("food-input").addEventListener("change", function () { var f = this.files && this.files[0]; if (f) { track("food_photo"); foodScan(f); } this.value = ""; });
+  ["food-input", "food-gallery-input"].forEach(function (id) { $(id).addEventListener("change", function () { var f = this.files && this.files[0]; if (f) { track("food_photo"); foodScan(f); } this.value = ""; }); });
   function quickFoodClick(ev) {
     var pb = ev.target.closest(".mini-seg button");
     if (pb) { portion = +pb.dataset.v; $("quick").innerHTML = quickHtml(); renderTodayMeals(); return; }
@@ -3165,7 +3292,7 @@
       if (b.dataset.tab === "gym") renderGym();
       if (b.dataset.tab === "food") renderFood();
       if (b.dataset.tab === "run") renderRun();
-      if (b.dataset.tab === "settings") renderSettings();
+      if (b.dataset.tab === "settings") { renderSettings(); refreshCameraPermission(); }
       if (b.dataset.tab === "today") renderPlan();
       window.scrollTo(0, 0);
       track("tab_" + b.dataset.tab);
@@ -3232,13 +3359,14 @@
     var a = ev.target.closest && ev.target.closest('a[href*="youtube.com"]'); if (a) track("video_open");
   }, true);
   window.addEventListener("appinstalled", function () { track("install"); flushStats(); });
-  $("stats-on").checked = statsOn();
-  $("stats-on").addEventListener("change", function () {
+  function setStatsConsent(enabled) {
     try {
-      if (this.checked) localStorage.removeItem(STATS_OFF);
+      if (enabled) localStorage.removeItem(STATS_OFF);
       else { localStorage.setItem(STATS_OFF, "1"); localStorage.removeItem(STATS_Q); }
     } catch (e) {}
-  });
+    renderPermissions();
+  }
+  ["stats-on","permission-stats-on"].forEach(function (id) { $(id).addEventListener("change",function () { setStatsConsent(this.checked); }); });
 
   function renderAll() { renderCheckin(); renderPlan(); renderHistory(); renderGym(); renderRun(); renderFood(); renderSettings(); }
 
@@ -3518,6 +3646,7 @@
   $("today-date").innerHTML = "<b>" + nowD.toLocaleDateString(LOCALE, { weekday: "long" }) + "</b>" + nowD.toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
   load();
   renderAll();
+  refreshCameraPermission();
   if (!S.onboarded) { try { localStorage.setItem(STATS_OFF, "1"); } catch (e) {} showProfileSetup(); }
   track("open");
   setTimeout(flushStats, 4000); // send what is queued from last time, after the app has settled

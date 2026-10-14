@@ -98,7 +98,7 @@ const EVENTS = [
   "food_photo", "food_manual", "food_quick",
   "run_log", "shoe_finder", "shoe_set",
   "weight_log", "goal_set", "ai_summary", "ai_explain",
-  "lang_en", "lang_th", "backup", "import", "sample", "onb_done", "onb_skip"
+  "lang_en", "lang_th", "backup", "import", "sample", "onb_done", "onb_skip", "permission_explain", "permission_fallback"
 ];
 const EVENT_SET = new Set(EVENTS);
 const MAX_BATCH = 40;          // events per request
