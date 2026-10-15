@@ -24,11 +24,38 @@ export function app(storage = fakeStorage()) {
     BASE_EX: [{ id: "chest_press", m: ["chest"], t: "kg" }, { id: "leg_press", m: ["quads"], t: "kg" }], EX: [], EXBY: {},
     RUN_TYPES: { easy: 1, tempo: 1, long: 1, race: 1 }, SHOE_USE: { daily: 1, cushion: 1, speed: 1, race: 1, trail: 1 },
     toast: (t) => toasts.push(t)
-  });
+  }, ["SHOE_BRANDS"]);
   ctx.toasts = toasts;
   ctx.storage = storage;
   return ctx;
 }
+
+test("shoe brand choices and an older named shoe survive save/reload and backup import", () => {
+  const storage = fakeStorage();
+  const a = app(storage), start = Date.now() - 10000;
+  a.S.shoe = { name: "Legacy Pegasus 37", ts: start, base: 120 };
+  a.S.runs = [{ ts: start - 1, km: 8, min: 50, type: "easy" }, { ts: start + 1, km: 5.5, min: 32, type: "easy" }];
+  a.S.shoeQ = { use: "cushion", sex: "f", width: "wide", arch: "flat", budget: 7300, brands: ["HOKA", "ASICS"] };
+  a.save();
+  const b = app(storage); b.load();
+  assert.equal(b.S.shoe.name, "Legacy Pegasus 37");
+  assert.equal(b.S.shoe.base, 120);
+  assert.equal(b.S.shoeQ.sex, "f"); assert.equal(b.S.shoeQ.budget, 7300);
+  assert.deepEqual(Array.from(b.S.shoeQ.brands), ["ASICS", "HOKA"]);
+  const mileage = load(["shoeKm", "r1"], { S: b.S });
+  assert.equal(mileage.shoeKm(), 125.5, "only runs after this pair's start count");
+  const backup = JSON.parse(JSON.stringify({ ...b.snapshot(), app: "train-today", v: 3 }));
+  const c = app(); c.load();
+  Object.assign(c, { confirm: () => true, renderAll: () => {}, DATA_WORDS: {} });
+  c.importBackup(JSON.stringify(backup));
+  assert.equal(c.S.shoe.name, "Legacy Pegasus 37");
+  assert.deepEqual(Array.from(c.S.shoeQ.brands), ["ASICS", "HOKA"]);
+  assert.equal(load(["shoeKm", "r1"], { S: c.S }).shoeKm(), 125.5);
+  delete backup.shoeQ.brands;
+  c.importBackup(JSON.stringify(backup));
+  assert.equal(c.S.shoeQ.brands.length, 0, "old backups use every brand");
+  assert.equal(c.S.shoe.name, "Legacy Pegasus 37");
+});
 
 // Data saved by the version before this change (no draft fields). Must still load the same.
 const OLD_SAVE = {

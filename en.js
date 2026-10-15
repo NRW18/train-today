@@ -2,6 +2,23 @@
 // To change a word: edit the value here. To add text: write it in Thai in index.html as t("…"), then add it here.
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
+  "แบรนด์ที่สนใจ": "Brands",
+  "เลือกได้หลายแบรนด์": "Choose one or more brands",
+  "ทุกแบรนด์": "All brands",
+  "สำหรับซ้อมวิ่งทั่วไป": "For everyday training",
+  "เน้นความนุ่มสำหรับวิ่งยาว": "Cushioned for long runs",
+  "สำหรับซ้อมทำความเร็ว": "For speed training",
+  "สำหรับการแข่งขัน": "For racing",
+  "สำหรับวิ่งเทรล": "For trail running",
+  "ช่วยประคองเท้าสำหรับการซ้อม": "Support for training",
+  "ยังไม่ยืนยันรุ่น Narrow ในรายการ จึงไม่แสดงรุ่นทรงปกติแทน": "No Narrow versions are verified in this list, so regular versions are not substituted",
+  "ดูรูปจริงและราคาที่ร้านทางการ": "See real photos and prices at the official store",
+  "ราคาตรวจสอบ ณ {date} · ราคาป้าย อาจเปลี่ยนได้": "Prices checked {date} · List prices may change",
+  "ภาพวาดแสดงประเภทรองเท้า ไม่ใช่รูปสินค้าจริง": "Illustrations show shoe categories, not actual products",
+  "พบ {n} รุ่นตรงเงื่อนไข · แสดง {shown} อันดับแรก": "{n} models match · Showing the top {shown}",
+  "ไม่พบรุ่นตรงเงื่อนไขที่เลือก ไม่มีการข้ามตัวกรองหรือเพิ่มงบให้อัตโนมัติ": "No models match your filters. No filters were skipped and your budget was not increased",
+  "ล้างตัวกรอง": "Clear filters",
+  "แสดงเฉพาะรุ่นเพศและ Wide ที่ยืนยันได้ ไม่ใช่ข้อมูลสต็อกสด สี ไซซ์ และโปรโมชันอาจทำให้ราคาต่างกัน ควรลองสวมก่อนซื้อ": "Only verified gender and Wide versions are listed. Stock is not live. Prices may vary by color, size and promotion. Try shoes before buying",
   "ไม่ตอนนี้": "Not now",
   "สิทธิ์การใช้งาน": "Permissions",
   "กล้อง": "Camera",

@@ -159,6 +159,17 @@
   .shoe-why { margin: 6px 0 0; padding-left: 18px; font-size: .86rem; color: var(--soft); }
   .shoe-warn { margin: 6px 0 0; font-size: .84rem; color: var(--yellow-ink); background: var(--yellow-bg); border-radius: 10px; padding: 6px 10px; }
   .shoe-link { display: inline-block; margin-top: 8px; font-weight: 600; font-size: .88rem; }
+  #sf-brands { gap: 8px; }
+  #sf-brands .chip { min-height: 44px; padding: 8px 13px; }
+  .shoe-h > span { min-width: 0; overflow-wrap: anywhere; }
+  .shoe-h { flex-wrap: wrap; }
+  .shoe-art { display: block; width: 100%; height: 110px; margin-bottom: 10px; color: var(--blue); background: var(--blue-bg); border-radius: 12px; }
+  .shoe-art .upper { fill: currentColor; fill-opacity: .18; stroke: currentColor; }
+  .shoe-art .sole { fill: var(--card); stroke: var(--soft); }
+  .shoe-art .detail { fill: none; stroke: currentColor; }
+  .shoe-art .support { fill: currentColor; fill-opacity: .45; }
+  .shoe-art[data-brand="Brooks"], .shoe-art[data-brand="On"], .shoe-art[data-brand="New Balance"] { color: var(--soft); }
+  .shoe-link { overflow-wrap: anywhere; min-height: 44px; padding-top: 10px; }
 
   /* food quick-add and goal */
   .quick { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
@@ -736,6 +747,9 @@
 
     <section class="card" aria-labelledby="sf-h">
       <h2 id="sf-h">หารองเท้าวิ่งที่เหมาะกับคุณ</h2>
+      <p class="q" id="sf-brands-label">แบรนด์ที่สนใจ</p>
+      <div class="chips" id="sf-brands" role="group" aria-labelledby="sf-brands-label"></div>
+      <p class="hint">เลือกได้หลายแบรนด์</p>
       <p class="q">ใช้วิ่งแบบไหน</p>
       <div class="seg seg-wrap" id="sf-use" role="group" aria-label="แบบการใช้">
         <button type="button" data-v="daily">ซ้อมทั่วไป</button>
@@ -1129,48 +1143,75 @@
   var RECOVER_H = 48, LO = 8, HI = 12, STEP = 2.5;
 
   /* ---------- knowledge: running shoes ----------
-     Prices are list prices in baht from the brands' official Thai web stores, checked October 2026.
-     Shops often discount, and models change every year: update this list (TASKS.md).
-     c: what it is for (first = main use). w: a wide version is sold. st: stability (for flat feet / ankles rolling in).
-     cu: cushioning 1 light, 2 medium, 3 max.
-     r: how well reviewed and proven the model is, 0-3 (the team's judgement from 2026 reviews), so the best fit wins over the cheapest. */
-  var SHOE_DATE = t("ต.ค. 2026");
+     Thai list-price snapshot checked 2026-10-15. Evidence and limits: docs/shoes-sources.md.
+     Existing b/n/r/p/c/w/st/cu/d fields retained. r = 0: no invented review ratings.
+     v holds only verified men's/women's variants: p, product url, optional w (wide p/url).
+     onlyWide means the verified base listing itself is Wide. Missing sex = not verified.
+     c and cu (1 light, 2 medium, 3 high) are editorial use/cushion classes, not measurements. */
+  var SHOE_DATE = "2026-10-15";
+  var SHOE_BRANDS = ["ASICS", "Nike", "adidas", "New Balance", "HOKA", "Brooks", "Saucony", "Puma", "On", "Mizuno"];
   var SHOE_USE = { daily: t("ซ้อมทั่วไป"), cushion: t("นุ่ม วิ่งยาว"), speed: t("ซ้อมเร็ว"), race: t("แข่ง"), trail: t("เทรล") };
   var SHOES = [
-    { b: "Nike", n: "Pegasus 42", r: 3, p: 5200, c: ["daily", "cushion"], w: 1, cu: 2, d: t("ทนทาน ใช้ได้แทบทุกแบบ เหมาะเป็นคู่แรก") },
-    { b: "ASICS", n: "Gel-Cumulus 28", r: 3, p: 5200, c: ["daily", "cushion"], w: 1, cu: 2, d: t("นุ่มกำลังดี ใส่สบาย วิ่งได้ทุกวัน") },
-    { b: "ASICS", n: "Novablast 6", r: 3, p: 5500, c: ["daily", "speed"], w: 1, cu: 2, d: t("เด้ง สนุก วิ่งเบาก็ได้ เร่งเร็วขึ้นก็ดี") },
-    { b: "adidas", n: "Supernova Rise 3", r: 2, p: 4700, c: ["daily", "cushion"], cu: 2, d: t("นุ่มสบาย ราคาย่อมเยากว่ารุ่นท็อป") },
-    { b: "Nike", n: "Winflo 12", r: 2, p: 3800, c: ["daily"], cu: 2, d: t("รุ่นประหยัด ใช้ซ้อมทั่วไปได้ดี") },
-    { b: "adidas", n: "Ultrarun 5", r: 1, p: 3000, c: ["daily"], cu: 2, d: t("ราคาประหยัด นุ่มพอสำหรับวิ่งสั้นถึงกลาง") },
-    { b: "ASICS", n: "Versablast 4", r: 1, p: 2900, c: ["daily"], cu: 1, d: t("ราคาประหยัด เบา เหมาะเริ่มวิ่ง") },
-    { b: "adidas", n: "Duramo SL 2", r: 1, p: 2500, c: ["daily"], cu: 1, d: t("ราคาประหยัด เบา ใช้วิ่งระยะสั้นถึงกลาง") },
-    { b: "adidas", n: "Galaxy 8", r: 0, p: 1900, c: ["daily"], cu: 1, d: t("ราคาเริ่มต้น เหมาะวิ่งระยะสั้นหรือออกกำลังทั่วไป") },
-    { b: "ASICS", n: "Gel-Nimbus 28", r: 3, p: 6500, c: ["cushion", "daily"], w: 1, cu: 3, d: t("นุ่มมาก รับแรงกระแทกดี วิ่งยาวหรือคนตัวใหญ่") },
-    { b: "Nike", n: "Vomero 18", r: 3, p: 5500, c: ["cushion", "daily"], cu: 3, d: t("พื้นหนา นุ่ม เหมาะวิ่งยาวและวันวิ่งเบา") },
-    { b: "Nike", n: "Vomero Plus", r: 2, p: 6100, c: ["cushion", "daily"], cu: 3, d: t("นุ่มและเด้งกว่า Vomero 18") },
-    { b: "ASICS", n: "Glideride Max 2", r: 2, p: 6500, c: ["cushion"], w: 1, cu: 3, d: t("พื้นโค้งช่วยส่งเท้าไปข้างหน้า สบายในวิ่งยาว") },
-    { b: "ASICS", n: "Gel-Kayano 33", r: 3, p: 6500, c: ["daily", "cushion"], st: 1, w: 1, cu: 3, d: t("ซัพพอร์ตเต็ม นุ่ม มีรุ่นหน้ากว้างและกว้างพิเศษ") },
-    { b: "ASICS", n: "GT-2000 15", r: 3, p: 5500, c: ["daily"], st: 1, cu: 2, d: t("ซัพพอร์ตปานกลาง เบากว่า Kayano") },
-    { b: "Nike", n: "Structure 26", r: 2, p: 5200, c: ["daily"], st: 1, cu: 2, d: t("ช่วยประคองเท้าที่ล้มเข้าด้านใน") },
-    { b: "Nike", n: "Structure Plus", r: 2, p: 6000, c: ["daily", "cushion"], st: 1, cu: 3, d: t("ซัพพอร์ตพร้อมพื้นที่นุ่มกว่า Structure 26") },
-    { b: "adidas", n: "Adizero Evo SL", r: 3, p: 5800, c: ["speed", "daily"], cu: 2, d: t("เบาและเด้ง ใช้ซ้อมเร็ว ไม่มีแผ่นคาร์บอน") },
-    { b: "adidas", n: "Adizero SL 2", r: 2, p: 4500, c: ["speed", "daily"], cu: 2, d: t("เบา ราคาย่อมเยา สำหรับซ้อมเร็ว") },
-    { b: "adidas", n: "Adizero Boston 13", r: 3, p: 5800, c: ["speed", "race"], cu: 2, d: t("มีแกนเสริม เหมาะเทมโป้และวิ่งยาวแบบเร็ว") },
-    { b: "Nike", n: "Pegasus Plus 2", r: 2, p: 6100, c: ["speed", "daily"], cu: 2, d: t("เบาและเด้งกว่า Pegasus ใช้ทั้งซ้อมทั่วไปและเร็ว") },
-    { b: "ASICS", n: "Magic Speed 4", r: 2, p: 6200, c: ["speed", "race"], cu: 2, d: t("มีแผ่นคาร์บอน ใช้ซ้อมเร็วหรือแข่งแบบงบจำกัด") },
-    { b: "ASICS", n: "Sonicblast 2", r: 2, p: 6900, c: ["speed", "daily"], cu: 3, d: t("เด้งมาก ใช้ซ้อมเร็วและวิ่งยาวแบบเร็ว") },
-    { b: "Nike", n: "Zoom Fly 6", r: 2, p: 6300, c: ["race", "speed"], cu: 2, d: t("มีแผ่นคาร์บอน ซ้อมเร็วและแข่ง ราคาต่ำกว่ารุ่นท็อป") },
-    { b: "adidas", n: "Adizero Adios 9", r: 2, p: 5300, c: ["race", "speed"], cu: 1, d: t("พื้นบาง เบา สำหรับแข่ง 5–10 กม. ไม่มีแผ่น") },
-    { b: "adidas", n: "Adizero Takumi Sen 11", r: 2, p: 6700, c: ["race"], cu: 1, d: t("รองเท้าแข่งระยะสั้น 5–10 กม.") },
-    { b: "adidas", n: "Adizero Adios Pro 4", r: 3, p: 8000, c: ["race"], cu: 3, d: t("รองเท้าแข่งระยะไกล มีแกนคาร์บอน") },
-    { b: "Nike", n: "Vaporfly 4", r: 3, p: 8500, c: ["race"], cu: 3, d: t("รองเท้าแข่งแผ่นคาร์บอน เบา 10 กม. ถึงมาราธอน") },
-    { b: "adidas", n: "Adizero Adios Pro 5", r: 3, p: 9200, c: ["race"], cu: 3, d: t("รองเท้าแข่งระยะไกลรุ่นใหม่ล่าสุดของ adidas") },
-    { b: "Nike", n: "Alphafly 4", r: 3, p: 9400, c: ["race"], cu: 3, d: t("รองเท้าแข่งมาราธอน พื้นหนา แผ่นคาร์บอน") },
-    { b: "Nike", n: "ACG Pegasus Trail", r: 2, p: 5400, c: ["trail", "daily"], cu: 2, d: t("ใส่ได้ทั้งถนนและทางดินเรียบ") },
-    { b: "Nike", n: "ACG Zegama Trail", r: 3, p: 6300, c: ["trail"], cu: 3, d: t("พื้นหนา นุ่ม สำหรับเทรลระยะไกล") },
-    { b: "adidas", n: "Terrex Agravic GTX 2", r: 2, p: 6500, c: ["trail"], cu: 2, d: t("กันน้ำ (GORE-TEX) เหมาะเทรลเปียกหรือฝนตก") },
-    { b: "adidas", n: "Terrex Agravic Speed Ultra 2", r: 2, p: 8500, c: ["trail", "race"], cu: 3, d: t("เบา สำหรับเทรลระยะไกลและแข่ง") }
+    {"b": "HOKA", "n": "Clifton 11", "r": 0, "p": 5990, "c": ["daily", "cushion"], "cu": 3, "v": {"m": {"p": 5990, "url": "https://hoka.co.th/products/1176572-bnny-hoka-clifton-11-men", "w": {"p": 5990, "url": "https://hoka.co.th/products/1177538-flck-hoka-clifton-11-wide-men"}}, "f": {"p": 5990, "url": "https://hoka.co.th/products/1176573-bnnn-hoka-clifton-11-women", "w": {"p": 5990, "url": "https://hoka.co.th/products/1177539-slwl-hoka-clifton-11-wide-women"}}}, "w": 1, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "HOKA", "n": "Bondi 9", "r": 0, "p": 6990, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 6990, "url": "https://hoka.co.th/products/1162011-bnny-hoka-bondi-9-men", "w": {"p": 6990, "url": "https://hoka.co.th/products/1162013-sysq-hoka-bondi-9-wide-men"}}, "f": {"p": 6990, "url": "https://hoka.co.th/products/1162012-bnnd-hoka-bondi-9-women", "w": {"p": 6990, "url": "https://hoka.co.th/products/1162014-mllw-hoka-bondi-9-wide-women"}}}, "w": 1, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "HOKA", "n": "Mach 7", "r": 0, "p": 5990, "c": ["speed", "daily"], "cu": 2, "v": {"m": {"p": 5990, "url": "https://hoka.co.th/products/1171905-ckcs-hoka-mach-7-wide-men", "onlyWide": 1, "w": {"p": 5990, "url": "https://hoka.co.th/products/1171905-ckcs-hoka-mach-7-wide-men"}}, "f": {"p": 5990, "url": "https://hoka.co.th/products/1171938-ckcs-hoka-mach-7-women", "w": {"p": 5990, "url": "https://hoka.co.th/products/1171906-ost-hoka-mach-7-wide-women"}}}, "w": 1, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "HOKA", "n": "Arahi 9", "r": 0, "p": 5990, "c": ["daily"], "cu": 2, "v": {"m": {"p": 5990, "url": "https://hoka.co.th/products/1177513-vsf-hoka-arahi-9-wide-men", "onlyWide": 1, "w": {"p": 5990, "url": "https://hoka.co.th/products/1177513-vsf-hoka-arahi-9-wide-men"}}, "f": {"p": 5990, "url": "https://hoka.co.th/products/1176570-flck-hoka-arahi-9-women", "w": {"p": 5990, "url": "https://hoka.co.th/products/1177535-pgm-hoka-arahi-9-wide-women"}}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "HOKA", "n": "Gaviota 6", "r": 0, "p": 6990, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 6990, "url": "https://hoka.co.th/products/1171934-sdstb-hoka-gaviota-6-wide-men", "onlyWide": 1, "w": {"p": 6990, "url": "https://hoka.co.th/products/1171934-sdstb-hoka-gaviota-6-wide-men"}}, "f": {"p": 6990, "url": "https://hoka.co.th/products/1171935-slwl-hoka-gaviota-6-wide-women", "onlyWide": 1, "w": {"p": 6990, "url": "https://hoka.co.th/products/1171935-slwl-hoka-gaviota-6-wide-women"}}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "HOKA", "n": "Speedgoat 7", "r": 0, "p": 6490, "c": ["trail"], "cu": 3, "v": {"m": {"p": 6490, "url": "https://hoka.co.th/products/1171928-fntn-hoka-speedgoat-7-men", "w": {"p": 6490, "url": "https://hoka.co.th/products/1171930-fntn-hoka-speedgoat-7-wide-men"}}, "f": {"p": 6490, "url": "https://hoka.co.th/products/1171929-mllw-hoka-speedgoat-7-women", "w": {"p": 6490, "url": "https://hoka.co.th/products/1171931-fyz-hoka-speedgoat-7-wide-women"}}}, "w": 1, "d": t("สำหรับวิ่งเทรล") },
+    {"b": "HOKA", "n": "Tecton X 4", "r": 0, "p": 10990, "c": ["trail"], "cu": 3, "v": {"m": {"p": 10990, "url": "https://hoka.co.th/products/1176632-bnng-hoka-tecton-x-4-men"}, "f": {"p": 10990, "url": "https://hoka.co.th/products/1176633-fntn-hoka-tecton-x-4-women"}}, "d": t("สำหรับวิ่งเทรล") },
+    {"b": "HOKA", "n": "Rocket X 3", "r": 0, "p": 9490, "c": ["race"], "cu": 3, "v": {"m": {"p": 9490, "url": "https://hoka.co.th/products/1168724-bnnn-hoka-rocket-x-3-unisex"}, "f": {"p": 9490, "url": "https://hoka.co.th/products/1168724-bnnn-hoka-rocket-x-3-unisex"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "HOKA", "n": "Cielo X1 3.0", "r": 0, "p": 9990, "c": ["race"], "cu": 3, "v": {"m": {"p": 9990, "url": "https://hoka.co.th/products/1171927-crbn-hoka-cielo-x1-3-0-unisex"}, "f": {"p": 9990, "url": "https://hoka.co.th/products/1171927-crbn-hoka-cielo-x1-3-0-unisex"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "HOKA", "n": "Skyward X 2", "r": 0, "p": 8990, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 8990, "url": "https://hoka.co.th/products/1171925-ckn-hoka-skyward-x-2-men"}, "f": {"p": 8990, "url": "https://hoka.co.th/products/1171926-sgnf-hoka-skyward-x-2-women"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "HOKA", "n": "Mach X 3", "r": 0, "p": 7490, "c": ["speed", "cushion"], "cu": 3, "v": {"m": {"p": 7490, "url": "https://hoka.co.th/products/1168720-bnnn-hoka-mach-x-3-men"}, "f": {"p": 7490, "url": "https://hoka.co.th/products/1168721-bnnn-hoka-mach-x-3-women"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "Brooks", "n": "Ghost 18", "r": 0, "p": 4490, "c": ["daily"], "cu": 2, "v": {"m": {"p": 4490, "url": "https://brooks.rev.co.th/products/1104931d036-brooks-ghost-18-men", "w": {"p": 4490, "url": "https://brooks.rev.co.th/products/1104932e172-brooks-ghost-18-2e-men"}}, "f": {"p": 4490, "url": "https://brooks.rev.co.th/products/1204821b047-brooks-ghost-18-women", "w": {"p": 4490, "url": "https://brooks.rev.co.th/products/1204821d161-brooks-ghost-18-1d-women"}}}, "w": 1, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Brooks", "n": "Ghost Max 4", "r": 0, "p": 4990, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 4990, "url": "https://brooks.rev.co.th/products/1104961d004-brooks-ghost-max-4-men", "w": {"p": 4990, "url": "https://brooks.rev.co.th/products/1104964e020-brooks-ghost-max-4-2e-men"}}, "f": {"p": 4990, "url": "https://brooks.rev.co.th/products/1204851b026-brooks-ghost-max-4-women", "w": {"p": 4990, "url": "https://brooks.rev.co.th/products/1204852e173-brooks-ghost-max-4-2e-women"}}}, "w": 1, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Brooks", "n": "Glycerin 23", "r": 0, "p": 5700, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 5700, "url": "https://brooks.rev.co.th/products/1104761d177-brooks-glycerin-23-men", "w": {"p": 5700, "url": "https://brooks.rev.co.th/products/1104762e090-brooks-glycerin-23-2e-men"}}, "f": {"p": 5700, "url": "https://brooks.rev.co.th/products/1204651b072-brooks-glycerin-23-women"}}, "w": 1, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Brooks", "n": "Glycerin GTS 23", "r": 0, "p": 5790, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 5790, "url": "https://brooks.rev.co.th/products/1105031d039-brooks-glycerin-gts-23-men", "w": {"p": 5790, "url": "https://brooks.rev.co.th/products/1105032e020-brooks-glycerin-gts-23-2e-men"}}, "f": {"p": 5790, "url": "https://brooks.rev.co.th/products/1204921b072-brooks-glycerin-gts-23-women", "w": {"p": 5790, "url": "https://brooks.rev.co.th/products/1204922e453-brooks-glycerin-gts-23-2e-women"}}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "Brooks", "n": "Glycerin Max 2", "r": 0, "p": 6490, "c": ["cushion"], "cu": 3, "v": {"m": {"p": 6490, "url": "https://brooks.rev.co.th/products/1104791d013-brooks-glycerin-max-2-men"}, "f": {"p": 6490, "url": "https://brooks.rev.co.th/products/1204681b131-brooks-glycerin-max-2-women"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Brooks", "n": "Hyperion Max 4", "r": 0, "p": 5900, "c": ["speed"], "cu": 3, "v": {"m": {"p": 5900, "url": "https://brooks.rev.co.th/products/1104981d879-brooks-hyperion-max-4-men"}, "f": {"p": 5900, "url": "https://brooks.rev.co.th/products/1204871b293-brooks-hyperion-max-4-women"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "Brooks", "n": "Hyperion Elite 6", "r": 0, "p": 7990, "c": ["race"], "cu": 3, "v": {"m": {"p": 7990, "url": "https://brooks.rev.co.th/products/1000541d699-brooks-hyperion-elite-6-unisex"}, "f": {"p": 7990, "url": "https://brooks.rev.co.th/products/1000541d699-brooks-hyperion-elite-6-unisex"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "Brooks", "n": "Cascadia 20", "r": 0, "p": 5490, "c": ["trail"], "cu": 2, "v": {"m": {"p": 5490, "url": "https://brooks.rev.co.th/products/1104891d016-brooks-cascadia-20-men", "w": {"p": 5490, "url": "https://brooks.rev.co.th/products/1104892e099-brooks-cascadia-20-2e-men"}}, "f": {"p": 5490, "url": "https://brooks.rev.co.th/products/1204781b206-brooks-cascadia-20-women", "w": {"p": 5490, "url": "https://brooks.rev.co.th/products/1204781d038-brooks-cascadia-20-1d-women"}}}, "w": 1, "d": t("สำหรับวิ่งเทรล") },
+    {"b": "Brooks", "n": "Adrenaline GTS 25", "r": 0, "p": 4990, "c": ["daily"], "cu": 2, "v": {"m": {"p": 4990, "url": "https://brooks.rev.co.th/products/1104541d123-brooks-adrenaline-gts-25-men", "w": {"p": 4990, "url": "https://brooks.rev.co.th/products/1104542e151-brooks-adrenaline-gts-25-2e-men"}}, "f": {"p": 4990, "url": "https://brooks.rev.co.th/products/1204431b244-brooks-adrenaline-gts-25-women", "w": {"p": 4990, "url": "https://brooks.rev.co.th/products/1204432e032-brooks-adrenaline-gts-25-2e-women"}}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "Brooks", "n": "Glycerin Flex", "r": 0, "p": 5490, "c": ["daily", "cushion"], "cu": 3, "v": {"m": {"p": 5490, "url": "https://brooks.rev.co.th/products/1104781d114-brooks-glycerin-flex-men"}, "f": {"p": 5490, "url": "https://brooks.rev.co.th/products/1204671b136-brooks-glycerin-flex-women"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Saucony", "n": "Ride 19", "r": 0, "p": 4990, "c": ["daily"], "cu": 2, "v": {"m": {"p": 4990, "url": "https://brooks.rev.co.th/products/s21055-94-saucony-ride-19-men"}, "f": {"p": 4990, "url": "https://brooks.rev.co.th/products/s11055-128-saucony-ride-19-women"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Saucony", "n": "Guide 19", "r": 0, "p": 4990, "c": ["daily"], "cu": 2, "v": {"m": {"p": 4990, "url": "https://brooks.rev.co.th/products/s21059-104-saucony-guide-19-men"}, "f": {"p": 4990, "url": "https://brooks.rev.co.th/products/s11058-411-saucony-guide-19-women"}}, "st": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "Saucony", "n": "Triumph 24", "r": 0, "p": 5790, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 5790, "url": "https://brooks.rev.co.th/products/s101894-1003-saucony-triumph-24-men"}, "f": {"p": 5790, "url": "https://brooks.rev.co.th/products/s100999-1014-saucony-triumph-24-women"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Saucony", "n": "Endorphin Speed 5", "r": 0, "p": 6290, "c": ["speed", "race"], "cu": 2, "v": {"m": {"p": 6290, "url": "https://brooks.rev.co.th/products/s101368-1006-saucony-endorphin-speed-5-men"}, "f": {"p": 6290, "url": "https://brooks.rev.co.th/products/s101391-1006-saucony-endorphin-speed-5-women"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "Saucony", "n": "Endorphin Pro 5", "r": 0, "p": 7990, "c": ["race"], "cu": 3, "v": {"m": {"p": 7990, "url": "https://brooks.rev.co.th/products/s101360-1011-saucony-endorphin-pro-5-men"}, "f": {"p": 7990, "url": "https://brooks.rev.co.th/products/s101308-1005-saucony-endorphin-pro-5-women"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "Saucony", "n": "Endorphin Elite 3", "r": 0, "p": 8990, "c": ["race"], "cu": 3, "v": {"m": {"p": 8990, "url": "https://brooks.rev.co.th/products/s100981-1019-saucony-endorphin-elite-3-unisex"}, "f": {"p": 8990, "url": "https://brooks.rev.co.th/products/s100981-1019-saucony-endorphin-elite-3-unisex"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "Saucony", "n": "Endorphin Azura", "r": 0, "p": 5490, "c": ["daily", "speed"], "cu": 3, "v": {"m": {"p": 5490, "url": "https://brooks.rev.co.th/products/s101329-1049-saucony-endorphin-azura-men"}, "f": {"p": 5490, "url": "https://brooks.rev.co.th/products/s101348-1038-saucony-endorphin-azura-women"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Saucony", "n": "Kinvara 16", "r": 0, "p": 4290, "c": ["speed", "daily"], "cu": 1, "v": {"m": {"p": 4290, "url": "https://brooks.rev.co.th/products/s21020-172-saucony-kinvara-16-men"}, "f": {"p": 4290, "url": "https://brooks.rev.co.th/products/s11020-172-saucony-kinvara-16-women"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "Saucony", "n": "Peregrine 16 GTX", "r": 0, "p": 5990, "c": ["trail"], "cu": 2, "v": {"m": {"p": 5990, "url": "https://brooks.rev.co.th/products/s21068-110-saucony-peregrine-16-gtx-men"}}, "d": t("สำหรับวิ่งเทรล") },
+    {"b": "Mizuno", "n": "Wave Rider 29", "r": 0, "p": 4900, "c": ["daily"], "cu": 2, "v": {"m": {"p": 4900, "url": "https://tha.mizuno.com/products/j1gc2663-wave-rider-29-2026ss"}, "f": {"p": 4900, "url": "https://tha.mizuno.com/products/j1gc2663-wave-rider-29-2026ss"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Mizuno", "n": "Wave Sky 9", "r": 0, "p": 5400, "c": ["cushion"], "cu": 3, "v": {"m": {"p": 5400, "url": "https://tha.mizuno.com/products/j1gc2502-wave-sky-9-2026ss", "w": {"p": 5400, "url": "https://tha.mizuno.com/products/j1gc2511-wave-sky-9-2e-2026ss"}}, "f": {"p": 5400, "url": "https://tha.mizuno.com/products/j1gd2502-wave-sky-9-2026ss"}}, "w": 1, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Mizuno", "n": "Neo Zen 2", "r": 0, "p": 4900, "c": ["daily", "speed"], "cu": 2, "v": {"m": {"p": 4900, "url": "https://tha.mizuno.com/products/j1gc2682-mizuno-neo-zen-2-2026ss"}, "f": {"p": 4900, "url": "https://tha.mizuno.com/products/j1gc2682-mizuno-neo-zen-2-2026ss"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Mizuno", "n": "Neo Vista 2", "r": 0, "p": 5900, "c": ["cushion", "speed"], "cu": 3, "v": {"m": {"p": 5900, "url": "https://tha.mizuno.com/products/j1gc2634-mizuno-neo-vista-2-2026ss"}, "f": {"p": 5900, "url": "https://tha.mizuno.com/products/j1gc2634-mizuno-neo-vista-2-2026ss"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Mizuno", "n": "Wave Horizon 9", "r": 0, "p": 5400, "c": ["daily", "cushion"], "cu": 3, "v": {"m": {"p": 5400, "url": "https://tha.mizuno.com/products/j1gc2631-wave-horizon-9-2e-2026ss", "onlyWide": 1, "w": {"p": 5400, "url": "https://tha.mizuno.com/products/j1gc2631-wave-horizon-9-2e-2026ss"}}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "Mizuno", "n": "Wave Rebellion Flash 3", "r": 0, "p": 6300, "c": ["speed"], "cu": 2, "v": {"m": {"p": 6300, "url": "https://tha.mizuno.com/products/j1gc2621-wave-rebellion-flash-3-2026ss"}, "f": {"p": 6300, "url": "https://tha.mizuno.com/products/j1gc2621-wave-rebellion-flash-3-2026ss"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "Mizuno", "n": "Hyperwarp Pro", "r": 0, "p": 7500, "c": ["race"], "cu": 3, "v": {"m": {"p": 7500, "url": "https://tha.mizuno.com/products/j1gc2674-hyperwarp-pro-2026ss"}, "f": {"p": 7500, "url": "https://tha.mizuno.com/products/j1gc2674-hyperwarp-pro-2026ss"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "Mizuno", "n": "Wave Mujin 11", "r": 0, "p": 4900, "c": ["trail"], "cu": 3, "v": {"m": {"p": 4900, "url": "https://tha.mizuno.com/products/j1gj2570-wave-mujin-11-2026ss"}}, "d": t("สำหรับวิ่งเทรล") },
+    {"b": "ASICS", "n": "Novablast 6", "r": 0, "p": 5500, "c": ["daily", "speed"], "cu": 2, "v": {"m": {"p": 5500, "url": "https://www.asics.com/th/th-th/novablast-6/p/1011C243-100.html", "w": {"p": 5500, "url": "https://www.asics.com/th/th-th/novablast-6-wide/p/1011C242-002.html"}}, "f": {"p": 5500, "url": "https://www.asics.com/th/en-th/novablast-6/p/1012C008-002.html", "w": {"p": 5500, "url": "https://www.asics.com/th/en-th/novablast-6-wide/p/1012C007-101.html"}}}, "w": 1, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "ASICS", "n": "Gel-Kayano 33", "r": 0, "p": 6500, "c": ["daily", "cushion"], "cu": 3, "v": {"m": {"p": 6500, "url": "https://www.asics.com/th/th-th/gel-kayano-33/p/1011C167-001.html", "w": {"p": 6500, "url": "https://www.asics.com/th/th-th/gel-kayano-33-wide/p/1011C227-001.html"}}, "f": {"p": 6500, "url": "https://www.asics.com/th/en-th/gel-kayano-33/p/1012B939-001.html", "w": {"p": 6500, "url": "https://www.asics.com/th/en-th/gel-kayano-33-wide/p/1012B992-001.html"}}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "ASICS", "n": "Gel-Nimbus 28", "r": 0, "p": 6500, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 6500, "url": "https://www.asics.com/th/th-th/gel-nimbus-28/p/1011C127-404.html"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "ASICS", "n": "GT-2000 14", "r": 0, "p": 5500, "c": ["daily"], "cu": 2, "v": {"m": {"p": 5500, "url": "https://www.asics.com/th/th-th/gt-2000-14/p/1011C056-402.html"}}, "st": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "Nike", "n": "Pegasus 42", "r": 0, "p": 5200, "c": ["daily"], "cu": 2, "v": {"m": {"p": 5200, "url": "https://www.nike.com/th/t/%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B9%89%E0%B8%94%E0%B8%A3%E0%B8%B1%E0%B8%99%E0%B8%99%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%8A%E0%B8%B2%E0%B8%A2-nike-pegasus-42-KaUtoqGX/IB1873-007"}, "f": {"p": 5200, "url": "https://www.nike.com/th/t/%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B9%89%E0%B8%94%E0%B8%A3%E0%B8%B1%E0%B8%99%E0%B8%99%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%AB%E0%B8%8D%E0%B8%B4%E0%B8%87-nike-pegasus-42-ofkR0yvr/IB1881-601"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Nike", "n": "Vomero 18", "r": 0, "p": 5500, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 5500, "url": "https://www.nike.com/th/t/%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B9%89%E0%B8%94%E0%B8%A3%E0%B8%B1%E0%B8%99%E0%B8%99%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%8A%E0%B8%B2%E0%B8%A2-nike-vomero-18-snsbkH/HM6803-023"}, "f": {"p": 5500, "url": "https://www.nike.com/th/t/%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B9%89%E0%B8%94%E0%B8%A3%E0%B8%B1%E0%B8%99%E0%B8%99%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%AB%E0%B8%8D%E0%B8%B4%E0%B8%87-nike-vomero-18-Vn57Nq/HM6804-013"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "Nike", "n": "Structure 26", "r": 0, "p": 5200, "c": ["daily"], "cu": 2, "v": {"f": {"p": 5200, "url": "https://www.nike.com/th/t/%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B9%89%E0%B8%94%E0%B8%A3%E0%B8%B1%E0%B8%99%E0%B8%99%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%AB%E0%B8%8D%E0%B8%B4%E0%B8%87-nike-structure-26-iLKytA4Q/HJ1101-005"}}, "st": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "Nike", "n": "Vaporfly 4", "r": 0, "p": 8500, "c": ["race"], "cu": 3, "v": {"f": {"p": 8500, "url": "https://www.nike.com/th/t/%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B9%89%E0%B8%94%E0%B9%80%E0%B8%A3%E0%B8%8B%E0%B8%8B%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%AB%E0%B8%8D%E0%B8%B4%E0%B8%87-nike-vaporfly-4-2dcdFt/HF6412-602"}}, "d": t("สำหรับการแข่งขัน") },
+    {"b": "adidas", "n": "Supernova Rise 3", "r": 0, "p": 4700, "c": ["daily", "cushion"], "cu": 2, "v": {"m": {"p": 4700, "url": "https://www.adidas.co.th/th/รองเท้าวิ่ง-supernova-rise-3/LA3962.html"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "adidas", "n": "Adizero EVO SL", "r": 0, "p": 5800, "c": ["speed", "daily"], "cu": 2, "v": {"m": {"p": 5800, "url": "https://www.adidas.co.th/th/รองเท้า-adizero-evo-sl/KH9575.html"}, "f": {"p": 5800, "url": "https://www.adidas.co.th/th/รองเท้าวิ่ง-adizero-evo-sl/KI4530.html"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "New Balance", "n": "1080 v15", "r": 0, "p": 6000, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 6000, "url": "https://www.newbalance.co.th/new-balance-1080-v15-men-performance-running-grey.html", "w": {"p": 6000, "url": "https://www.newbalance.co.th/new-balance-1080-v15-men-performance-running-white.html"}}, "f": {"p": 6000, "url": "https://www.newbalance.co.th/new-balance-1080v15-women-performance-running-white.html"}}, "w": 1, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "New Balance", "n": "FuelCell Rebel v5", "r": 0, "p": 5300, "c": ["speed", "daily"], "cu": 2, "v": {"m": {"p": 5300, "url": "https://www.newbalance.co.th/new-balance-fuelcell-rebel-v5-men-performance-running-grey.html"}, "f": {"p": 5300, "url": "https://www.newbalance.co.th/new-balance-fuelcell-rebel-v5-women-performance-running-white.html"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "New Balance", "n": "860 v15", "r": 0, "p": 5200, "c": ["daily"], "cu": 2, "v": {"m": {"p": 5200, "url": "https://www.newbalance.co.th/new-balance-860-v-15-mens-wide-running-shoes-white.html", "onlyWide": 1}}, "st": 1, "w": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "New Balance", "n": "Fresh Foam X Hierro v9", "r": 0, "p": 5900, "c": ["trail"], "cu": 3, "v": {"m": {"p": 5900, "url": "https://www.newbalance.co.th/new-balance-hierro-v-9-men-running-shoes-grey.html"}}, "d": t("สำหรับวิ่งเทรล") },
+    {"b": "Puma", "n": "Velocity NITRO 5", "r": 0, "p": 4500, "c": ["daily"], "cu": 2, "v": {"m": {"p": 4500, "url": "https://th.puma.com/th/en/pd/velocity-nitro%E2%84%A2-5-running-shoes-men/312944.html?dwvar_312944_color=10"}, "f": {"p": 4500, "url": "https://th.puma.com/th/en/pd/velocity-nitro%E2%84%A2-5-running-shoes-women/312945.html?dwvar_312945_color=09"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Puma", "n": "Deviate Pure NITRO", "r": 0, "p": 5400, "c": ["daily", "speed"], "cu": 2, "v": {"m": {"p": 5400, "url": "https://th.puma.com/th/en/pd/deviate-pure-nitro%E2%84%A2-running-shoes-men/313904.html?dwvar_313904_color=13"}, "f": {"p": 5400, "url": "https://th.puma.com/th/en/pd/deviate-pure-nitro%E2%84%A2-running-shoes-women/313905.html?dwvar_313905_color=11"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "Puma", "n": "Deviate NITRO 4", "r": 0, "p": 6200, "c": ["speed", "race"], "cu": 3, "v": {"m": {"p": 6200, "url": "https://th.puma.com/th/en/pd/deviate-nitro%E2%84%A2-4-running-shoes-men/312123.html?dwvar_312123_color=27"}, "f": {"p": 6200, "url": "https://th.puma.com/th/en/pd/deviate-nitro%E2%84%A2-4-running-shoes-women/312124.html?dwvar_312124_color=35"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "Puma", "n": "MagMax NITRO 2", "r": 0, "p": 6400, "c": ["cushion", "daily"], "cu": 3, "v": {"m": {"p": 6400, "url": "https://th.puma.com/th/en/pd/magmax-nitro%E2%84%A2-2-running-shoes-men/312125.html?dwvar_312125_color=20"}, "f": {"p": 6400, "url": "https://th.puma.com/th/en/pd/magmax-nitro%E2%84%A2-2-running-shoes-women/312126.html?dwvar_312126_color=21"}}, "d": t("เน้นความนุ่มสำหรับวิ่งยาว") },
+    {"b": "On", "n": "Cloudrunner 3", "r": 0, "p": 5800, "c": ["daily"], "cu": 2, "v": {"m": {"p": 5800, "url": "https://www.on.com/en-th/products/cloudrunner-3-m-3mg1007/mens/platinum-squash-shoes-3MG10075244"}, "f": {"p": 5800, "url": "https://www.on.com/en-th/products/cloudrunner-3-w-3wg1005/womens/ivory-aquamarine-shoes-3WG10056057"}}, "st": 1, "d": t("ช่วยประคองเท้าสำหรับการซ้อม") },
+    {"b": "On", "n": "Cloudmonster 3", "r": 0, "p": 7200, "c": ["daily", "cushion"], "cu": 3, "v": {"m": {"p": 7200, "url": "https://www.on.com/en-th/products/cloudmonster-3-m-3mg1005/mens/brook-flurry-shoes-3MG10055256"}, "f": {"p": 7200, "url": "https://www.on.com/en-th/products/cloudmonster-3-w-3wg1003/womens/ivory-topaz-shoes-3WG10035261"}}, "d": t("สำหรับซ้อมวิ่งทั่วไป") },
+    {"b": "On", "n": "Cloudmonster 3 Hyper", "r": 0, "p": 9100, "c": ["speed", "cushion"], "cu": 3, "v": {"m": {"p": 9100, "url": "https://www.on.com/en-th/products/cloudmonster-3-hyper-3mg1006/mens/ivory-flurry-shoes-3MG10065262"}, "f": {"p": 9100, "url": "https://www.on.com/en-th/products/cloudmonster-3-hyper-3wg1004/womens/ivory-flurry-shoes-3WG10045262"}}, "d": t("สำหรับซ้อมทำความเร็ว") },
+    {"b": "On", "n": "LightSpray Cloudmonster 3 Hyper", "r": 0, "p": 9900, "c": ["speed", "cushion"], "cu": 3, "v": {"m": {"p": 9900, "url": "https://www.on.com/en-th/products/cloudmonster-3-hyper-ls-u-3ug1001/unisex/flurry-verdite-shoes-3UG10015162"}, "f": {"p": 9900, "url": "https://www.on.com/en-th/products/cloudmonster-3-hyper-ls-u-3ug1001/unisex/flurry-verdite-shoes-3UG10015162"}}, "d": t("สำหรับซ้อมทำความเร็ว") }
   ];
 
   /* ---------- knowledge: common Thai dishes, one usual serving ----------
@@ -1193,7 +1234,7 @@
   function blankState() {
     return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
       food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" }, summary: null,
-      profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 },
+      profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: cleanShoeQ(null),
       today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
   }
   // "Delete all data": everything the app stored goes. Only the language and the user's own Gemini key
@@ -1253,13 +1294,16 @@
     return { name: x.name.trim().slice(0, 40), ts: x.ts, base: Math.max(0, Math.min(3000, +x.base || 0)) };
   }
   function cleanShoeQ(q) {
-    var d = { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500 };
+    var d = { use: "daily", sex: "m", width: "normal", arch: "unsure", budget: 6500, brands: [] };
     if (!q || typeof q !== "object") return d;
     if (SHOE_USE[q.use]) d.use = q.use;
     if (q.sex === "m" || q.sex === "f") d.sex = q.sex;
     if (["narrow", "normal", "wide"].indexOf(q.width) >= 0) d.width = q.width;
     if (["normal", "flat", "unsure"].indexOf(q.arch) >= 0) d.arch = q.arch;
     if (+q.budget >= 500 && +q.budget <= 30000) d.budget = Math.round(+q.budget);
+    // [] means every brand; old saves have no brands field. Drop unknown/duplicate import values.
+    if (Array.isArray(q.brands)) d.brands = SHOE_BRANDS.filter(function (brand) { return q.brands.indexOf(brand) >= 0; });
+    if (d.brands.length === SHOE_BRANDS.length) d.brands = [];
     return d;
   }
   // Workout history: drop anything the rest of the app would crash on (a broken import used to brick the app).
@@ -2757,51 +2801,82 @@
       '<p class="hint">' + msg + t(' (รองเท้าวิ่งส่วนใหญ่ใช้ได้ราว 500–800 กม.)</p><button class="btn line" type="button" id="shoe-clear">เปลี่ยนคู่ใหม่</button>');
   }
 
-  // Score every shoe for what the runner asked for. Over budget is never shown as a pick.
+  // Apply hard constraints before scoring. Never relax filters or offer over-budget alternatives.
   function pickShoes(q, ctx) {
     ctx = ctx || {};
-    var scored = SHOES.map(function (sh) {
-      var sc = 0, why = [], warn = [];
-      var main = sh.c[0] === q.use, fits = sh.c.indexOf(q.use) >= 0;
-      if (main) sc += 10; else if (fits) sc += 6; else if (q.use === "daily" && sh.c.indexOf("cushion") >= 0) sc += 4; else sc -= 20;
-      if (main) why.push(t("ออกแบบมาเพื่อ") + SHOE_USE[q.use]); else if (fits) why.push(t("ใช้") + SHOE_USE[q.use] + t("ได้ดี"));
-      if (q.arch === "flat") {
-        if (sh.st) { sc += 7; why.push(t("มีซัพพอร์ต ช่วยเท้าแบนหรือข้อเท้าที่ล้มเข้า")); }
-        else if (q.use === "daily" || q.use === "cushion") sc -= 3;
-      } else if (q.arch === "normal" && sh.st) sc -= 2;
-      if (q.width === "wide") {
-        if (sh.w) { sc += 4; why.push(t("มีรุ่นหน้ากว้าง (Wide)")); } else { sc -= 4; warn.push(t("ไม่มีรุ่นหน้ากว้าง ลองใส่จริงก่อนซื้อ")); }
-      }
-      if (q.width === "narrow" && sh.cu === 3) warn.push(t("ทรงค่อนข้างหนา คนเท้าแคบควรลองผูกเชือกให้กระชับ"));
+    var scored = SHOES.map(function (model) {
+      var variant = model.v[q.sex];
+      if (!variant || (q.brands && q.brands.length && q.brands.indexOf(model.b) < 0)) return null;
+      if (model.c.indexOf(q.use) < 0 || (q.arch === "flat" && !model.st)) return null;
+      if (q.width === "narrow") return null; // No Narrow SKU has been verified in this snapshot.
+      var wide = q.width === "wide";
+      if (wide && !variant.w && !variant.onlyWide) return null;
+      if (!wide && variant.onlyWide) return null;
+      var selected = wide && variant.w ? variant.w : variant;
+      if (selected.p > q.budget) return null;
+      var sh = Object.assign({}, model, { p: selected.p, url: selected.url, w: wide ? 1 : 0 });
+      var sc = sh.c[0] === q.use ? 10 : 6, why = [], warn = [];
+      why.push(t("ออกแบบมาเพื่อ") + SHOE_USE[sh.c[0]]);
+      if (q.arch === "flat") { sc += 7; why.push(t("มีซัพพอร์ต ช่วยเท้าแบนหรือข้อเท้าที่ล้มเข้า")); }
+      else if (q.arch === "normal" && sh.st) sc -= 2;
+      if (wide) why.push(t("มีรุ่นหน้ากว้าง (Wide)"));
       if (ctx.kg >= 85 && sh.cu === 3) { sc += 2; why.push(t("พื้นหนา รับน้ำหนักตัวได้ดี")); }
       if (ctx.kg >= 85 && sh.cu === 1) sc -= 2;
-      if (q.use === "race" && ctx.runs < 5 && sh.p >= 8000) { sc -= 3; warn.push(t("ถ้ายังวิ่งไม่บ่อย รุ่นแข่งราคาสูงอาจยังไม่จำเป็น")); }
-      sc += sh.r * 1.5 - sh.p / q.budget * 0.5; // proven models first; cheaper wins a tie
+      if (q.use === "race" && ctx.runs < 5 && sh.p >= 8000) warn.push(t("ถ้ายังวิ่งไม่บ่อย รุ่นแข่งราคาสูงอาจยังไม่จำเป็น"));
+      sc += sh.r * 1.5 - sh.p / q.budget * 0.5;
       return { s: sh, sc: sc, why: why, warn: warn };
-    }).filter(function (x) { return x.sc > 0; }).sort(function (a, b) { return b.sc - a.sc; });
-    var inBudget = scored.filter(function (x) { return x.s.p <= q.budget; });
-    var over = scored.filter(function (x) { return x.s.p > q.budget; }).sort(function (a, b) { return a.s.p - b.s.p; });
-    return { picks: inBudget.slice(0, 3), nearest: inBudget.length ? null : over[0] || null };
+    }).filter(function (x) { return x !== null; }).sort(function (a, b) { return b.sc - a.sc; });
+    return { picks: scored.slice(0, 3), count: scored.length, nearest: null };
   }
   function baht(n) { return t("฿") + n.toLocaleString(LOCALE); }
+  // Original category illustrations: silhouettes and details are drawn here, never brand product photos.
+  function shoeIllustration(sh) {
+    var kind = sh.st ? "stability" : sh.c[0];
+    var upper = "M36 65 L42 36 Q45 30 51 36 L66 48 Q77 52 87 39 L104 28 Q110 25 115 33 L143 58 Q160 66 184 66 Q199 66 205 77 L202 84 L36 84 Z";
+    var sole = "M32 81 Q80 91 140 83 L204 77 Q211 84 202 92 Q170 103 101 103 L40 99 Q30 96 32 81 Z";
+    if (kind === "cushion" || kind === "stability") sole = "M31 77 Q93 88 145 78 L205 74 L208 92 Q175 111 100 110 L36 104 Q27 100 31 77 Z";
+    if (kind === "speed" || kind === "race") upper = "M34 69 L44 38 Q48 34 54 43 L69 52 Q85 55 97 33 Q103 24 112 32 L143 58 Q171 61 193 67 Q202 71 204 78 L196 85 L36 84 Z";
+    var detail = '<path class="detail" d="M96 43 L113 47 M90 49 L120 54 M85 55 L126 60"/>';
+    if (kind === "daily") detail += '<path class="detail" d="M49 63 Q68 72 87 63 M145 72 L176 74"/>';
+    if (kind === "cushion") detail += '<path class="detail" d="M42 94 Q113 107 193 88"/>';
+    if (kind === "speed") detail += '<path class="detail" d="M61 73 L93 64 M113 77 L146 67 M18 59 L33 59 M15 68 L29 68"/>';
+    if (kind === "race") detail += '<path class="detail" d="M42 92 Q122 100 199 82 M145 55 L154 49 L162 56 L170 50"/>';
+    if (kind === "trail") detail += '<path class="detail" d="M41 101 L44 108 L54 108 L57 102 M72 103 L75 111 L85 111 L88 104 M105 104 L108 111 L118 111 L121 103 M145 101 L149 108 L159 106 L161 98 M180 96 L186 102 L195 98 L195 91 M45 55 L59 68 L70 60"/>';
+    if (kind === "stability") detail += '<path class="support" d="M38 80 L66 85 L71 103 L40 100 Z"/><path class="detail" d="M47 86 L50 97 M56 88 L60 98"/>';
+    return '<svg class="shoe-art" data-brand="' + esc(sh.b) + '" data-kind="' + kind + '" viewBox="0 0 240 125" aria-hidden="true" focusable="false"><path class="upper" d="' + upper + '"/><path class="sole" d="' + sole + '"/>' + detail + '</svg>';
+  }
   function shoeCard(x, q, rank) {
-    var sh = x.s, url = "https://www.google.com/search?q=" + encodeURIComponent(sh.b + " " + sh.n + (q.sex === "f" ? " women" : " men") + t(" ราคา"));
-    return '<div class="shoe' + (rank === 0 ? " top" : "") + '"><div class="shoe-h"><span><small>' + esc(sh.b) + "</small>" + esc(sh.n) + '</span><b>' + baht(sh.p) + "</b></div>" +
+    var sh = x.s;
+    return '<div class="shoe' + (rank === 0 ? " top" : "") + '">' + shoeIllustration(sh) + '<div class="shoe-h"><span><small>' + esc(sh.b) + "</small>" + esc(sh.n) + '</span><b>' + baht(sh.p) + "</b></div>" +
       '<p class="shoe-d">' + esc(sh.d) + "</p>" +
       (x.why.length ? '<ul class="shoe-why">' + x.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>" : "") +
       (x.warn.length ? '<p class="shoe-warn">' + x.warn.map(esc).join(" ") + "</p>" : "") +
-      '<a class="shoe-link" href="' + url + t('" target="_blank" rel="noopener">ค้นหาราคาและร้าน</a></div>');
+      '<a class="shoe-link" href="' + esc(sh.url) + '" target="_blank" rel="noopener noreferrer">' + t("ดูรูปจริงและราคาที่ร้านทางการ") + '</a></div>';
   }
   function finderHtml() {
     var q = S.shoeQ, r = pickShoes(q, { kg: latestWeight() || 0, runs: S.runs.length });
-    var h = "";
-    if (r.picks.length) h += t('<p class="q" style="margin-top:16px">แนะนำสำหรับ') + SHOE_USE[q.use] + t(" (รุ่น") + (q.sex === "f" ? t("ผู้หญิง") : t("ผู้ชาย")) + t(") งบไม่เกิน ") + baht(q.budget) + "</p>" + r.picks.map(function (x, i) { return shoeCard(x, q, i); }).join("");
-    else if (r.nearest) h += t('<p class="empty">ในงบ ') + baht(q.budget) + t(" ยังไม่มีรุ่นที่เหมาะในรายการ</p><p class=\"q\">ใกล้งบที่สุด</p>") + shoeCard(r.nearest, q, 1);
-    else h += t('<p class="empty">ยังไม่มีรุ่นที่ตรงเงื่อนไข ลองเปลี่ยนแบบการใช้หรือเพิ่มงบ</p>');
-    if (q.arch === "flat") h += t('<p class="hint">ถ้าเจ็บอุ้งเท้าหรือเข่าเวลาวิ่งบ่อย ๆ ควรให้นักกายภาพหรือร้านที่วิเคราะห์การวิ่งดูก่อน</p>');
-    h += t('<p class="hint">ราคาป้ายจากเว็บไซต์ทางการในไทย (ASICS, Nike, adidas) ') + SHOE_DATE + t(" ร้านอาจลดราคา ") +
-      (q.sex === "f" ? t("รุ่นผู้หญิงใช้ชื่อเดียวกันแต่ทรงและไซซ์ต่างจากรุ่นผู้ชาย ") : "") + t("ลองใส่จริงตอนเย็นที่เท้าขยายแล้ว เผื่อปลายเท้าราวครึ่งนิ้ว</p>");
+    var h = '<p class="hint">' + esc(tf(t("ราคาตรวจสอบ ณ {date} · ราคาป้าย อาจเปลี่ยนได้"), { date: SHOE_DATE })) + '</p>';
+    h += '<p class="hint">' + t("ภาพวาดแสดงประเภทรองเท้า ไม่ใช่รูปสินค้าจริง") + '</p>';
+    if (r.picks.length) {
+      h += '<p class="q">' + esc(tf(t("พบ {n} รุ่นตรงเงื่อนไข · แสดง {shown} อันดับแรก"), { n: r.count, shown: r.picks.length })) + '</p>';
+      h += '<p class="hint">' + SHOE_USE[q.use] + ' · ' + (q.sex === "f" ? t("ผู้หญิง") : t("ผู้ชาย")) + ' · ' + t("งบไม่เกิน") + ' ' + baht(q.budget) + '</p>';
+      h += r.picks.map(function (x, i) { return shoeCard(x, q, i); }).join("");
+    } else h += '<p class="empty">' + t("ไม่พบรุ่นตรงเงื่อนไขที่เลือก ไม่มีการข้ามตัวกรองหรือเพิ่มงบให้อัตโนมัติ") + '</p>';
+    h += '<button class="btn line" type="button" id="sf-reset">' + t("ล้างตัวกรอง") + '</button>';
+    if (q.arch === "flat") h += t("<p class=\"hint\">ถ้าเจ็บอุ้งเท้าหรือเข่าเวลาวิ่งบ่อย ๆ ควรให้นักกายภาพหรือร้านที่วิเคราะห์การวิ่งดูก่อน</p>");
+    if (q.width === "narrow") h += '<p class="hint">' + t("ยังไม่ยืนยันรุ่น Narrow ในรายการ จึงไม่แสดงรุ่นทรงปกติแทน") + '</p>';
+    h += '<p class="hint">' + t("แสดงเฉพาะรุ่นเพศและ Wide ที่ยืนยันได้ ไม่ใช่ข้อมูลสต็อกสด สี ไซซ์ และโปรโมชันอาจทำให้ราคาต่างกัน ควรลองสวมก่อนซื้อ") + '</p>';
     return h;
+  }
+  function toggleShoeBrand(q, brand) {
+    var next = cleanShoeQ(q);
+    if (brand === "all") next.brands = [];
+    else if (SHOE_BRANDS.indexOf(brand) >= 0) {
+      var at = next.brands.indexOf(brand);
+      if (at >= 0) next.brands.splice(at, 1); else next.brands.push(brand);
+      if (next.brands.length === SHOE_BRANDS.length) next.brands = [];
+    }
+    return next;
   }
   function renderRun() {
     Array.prototype.forEach.call($("run-type").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", b.dataset.v === runType ? "true" : "false"); });
@@ -2819,6 +2894,15 @@
       '<p class="trend" style="margin-top:12px">' + esc(weekAdvice(w)) + "</p>";
     $("shoe-now").innerHTML = shoeHtml();
     var q = S.shoeQ;
+    var brands = q.brands || [];
+    var brandButtons = $("sf-brands").querySelectorAll("button");
+    if (!brandButtons.length) {
+      $("sf-brands").innerHTML = '<button type="button" class="chip" data-brand="all">' + t("ทุกแบรนด์") + '</button>' + SHOE_BRANDS.map(function (brand) { return '<button type="button" class="chip" data-brand="' + esc(brand) + '">' + esc(brand) + '</button>'; }).join("");
+      brandButtons = $("sf-brands").querySelectorAll("button");
+    }
+    Array.prototype.forEach.call(brandButtons, function (button) {
+      button.setAttribute("aria-pressed", button.dataset.brand === "all" ? String(!brands.length) : String(brands.indexOf(button.dataset.brand) >= 0));
+    });
     pressed("sf-use", q.use); pressed("sf-sex", q.sex); pressed("sf-width", q.width); pressed("sf-arch", q.arch);
     if (document.activeElement !== $("sf-budget")) $("sf-budget").value = q.budget;
     Array.prototype.forEach.call($("sf-budget-q").querySelectorAll("button"), function (b) { b.classList.toggle("on", +b.dataset.v === q.budget); });
@@ -3120,6 +3204,15 @@
       S.shoeQ[p[1]] = b.dataset.v; save(); renderRun(); trackOnce("shoe_finder");
     });
   });
+  $("sf-brands").addEventListener("click", function (ev) {
+    var button = ev.target.closest("button[data-brand]"); if (!button) return;
+    S.shoeQ = toggleShoeBrand(S.shoeQ, button.dataset.brand); save(); renderRun(); trackOnce("shoe_finder");
+  });
+  $("sf-out").addEventListener("click", function (ev) {
+    if (!ev.target.closest("#sf-reset")) return;
+    S.shoeQ = cleanShoeQ(null); save(); renderRun();
+    $("sf-brands").querySelector("button").focus(); trackOnce("shoe_finder");
+  });
   $("sf-budget-q").addEventListener("click", function (ev) {
     var b = ev.target.closest("button"); if (!b) return;
     S.shoeQ.budget = +b.dataset.v; save(); renderRun(); trackOnce("shoe_finder");
@@ -3127,6 +3220,7 @@
   $("sf-budget").addEventListener("change", function () {
     var v = num(this.value);
     if (v >= 500 && v <= 30000) { S.shoeQ.budget = Math.round(v); save(); }
+    this.value = S.shoeQ.budget;
     renderRun();
   });
   $("sessions").addEventListener("click", function (ev) {

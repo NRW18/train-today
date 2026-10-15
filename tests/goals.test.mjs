@@ -60,15 +60,17 @@ test("flat feet get a stability shoe on top; wide feet get a wide model", () => 
   assert.ok(finder({ ...base, width: "wide" }, {}).picks[0].s.w);
 });
 
-test("a mid budget gets proven trainers, not just the cheapest", () => {
+test("a mid budget gets a verified primary-use trainer without invented ratings", () => {
   const top = finder(base, {}).picks[0].s;
-  assert.ok(top.r >= 3 && top.p >= 4500, top.n);
+  assert.equal(top.c[0], "daily");
+  assert.equal(top.r, 0);
+  assert.ok(top.url.startsWith("https://"));
 });
 
-test("budget too low: no picks, but the nearest model is offered", () => {
+test("budget too low: no picks and no over-budget alternative", () => {
   const r = finder({ ...base, use: "race", budget: 3000 }, {});
   assert.equal(r.picks.length, 0);
-  assert.ok(r.nearest && r.nearest.s.p > 3000);
+  assert.equal(r.nearest, null);
 });
 
 test("saving the goal numbers keeps the chosen goal and rest time", () => {
