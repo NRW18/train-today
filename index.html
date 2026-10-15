@@ -466,8 +466,15 @@
   .sheet.dark .sh-msg.err { color: var(--red); }
   .sh-sec { font-family: var(--head); font-weight: 700; font-size: 1.05rem; margin: 20px 0 6px; padding-left: 10px; border-left: 3px solid currentColor; line-height: 1.25; }
   .sheet.dark .hint, .sheet.dark small { color: var(--soft); }
-  .sh-ex { padding: 16px 0; border-top: 1px solid var(--line); }
-  .sh-ex:first-of-type { border-top: 0; }
+  .sh-ex { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; margin: 14px 0; overflow-wrap: anywhere; }
+  .scan-muscles { display: block; width: 180px; max-width: 100%; height: auto; margin: 14px auto; }
+  .scan-body { fill: var(--bg); stroke: var(--line); stroke-width: 2; }
+  .scan-region { fill: var(--line); }
+  .scan-region.on { fill: var(--blue); }
+  .scan-steps { padding-left: 24px; line-height: 1.65; }
+  .scan-dose { background: var(--bg); border-radius: 16px; padding: 12px; margin: 12px 0; }
+  .scan-actions { display: grid; gap: 10px; margin-top: 16px; }
+  .gym-thumb { float: left; object-fit: cover; border-radius: 12px; margin: 0 10px 6px 0; }
   .sh-pick { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; cursor: pointer; line-height: 1.4; }
   .sh-pick input { width: 22px; height: 22px; accent-color: var(--blue); flex: none; margin: 1px 0 0; }
   .sh-pick small { display: block; font-weight: 400; font-size: .84rem; }
@@ -1232,7 +1239,7 @@
   var KEY = "train-today-v1", AIKEY = "train-today-gemini-key";
   var S = blankState();
   function blankState() {
-    return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanned: false,
+    return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanThumbs: {}, scanned: false,
       food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" }, summary: null,
       profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: cleanShoeQ(null),
       today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
@@ -1248,6 +1255,81 @@
   // a short plain-English name (letters, digits, spaces, a few marks) or nothing
   function cleanEn(x) { return typeof x === "string" && /^[A-Za-z0-9 ().&\/-]{2,60}$/.test(x.trim()) ? x.trim() : ""; }
   function cleanGuide(g) { return g && typeof g === "object" ? { how: strList(g.how, 4), miss: strList(g.miss, 3) } : null; }
+  // Bound the stored data URL too: base64 overhead counts toward the 25 KB limit.
+  function cleanThumbnail(value) {
+    if (typeof value !== "string" || value.length > 25000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value)) return "";
+    try {
+      var bytes = atob(value.slice(23));
+      if (bytes.slice(0, 3) !== "\xff\xd8\xff" || bytes.slice(-2) !== "\xff\xd9") return "";
+      var pos = 2, sized = false, scanned = false;
+      while (pos + 3 < bytes.length) {
+        if (bytes.charCodeAt(pos++) !== 255) return "";
+        var marker = bytes.charCodeAt(pos++);
+        var len = bytes.charCodeAt(pos) * 256 + bytes.charCodeAt(pos + 1);
+        if (len < 2 || pos + len > bytes.length) return "";
+        if (marker === 218) { scanned = len >= 6 && pos + len < bytes.length - 2; break; }
+        if ([192,193,194].indexOf(marker) >= 0) {
+          var height = bytes.charCodeAt(pos + 3) * 256 + bytes.charCodeAt(pos + 4);
+          var width = bytes.charCodeAt(pos + 5) * 256 + bytes.charCodeAt(pos + 6);
+          if (len < 8 || !width || !height || width > 320 || height > 320) return "";
+          sized = true;
+        }
+        pos += len;
+      }
+      return sized && scanned ? value : "";
+    } catch (err) { return ""; }
+  }
+  function cleanScanThumbs(value, ids) {
+    var out = {};
+    if (!value || typeof value !== "object" || Array.isArray(value)) return out;
+    Object.keys(value).forEach(function (id) {
+      if (Object.keys(out).length >= 30 || ids.indexOf(id) < 0 || id === "__proto__" || id === "constructor") return;
+      var image = cleanThumbnail(value[id]);
+      if (image) out[id] = image;
+    });
+    return out;
+  }
+  // Header checks bound work; the browser's JPEG decoder decides whether this is a real image.
+  function decodeThumbnail(value) {
+    value = cleanThumbnail(value);
+    if (!value) return Promise.resolve("");
+    return new Promise(function (resolve) {
+      var image = new Image();
+      image.onload = function () {
+        function decoded() { resolve(image.naturalWidth > 0 && image.naturalHeight > 0 && image.naturalWidth <= 320 && image.naturalHeight <= 320 ? value : ""); }
+        if (typeof image.decode === "function") image.decode().then(decoded, function () { resolve(""); });
+        else decoded();
+      };
+      image.onerror = function () { resolve(""); };
+      image.src = value;
+    });
+  }
+  function decodeScanThumbs(value, ids) {
+    var candidates = cleanScanThumbs(value, ids), out = {};
+    return Promise.all(Object.keys(candidates).map(function (id) {
+      return decodeThumbnail(candidates[id]).then(function (image) { if (image) out[id] = image; });
+    })).then(function () { return out; });
+  }
+  function checkLoadedThumbnails() {
+    var owner = S, images = S.scanThumbs;
+    if (!images || !Object.keys(images).length) return;
+    var candidates = Object.assign({}, images);
+    return decodeScanThumbs(candidates, Object.keys(EXBY)).then(function (valid) {
+      if (S !== owner || S.scanThumbs !== images) return;
+      Object.keys(candidates).forEach(function (id) { if (images[id] === candidates[id] && !valid[id]) delete images[id]; });
+      renderGym();
+    });
+  }
+  function hideBrokenThumbnail(image) {
+    image.hidden = true;
+    var id = image.dataset.thumbId, value = image.getAttribute("src");
+    if (id && S.scanThumbs && S.scanThumbs[id] === value) delete S.scanThumbs[id];
+    image.removeAttribute("src");
+  }
+  function thumbnailHtml(id) {
+    var image = S.scanThumbs && S.scanThumbs[id];
+    return image ? '<img class="gym-thumb" data-thumb-id="' + esc(id) + '" src="' + esc(image) + '" alt="' + t("รูปเครื่องที่ถ่าย") + '" loading="lazy" width="48" height="48">' : "";
+  }
   function cleanCustom(list) {
     return (Array.isArray(list) ? list : []).filter(function (e) {
       return e && typeof e.id === "string" && /^c_/.test(e.id) && typeof e.name === "string" && DAYS[e.day] &&
@@ -1345,6 +1427,7 @@
         if (d.slot) S.slot = d.slot; if (d.energy) S.energy = d.energy;
         if (d.body && d.bodyDay === dayKey(Date.now())) S.body = d.body; // soreness resets each day
         S.custom = cleanCustom(d.custom);
+        S.scanThumbs = cleanScanThumbs(d.scanThumbs, BASE_EX.concat(S.custom).map(function (ex) { return ex.id; }));
         S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return typeof x === "string"; }) : [];
         S.scanned = !!d.scanned;
         S.food = cleanFood(d.food); S.weights = cleanW(d.weights); S.runs = cleanRuns(d.runs);
@@ -1358,12 +1441,12 @@
         }
       }
     } catch (e) {}
-    rebuildEx();
+    rebuildEx(); checkLoadedThumbnails();
   }
   function snapshot() {
-    return { log: S.log, off: S.off, custom: S.custom, seen: S.seen, food: S.food, weights: S.weights, runs: S.runs, prefs: S.prefs, profile: S.profile, shoe: S.shoe, shoeQ: S.shoeQ };
+    return { log: S.log, off: S.off, custom: S.custom, seen: S.seen, scanThumbs: S.scanThumbs || {}, food: S.food, weights: S.weights, runs: S.runs, prefs: S.prefs, profile: S.profile, shoe: S.shoe, shoeQ: S.shoeQ };
   }
-  function save() {
+  function save(previousThumbs) {
     try {
       var o = snapshot();
       o.slot = S.slot; o.energy = S.energy; o.body = S.body; o.bodyDay = dayKey(Date.now()); o.scanned = S.scanned; o.summary = S.summary;
@@ -1371,7 +1454,20 @@
       o.onboarded = S.onboarded;
       o.draft = S.draft; o.draftTs = S.draftTs; // set only when the user types or ticks, so an old draft still expires
       localStorage.setItem(KEY, JSON.stringify(o));
-    } catch (e) { toast(t("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า")); }
+      return true;
+    } catch (e) {
+      // Retry only a scan's new/replaced photos. Never remove previously saved photos.
+      if (o && previousThumbs && JSON.stringify(o.scanThumbs) !== JSON.stringify(previousThumbs)) {
+        o.scanThumbs = previousThumbs;
+        try {
+          localStorage.setItem(KEY, JSON.stringify(o)); S.scanThumbs = previousThumbs;
+          toast(t("บันทึกท่าโดยไม่เพิ่มรูปย่อใหม่ รูปเดิมและข้อมูลส่วนตัวยังอยู่ครบ"));
+          return true;
+        } catch (retryError) {}
+      }
+      toast(t("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า"));
+      return false;
+    }
   }
   // Another tab saved: take its data so this tab never writes old data over it. The sets being typed or
   // ticked (the draft) stay from whichever tab touched them last. Returns true if this tab's draft won,
@@ -2125,7 +2221,7 @@
       items.forEach(function (e) {
         var tags = (S.seen.indexOf(e.id) >= 0 ? t(' <span class="ai-tag">สแกนเจอ</span>') : "") + (e.ai ? t(' <span class="newtag">AI เพิ่ม</span>') : "");
         var del = e.ai ? ' <button type="button" class="del" data-del="' + e.id + t('">ลบ</button>') : "";
-        h += '<label class="toggle"><span class="lbl">' + esc(e.name) + tags + del + '</span><input type="checkbox" data-ex="' + e.id + '"' + (S.off.indexOf(e.id) < 0 ? " checked" : "") + "></label>";
+        h += '<label class="toggle"><span class="lbl">' + thumbnailHtml(e.id) + esc(e.name) + tags + del + '</span><input type="checkbox" data-ex="' + e.id + '"' + (S.off.indexOf(e.id) < 0 ? " checked" : "") + "></label>";
       });
       h += "</div>";
     });
@@ -2177,6 +2273,51 @@
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("read")); };
       img.src = url;
     });
+  }
+
+  function makeThumbnail(dataUrl) {
+    return new Promise(function (resolve) {
+      var image = new Image();
+      image.onerror = function () { resolve(""); };
+      image.onload = function () {
+        try {
+          var canvas = document.createElement("canvas"), size = 320;
+          while (size >= 80) {
+            var ratio = Math.min(1, size / Math.max(image.naturalWidth, image.naturalHeight));
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * ratio));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * ratio));
+            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+            for (var quality = 0.8; quality >= 0.3; quality -= 0.15) {
+              var thumb = cleanThumbnail(canvas.toDataURL("image/jpeg", quality));
+              if (thumb) { resolve(decodeThumbnail(thumb)); return; }
+            }
+            size = Math.floor(size * 0.75);
+          }
+        } catch (err) {}
+        resolve("");
+      };
+      image.src = dataUrl;
+    });
+  }
+
+  // Original front/back schematic. Highlighted regions come only from validated muscle IDs.
+  function scanMuscles(ex) {
+    function region(key, path) { return '<path class="scan-region' + (ex.m.indexOf(key) >= 0 ? ' on' : '') + '" data-muscle="' + key + '" d="' + path + '"/>'; }
+    var front = '<circle class="scan-body" cx="50" cy="20" r="12"/><path class="scan-body" d="M34 37Q50 32 66 37L82 83 72 88 63 62 62 100 67 171 54 171 50 119 46 171 33 171 38 100 37 62 28 88 18 83Z"/>';
+    var rear = front;
+    front += region("chest", "M38 43H62V61H38Z") + region("core", "M40 65H60V98H40Z") + region("shoulders", "M30 40L36 38 38 54 32 56ZM64 38L70 40 68 56 62 54Z") + region("biceps", "M29 57L35 59 30 75 24 73ZM65 59L71 57 76 73 70 75Z") + region("quads", "M38 105L47 107 45 137 35 137ZM53 107L62 105 65 137 55 137Z");
+    rear += region("back", "M38 43H62L59 96H41Z") + region("triceps", "M29 57L35 59 30 75 24 73ZM65 59L71 57 76 73 70 75Z") + region("glutes", "M38 99H62L63 115H37Z") + region("hamstrings", "M37 118H47L45 139H35ZM53 118H63L65 139H55Z") + region("calves", "M35 143H45L44 164H35ZM55 143H65V164H56Z");
+    return '<svg class="scan-muscles" viewBox="0 0 210 200" role="img" aria-label="' + esc(t("กล้ามเนื้อเป้าหมาย") + ": " + names(ex.m, MUSCLES)) + '">' + front + '<g transform="translate(110 0)">' + rear + '</g><text x="50" y="192" text-anchor="middle" fill="currentColor" font-size="11">' + t("ด้านหน้า") + '</text><text x="160" y="192" text-anchor="middle" fill="currentColor" font-size="11">' + t("ด้านหลัง") + '</text></svg>';
+  }
+  function scanExerciseHtml(ex, item, saved, selected) {
+    var en = EN_NAME[ex.id] || ex.en || "", guide = GUIDE[ex.id] || ex.guide;
+    var sug = suggest(ex, S.energy === "tired"), sets = S.energy === "tired" || firstWeekLevel() === 0 ? 2 : 3;
+    var pick = item.fresh ? 'data-new="' + item.k + '"' : 'data-known="' + esc(item.id) + '"';
+    var checked = typeof selected === "boolean" ? selected : !!item.fresh || item.conf >= 0.5;
+    return '<article class="sh-ex"><label class="sh-pick"><input type="checkbox" ' + pick + (checked ? " checked" : "") + (saved ? " disabled" : "") + '><span>' + esc(ex.name) + (en ? '<small lang="en">' + esc(en) + '</small>' : '<small>' + t("ยังไม่มีชื่อภาษาอังกฤษที่ยืนยันแล้ว") + '</small>') + (!checked ? '<small>' + t("AI ไม่แน่ใจ ตรวจดูก่อน") + '</small>' : '') + '</span></label>' +
+      scanMuscles(ex) + '<p class="hint">' + esc(names(ex.m, MUSCLES)) + '</p><div class="scan-dose">' + tf(t("{n} เซ็ต"), { n: sets }) + ' · ' + esc(sug.reps + (ex.t === "sec" ? t(" วิ") : t(" ครั้ง"))) + '<small class="hint" style="display:block">' + esc(sug.tip) + '</small></div>' +
+      (guide && guide.how && guide.how.length >= 3 ? '<ol class="scan-steps">' + guide.how.slice(0, 4).map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>' : '<p class="hint">' + t("ยังไม่มีขั้นตอนที่ครบถ้วนสำหรับท่านี้ ดูวิดีโอหรือสอบถามผู้ฝึกสอนก่อนใช้เครื่อง") + '</p>') +
+      '<p class="hint">' + tf(t("พักระหว่างเซ็ต {t}"), { t: restText(S.prefs.rest) }) + '</p>' + exVideos(ex) + '</article>';
   }
 
   // One place that talks to Gemini; always asks for JSON back.
@@ -2432,8 +2573,10 @@
     drawShots(); openShot(id);
     $("scan-label").classList.add("busy");
     shrink(file).then(function (dataUrl) {
-      s.img = dataUrl; shotChanged(id);
-      return callGemini([{ text: buildPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }]);
+      return makeThumbnail(dataUrl).then(function (thumb) {
+        s.img = thumb; shotChanged(id);
+        return callGemini([{ text: buildPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }]);
+      });
     }).then(function (raw) {
       s.r = validate(raw);
       s.state = s.r.equipment.length || s.r.fresh.length ? "done" : "empty";
@@ -2447,11 +2590,23 @@
     $("scan-results").innerHTML = Object.keys(shots).reverse().map(function (id) {
       var s = shots[id];
       var st = s.state === "busy" ? t("AI กำลังดูรูป…") : s.state === "err" ? s.err : s.state === "empty" ? t("ไม่เห็นเครื่องออกกำลังกายในรูปนี้") : s.msg || t("ยังไม่ได้เพิ่มเข้าแอป");
-      return '<div class="shot"><img alt="' + t("รูปเครื่องที่ถ่าย") + '"' + (s.img ? ' src="' + s.img + '"' : "") + "><div>" + (s.r && shotTitle(s) ? "<strong>" + esc(shotTitle(s)) + "</strong>" : "") +
+      return '<div class="shot"><img data-scan-thumbnail alt="' + t("รูปเครื่องที่ถ่าย") + '"' + (s.img ? ' src="' + s.img + '"' : "") + "><div>" + (s.r && shotTitle(s) ? "<strong>" + esc(shotTitle(s)) + "</strong>" : "") +
         '<div class="' + (s.state === "err" ? "err" : "st") + '">' + esc(st) + '</div><button type="button" class="mini" data-open="' + id + '">' + t("ดูผล") + "</button></div></div>";
     }).join("");
   }
   // exercises in the order the AI is surest of, then new ones
+  function scanExerciseFor(item) {
+    if (!item.fresh) return EXBY[item.id];
+    return item.fresh.back && EXBY[item.fresh.back] || Object.assign({ t: "kg" }, item.fresh);
+  }
+  function shotSelectionKey(item) { return item.fresh ? "new:" + item.k : "known:" + item.id; }
+  function rememberShotSelection(shot, box) {
+    shot.selection = shot.selection || {};
+    Array.prototype.forEach.call(box.querySelectorAll("input[data-known], input[data-new]"), function (input) {
+      var key = input.dataset.known != null ? "known:" + input.dataset.known : "new:" + input.dataset.new;
+      shot.selection[key] = input.checked;
+    });
+  }
   function shotItems(r) {
     var eq = r.equipment.slice().sort(function (a, b) { return b.conf - a.conf; }), listed = {}, out = [];
     eq.forEach(function (q) { q.ids.forEach(function (exId) { if (!listed[exId]) { listed[exId] = 1; out.push({ id: exId, conf: q.conf }); } }); });
@@ -2461,42 +2616,35 @@
   function restText(sec) { return sec < 120 ? sec + t(" วินาที") : sec / 60 + t(" นาที"); }
   function openShot(id) { shotSheet = id; openSheet("dark", function () { shotSheet = null; }, $("scan-label")); drawShot(id); sheet.focus(); }
   function drawShot(id) {
-    var s = shots[id], h = sheetHead(t("เครื่องเล่นที่คุณถ่าย"), s.state === "done") + '<img class="sh-img" alt="' + t("รูปเครื่องที่ถ่าย") + '"' + (s.img ? ' src="' + s.img + '"' : "") + ">";
+    var s = shots[id], h = sheetHead(t("เครื่องเล่นที่คุณถ่าย"), s.state === "done") + '<img data-scan-thumbnail class="sh-img" alt="' + t("รูปเครื่องที่ถ่าย") + '"' + (s.img ? ' src="' + s.img + '"' : "") + ">";
     if (s.state === "busy") h += '<p class="sh-msg" role="status">' + t("AI กำลังดูรูป…") + "</p>";
     else if (s.state === "err") h += '<p class="sh-msg err" role="alert">' + esc(s.err) + "</p>";
     else if (s.state === "empty") h += '<p class="sh-msg">' + t("ไม่เห็นเครื่องออกกำลังกายในรูปนี้ ลองถ่ายใหม่ให้เห็นทั้งเครื่อง") + "</p>";
     else {
       var r = s.r;
+      h += '<p class="hint">' + t("เก็บเฉพาะรูปย่อ JPEG ไม่เกิน 25 KB สูงสุด 30 รูป ไม่เก็บรูปเต็ม") + "</p>";
+      if (!s.img) h += '<p class="hint" role="status">' + t("สร้างรูปย่อไม่ได้ ยังเพิ่มท่าโดยไม่มีรูปได้") + "</p>";
       h += '<p class="sh-name">' + esc(shotTitle(s)) + "</p>";
       var vids = r.equipment.map(function (q) { return { th: q.label, en: q.en ? "how to use " + q.en : "" }; }).concat(r.fresh.map(function (n) { return { th: n.name, en: n.en }; }));
       h += t('<div class="yt-scan"><span>ดูวิธีเล่นใน YouTube</span>') + vids.map(function (v) { return ytLinks(v.th, v.en, true); }).join("") + "</div>";
       h += '<h3 class="sh-sec">' + t("วิธีการเล่น") + "</h3>";
-      shotItems(r).forEach(function (it, i) {
-        var open = i === 0 ? " open" : "";
-        if (it.fresh) {
-          var n = it.fresh;
-          h += '<div class="sh-ex"><label class="sh-pick"><input type="checkbox" data-new="' + it.k + '" checked' + (s.msg ? " disabled" : "") + "><span>" + esc(n.name) + t('<span class="newtag">ท่าใหม่</span><small>') +
-            DAYS[n.day].name + " · " + names(n.m, MUSCLES) + (n.j.length ? t(" · โดน") + names(n.j, JOINTS) : "") + "</small></span></label>" +
-            '<details class="sh-how"' + open + "><summary>" + t("วิธีเล่น") + '</summary><p class="hint">' + t("ท่าใหม่ยังไม่มีคำอธิบาย เพิ่มเข้าแอปแล้วกด \"ให้ AI อธิบายท่านี้\" ที่หน้าวันนี้ได้") + "</p></details></div>";
-          return;
-        }
-        var e = EXBY[it.id], g = GUIDE[it.id] || e.guide;
-        h += '<div class="sh-ex"><label class="sh-pick"><input type="checkbox" data-known="' + it.id + '"' + (it.conf >= 0.5 ? " checked" : "") + (s.msg ? " disabled" : "") + "><span>" + esc(e.name) +
-          (it.conf < 0.5 ? t("<small>AI ไม่แน่ใจ ตรวจดูก่อน</small>") : "") + "</span></label>" +
-          '<details class="sh-how"' + open + "><summary>" + t("วิธีเล่น") + "</summary>" +
-          (g ? "<ol>" + g.how.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol>" : '<p class="hint">' + t("ยังไม่มีคำอธิบาย") + "</p>") + "</details></div>";
+      shotItems(r).forEach(function (it) {
+        h += scanExerciseHtml(scanExerciseFor(it), it, !!s.msg, s.selection && s.selection[shotSelectionKey(it)]);
       });
-      h += '<h3 class="sh-sec">' + t("จำนวนครั้งที่แนะนำ") + '</h3><ul class="sh-dose"><li>' + tf(t("{n} เซ็ต"), { n: 3 }) + "</li><li>" + tf(t("เซ็ตละ {a}–{b} ครั้ง"), { a: LO, b: HI }) +
-        "</li><li>" + tf(t("พักระหว่างเซ็ต {t}"), { t: restText(S.prefs.rest) }) + "</li><li>" + t("เลือกน้ำหนักที่ยกได้โดยไม่ต้องเหวี่ยงตัว") + "</li></ul>";
-      h += s.msg ? '<p class="sh-msg" role="status">' + esc(s.msg) + "</p>" : '<button class="btn" type="button" data-apply="' + id + '">' + t("เพิ่มเข้าแอป") + "</button>";
+      h += s.msg ? '<p class="sh-msg" role="status">' + esc(s.msg) + "</p>" :
+        '<div class="scan-actions"><button class="btn" type="button" data-apply="' + id + '">' + t("เพิ่มในยิมของฉัน") + '</button><button class="btn line" type="button" data-reject>' + t("ไม่ใช่เครื่องนี้") + '</button></div>';
     }
     h += '<button class="btn sh-next" type="button" data-next>' + t("ถ่ายเครื่องเล่นถัดไป") + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8.5 12h7"/></svg></button>';
     var focusIn = sheet.contains(document.activeElement) && document.activeElement !== sheet;
     sheet.innerHTML = h;
     if (focusIn) sheet.focus(); // the redraw removed the focused element: keep focus in the sheet
+    sheet.onchange = function (ev) {
+      if (ev.target.matches("input[data-known], input[data-new]")) rememberShotSelection(s, sheet);
+    };
     sheet.onclick = function (ev) {
       if (ev.target.closest("[data-close]")) closeSheet();
       else if (ev.target.closest("[data-share]")) share(t("เครื่องเล่นที่คุณถ่าย") + ": " + shotTitle(s) + "\n" + shotItems(s.r).map(function (it) { return "• " + (it.fresh ? it.fresh.name : EXBY[it.id].name); }).join("\n"));
+      else if (ev.target.closest("[data-reject]")) { closeSheet(); delete shots[id]; drawShots(); }
       else if (ev.target.closest("[data-apply]")) applyShot(id, sheet);
       else if (ev.target.closest("[data-next]")) { closeSheet(true); requestPhoto("machine", false, $("scan-label")); }
     };
@@ -2504,17 +2652,23 @@
 
   function applyShot(id, box) {
     var s = shots[id]; if (!s || !s.r || s.msg) return;
-    var added = 0, on = 0;
+    rememberShotSelection(s, box);
+    var before = JSON.stringify(S), previousThumbs = Object.assign({}, S.scanThumbs || {}), selected = [], added = 0, on = 0;
     Array.prototype.forEach.call(box.querySelectorAll("input[data-known]:checked"), function (cb) {
       var exId = cb.dataset.known;
+      if (!EXBY[exId] || EXBY[exId].hidden) return;
+      selected.push(exId);
       if (S.seen.indexOf(exId) < 0) S.seen.push(exId);
       S.off = S.off.filter(function (x) { return x !== exId; });
       on++;
     });
     Array.prototype.forEach.call(box.querySelectorAll("input[data-new]:checked"), function (cb) {
       var n = s.r.fresh[+cb.dataset.new];
+      if (!n) return;
       if (n.back && EXBY[n.back]) { // removed earlier: bring the same one back, with its history
         delete EXBY[n.back].hidden;
+        S.off = S.off.filter(function (exId) { return exId !== n.back; });
+        selected.push(n.back);
         if (S.seen.indexOf(n.back) < 0) S.seen.push(n.back);
         added++; return;
       }
@@ -2522,12 +2676,23 @@
       var c = { id: exId, name: n.name, day: n.day, m: n.m, j: n.j, t: "kg", ai: true };
       if (n.en) c.en = n.en;
       S.custom.push(c);
+      selected.push(exId);
       S.seen.push(exId);
       added++;
     });
+    if (!selected.length) { toast(t("เลือกอย่างน้อยหนึ่งท่าก่อนเพิ่มในยิม")); return; }
+    S.scanThumbs = S.scanThumbs || {};
+    var thumb = cleanThumbnail(s.img), omitted = !thumb;
+    selected.forEach(function (exId) {
+      if (thumb && (S.scanThumbs[exId] || Object.keys(S.scanThumbs).length < 30)) S.scanThumbs[exId] = thumb;
+      else omitted = true;
+    });
     S.scanned = true;
     s.msg = t("เพิ่มแล้ว: เปิด ") + on + t(" ท่า") + (added ? t(" · ท่าใหม่ ") + added + t(" ท่า") : "");
-    rebuildEx(); save(); renderGym(); renderPlan(); shotChanged(id);
+    rebuildEx();
+    if (save(previousThumbs) === false) { S = JSON.parse(before); s.msg = ""; rebuildEx(); renderGym(); renderPlan(); shotChanged(id); return; }
+    if (omitted || selected.some(function (exId) { return S.scanThumbs[exId] !== thumb; })) s.msg += " · " + t("บันทึกท่าโดยไม่มีรูปย่อใหม่บางรูป รูปเดิมยังอยู่ครบ");
+    renderGym(); renderPlan(); shotChanged(id);
     toast(t("อัปเดตเครื่องในยิมแล้ว"));
   }
 
@@ -3137,6 +3302,9 @@
     if (f) { track("scan_machine"); scan(f); }
     this.value = "";
   }); });
+  document.addEventListener("error", function (ev) {
+    if (ev.target.matches && ev.target.matches(".gym-thumb, [data-scan-thumbnail]")) hideBrokenThumbnail(ev.target);
+  }, true);
   $("scan-results").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-open]"); if (b) openShot(b.dataset.open);
   });
@@ -3332,29 +3500,41 @@
     try { d = JSON.parse(text); } catch (e) { d = null; }
     if (!d || !Array.isArray(d.log)) { toast(t("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป")); return; }
     var custom = cleanCustom(d.custom);
-    var inc = { log: cleanLog(d.log), custom: custom, food: cleanFood(d.food), weights: cleanW(d.weights), runs: cleanRuns(d.runs) };
-    var keys = ["log", "runs", "food", "weights", "custom"];
-    var lost = dataList(S, keys);
-    if (draftTicked()) lost.push(t("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก"));
-    if (lost.length) {
-      var got = dataList(inc, keys);
-      if (!confirm(t("นำเข้าไฟล์นี้จะแทนที่ข้อมูลเดิมทั้งหมดในเครื่องนี้ รวมถึงรายการเครื่องในยิมที่เลือกไว้\n\nจะหาย: ") + lost.join(", ") +
-        t("\n\nในไฟล์มี: ") + (got.length ? got.join(", ") : t("ไม่มีข้อมูล")) + t("\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" ข้อมูลเดิมจะกู้คืนไม่ได้ นำเข้าไหม?"))) return;
+    var ids = BASE_EX.concat(custom).map(function (ex) { return ex.id; });
+    var candidates = cleanScanThumbs(d.scanThumbs, ids);
+    function finishImport(thumbnails) {
+      var inc = { log: cleanLog(d.log), custom: custom, food: cleanFood(d.food), weights: cleanW(d.weights), runs: cleanRuns(d.runs) };
+      var keys = ["log", "runs", "food", "weights", "custom"];
+      var lost = dataList(S, keys);
+      if (draftTicked()) lost.push(t("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก"));
+      if (lost.length) {
+        var got = dataList(inc, keys);
+        if (!confirm(t("นำเข้าไฟล์นี้จะแทนที่ข้อมูลเดิมทั้งหมดในเครื่องนี้ รวมถึงรายการเครื่องในยิมที่เลือกไว้\n\nจะหาย: ") + lost.join(", ") +
+          t("\n\nในไฟล์มี: ") + (got.length ? got.join(", ") : t("ไม่มีข้อมูล")) + t("\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" ข้อมูลเดิมจะกู้คืนไม่ได้ นำเข้าไหม?"))) return;
+      }
+      var before = JSON.stringify(S);
+      S.log = inc.log;
+      S.custom = custom; rebuildEx();
+      S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
+      S.scanned = S.scanned || S.seen.length > 0;
+      S.scanThumbs = thumbnails;
+      S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
+      S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
+      if (d.prefs) S.prefs = cleanPrefs(d.prefs);
+      // body details and shoes are in backups since v3; older files leave the current ones alone
+      if ("profile" in d) S.profile = cleanProfile(d.profile);
+      if ("shoe" in d) S.shoe = cleanShoe(d.shoe);
+      if ("shoeQ" in d) S.shoeQ = cleanShoeQ(d.shoeQ);
+      S.summary = null; // it described the data that was just replaced
+      var settingUp = typeof setupWrap !== "undefined" && setupWrap;
+      if (settingUp) S.onboarded = true;
+      S.draft = {};
+      if (save() === false) { S = JSON.parse(before); rebuildEx(); renderAll(); return false; }
+      if (settingUp) closeProfileSetup();
+      renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว")); track("import");
     }
-    S.log = inc.log;
-    S.custom = custom; rebuildEx();
-    S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
-    S.scanned = S.scanned || S.seen.length > 0;
-    S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
-    S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
-    if (d.prefs) S.prefs = cleanPrefs(d.prefs);
-    // body details and shoes are in backups since v3; older files leave the current ones alone
-    if ("profile" in d) S.profile = cleanProfile(d.profile);
-    if ("shoe" in d) S.shoe = cleanShoe(d.shoe);
-    if ("shoeQ" in d) S.shoeQ = cleanShoeQ(d.shoeQ);
-    S.summary = null; // it described the data that was just replaced
-    if (typeof setupWrap !== "undefined" && setupWrap) { closeProfileSetup(); S.onboarded = true; }
-    S.draft = {}; save(); renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว")); track("import");
+    if (Object.keys(candidates).length) return decodeScanThumbs(candidates, ids).then(finishImport);
+    return finishImport({});
   }
   $("sample").addEventListener("click", useSample);
   function useSample() {

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
-const STATE_FNS = ["strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
+const STATE_FNS = ["checkLoadedThumbnails", "decodeThumbnail", "decodeScanThumbs", "cleanThumbnail", "cleanScanThumbs","strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
   "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "importBackup", "dataList", "draftTicked", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
@@ -19,7 +19,7 @@ function freshS() {
 export function app(storage = fakeStorage()) {
   const toasts = [];
   const ctx = load(STATE_FNS, {
-    S: freshS(), localStorage: storage, KEY: "train-today-v1", DRAFT_TTL: 12 * 36e5,
+    atob, S: freshS(), localStorage: storage, KEY: "train-today-v1", DRAFT_TTL: 12 * 36e5,
     DAYS: { push: {}, pull: {}, legs: {} }, MUSCLES: { chest: 1, back: 1, quads: 1 }, JOINTS: { shoulder: 1, knee: 1 },
     BASE_EX: [{ id: "chest_press", m: ["chest"], t: "kg" }, { id: "leg_press", m: ["quads"], t: "kg" }], EX: [], EXBY: {},
     RUN_TYPES: { easy: 1, tempo: 1, long: 1, race: 1 }, SHOE_USE: { daily: 1, cushion: 1, speed: 1, race: 1, trail: 1 },
@@ -55,6 +55,20 @@ test("shoe brand choices and an older named shoe survive save/reload and backup 
   c.importBackup(JSON.stringify(backup));
   assert.equal(c.S.shoeQ.brands.length, 0, "old backups use every brand");
   assert.equal(c.S.shoe.name, "Legacy Pegasus 37");
+});
+
+test("invalid thumbnail imports are dropped without interrupting load of existing workouts", () => {
+  const storage = fakeStorage({ "train-today-v1": JSON.stringify({
+    log: [{ ts: Date.now(), day: "push", entries: [{ ex: "chest_press", sets: [{ kg: 25, reps: 10 }] }] }],
+    onboarded: true, scanThumbs: { chest_press: "data:image/jpeg;base64,bm90LWFuLWltYWdl" },
+    seen: ["chest_press"], prefs: { rest: 90 }
+  }) });
+  const a = app(storage); a.load();
+  assert.equal(a.S.log[0].entries[0].sets[0].kg, 25);
+  assert.equal(a.S.onboarded, true); assert.equal(Object.keys(a.S.scanThumbs).length, 0);
+  a.save(); const b = app(storage); b.load();
+  assert.equal(b.S.log[0].entries[0].sets[0].reps, 10);
+  assert.deepEqual(Array.from(b.S.seen), ["chest_press"]);
 });
 
 // Data saved by the version before this change (no draft fields). Must still load the same.

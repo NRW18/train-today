@@ -2,6 +2,20 @@
 // To change a word: edit the value here. To add text: write it in Thai in index.html as t("…"), then add it here.
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
+  "บันทึกท่าโดยไม่เพิ่มรูปย่อใหม่ รูปเดิมและข้อมูลส่วนตัวยังอยู่ครบ": "Saved without new thumbnails. Existing photos and personal data are preserved.",
+  "บันทึกท่าโดยไม่มีรูปย่อใหม่บางรูป รูปเดิมยังอยู่ครบ": "Some new thumbnails were not saved. Existing photos are preserved.",
+  "AI ไม่แน่ใจ ตรวจดูก่อน": "AI is unsure. Please check first.",
+  "บันทึกท่าแล้ว แต่พื้นที่ไม่พอเก็บรูปย่อ รูปย่อถูกนำออก ข้อมูลการซ้อมยังอยู่ครบ": "Saved without thumbnails because storage is full. All workout data is preserved.",
+  "เก็บเฉพาะรูปย่อ JPEG ไม่เกิน 25 KB สูงสุด 30 รูป ไม่เก็บรูปเต็ม": "Only JPEG thumbnails up to 25 KB each are saved, up to 30 images. Full-size photos are never stored.",
+  "สร้างรูปย่อไม่ได้ ยังเพิ่มท่าโดยไม่มีรูปได้": "Could not create a thumbnail. You can still add the exercise without a photo.",
+  "เพิ่มในยิมของฉัน": "Add to my gym",
+  "ไม่ใช่เครื่องนี้": "Not this machine",
+  "เลือกอย่างน้อยหนึ่งท่าก่อนเพิ่มในยิม": "Select at least one exercise before adding to your gym.",
+  "บันทึกท่าโดยไม่มีรูปย่อบางรูป เพราะสร้างรูปไม่ได้หรือพื้นที่จัดเก็บเต็ม": "Some exercises were saved without a thumbnail because it could not be created or storage is full.",
+  "กล้ามเนื้อเป้าหมาย": "Target muscles",
+  "ยังไม่มีชื่อภาษาอังกฤษที่ยืนยันแล้ว": "No verified English name is available yet.",
+  "ยังไม่มีขั้นตอนที่ครบถ้วนสำหรับท่านี้ ดูวิดีโอหรือสอบถามผู้ฝึกสอนก่อนใช้เครื่อง": "Complete instructions are not available for this exercise. Watch a demonstration or ask a trainer before using the machine.",
+
   "แบรนด์ที่สนใจ": "Brands",
   "เลือกได้หลายแบรนด์": "Choose one or more brands",
   "ทุกแบรนด์": "All brands",
