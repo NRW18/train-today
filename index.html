@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="theme.css">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -28,6 +28,18 @@
   body.resting .app { padding-bottom: calc(196px + env(safe-area-inset-bottom)); }
   main:not([hidden]) { animation: rise .22s ease-out; }
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Opening only: existing brand assets, no loading gate or data changes. */
+  body.splash-open { overflow: hidden; }
+  .splash-v2 { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 24px; background: linear-gradient(180deg, var(--home-top), var(--home-mid) 42%, var(--bg) 82%); color: var(--brand-ink); animation: kryvos-splash-exit 230ms cubic-bezier(.3,0,1,1) 820ms both; }
+  .splash-v2:focus { outline: none; }
+  .splash-brand { display: flex; flex-direction: column; align-items: center; gap: 26px; transform: translateY(-3vh); }
+  .splash-runner { display: block; width: min(58vw, 230px); height: auto; object-fit: contain; animation: kryvos-runner-enter 420ms cubic-bezier(.2,0,0,1) both; }
+  .splash-v2 .wordmark { display: block; width: min(68vw, 260px); height: auto; animation: kryvos-wordmark-enter 280ms cubic-bezier(.2,0,0,1) 380ms both; }
+  @keyframes kryvos-runner-enter { from { opacity: 0; transform: translate(-14px, 8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes kryvos-wordmark-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes kryvos-splash-exit { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px); visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) { .splash-v2 { display: none; } .splash-v2, .splash-v2 * { animation: none !important; } }
 
   /* header */
   header.top { display: flex; align-items: center; justify-content: space-between; padding: 20px 2px 8px; gap: 12px; }
@@ -4346,6 +4358,71 @@
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }
 
+  var splashStarted = false;
+  function startOpeningSplash() {
+    if (splashStarted) return;
+    splashStarted = true;
+    var overlay, observer, motion, timeout, fallback, done = false, locked = [], previous = document.activeElement;
+    function lock(element) {
+      if (element === overlay || ["SCRIPT", "STYLE", "LINK"].includes(element.tagName) || locked.some(function (entry) { return entry.element === element; })) return;
+      locked.push({ element: element, inert: element.inert, aria: element.getAttribute("aria-hidden") });
+      element.inert = true; element.setAttribute("aria-hidden", "true");
+    }
+    function guardFocus(ev) { if (overlay && !overlay.contains(ev.target)) overlay.focus({ preventScroll: true }); }
+    function guardKey(ev) { if (ev.key === "Tab" || ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); if (ev.key === "Escape") finish(); } }
+    function guardClick(ev) { if (overlay && !overlay.contains(ev.target)) { ev.preventDefault(); ev.stopImmediatePropagation(); } }
+    function hidden() { if (document.hidden) finish(); }
+    function reduced() { if (motion.matches) finish(); }
+    function ended(ev) { if (ev.target === overlay && ev.animationName === "kryvos-splash-exit") finish(); }
+    function finish() {
+      if (done) return;
+      done = true;
+      clearTimeout(timeout); clearTimeout(fallback);
+      if (observer) observer.disconnect();
+      window.removeEventListener("error", finish, true); window.removeEventListener("unhandledrejection", finish);
+      window.removeEventListener("pagehide", finish); document.removeEventListener("visibilitychange", hidden);
+      document.removeEventListener("keydown", guardKey, true); document.removeEventListener("focusin", guardFocus, true); document.removeEventListener("click", guardClick, true);
+      if (motion && motion.removeEventListener) motion.removeEventListener("change", reduced);
+      if (overlay) overlay.remove();
+      document.body.classList.remove("splash-open");
+      locked.forEach(function (entry) { entry.element.inert = entry.inert; if (entry.aria === null) entry.element.removeAttribute("aria-hidden"); else entry.element.setAttribute("aria-hidden", entry.aria); });
+      if (!overlay) return; // reduced motion or failed setup never steals focus
+      var target = previous && previous !== document.body && previous.isConnected ? previous : document.querySelector(".profile-setup #setup-title") || document.querySelector(".today-heading h2");
+      if (target && !target.closest("[inert], [hidden]")) {
+        try {
+          target.focus({ preventScroll: true });
+          if (document.activeElement !== target && target.getAttribute("tabindex") === null) { target.setAttribute("tabindex", "-1"); target.focus({ preventScroll: true }); }
+        } catch (e) {}
+      }
+    }
+    try {
+      motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (motion.matches || document.hidden) return;
+      // Arm both deadlines before touching the DOM. Never await an asset, font or network request.
+      fallback = setTimeout(finish, 1500); timeout = setTimeout(finish, 1050);
+      window.addEventListener("error", finish, true); window.addEventListener("unhandledrejection", finish);
+      window.addEventListener("pagehide", finish); document.addEventListener("visibilitychange", hidden);
+      var source = document.querySelector("header.top .wordmark");
+      if (!source) throw new Error("brand unavailable");
+      overlay = document.createElement("div"); overlay.className = "splash-v2"; overlay.tabIndex = -1;
+      overlay.setAttribute("role", "dialog"); overlay.setAttribute("aria-modal", "true"); overlay.setAttribute("aria-label", "KRYVOS");
+      var stage = document.createElement("div"); stage.className = "splash-brand"; stage.setAttribute("aria-hidden", "true");
+      var runner = document.createElement("img"); runner.className = "splash-runner"; runner.alt = ""; runner.width = 665; runner.height = 537;
+      runner.addEventListener("error", finish, { once: true }); runner.src = "assets/onboarding/runner-mark.png";
+      var wordmark = source.cloneNode(true); wordmark.setAttribute("aria-hidden", "true"); wordmark.removeAttribute("role"); wordmark.removeAttribute("aria-label");
+      stage.appendChild(runner); stage.appendChild(wordmark); overlay.appendChild(stage);
+      document.body.appendChild(overlay); document.body.classList.add("splash-open");
+      Array.prototype.forEach.call(document.body.children, lock);
+      observer = new MutationObserver(function (records) { records.forEach(function (record) { Array.prototype.forEach.call(record.addedNodes, function (node) { if (node.nodeType === 1) lock(node); }); }); });
+      observer.observe(document.body, { childList: true });
+      document.addEventListener("keydown", guardKey, true); document.addEventListener("focusin", guardFocus, true); document.addEventListener("click", guardClick, true);
+      if (motion.addEventListener) motion.addEventListener("change", reduced);
+      overlay.addEventListener("animationend", ended); overlay.addEventListener("animationcancel", finish);
+      overlay.focus({ preventScroll: true });
+    } catch (e) { finish(); }
+    return finish;
+  }
+
   var nowD = new Date();
   $("today-date").innerHTML = "<b>" + nowD.toLocaleDateString(LOCALE, { weekday: "long" }) + "</b>" + nowD.toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
   load();
@@ -4354,6 +4431,7 @@
   refreshCameraPermission();
   refreshLocationPermission();
   if (!S.onboarded) { try { localStorage.setItem(STATS_OFF, "1"); } catch (e) {} showProfileSetup(); }
+  startOpeningSplash();
   track("open");
   setTimeout(flushStats, 4000); // send what is queued from last time, after the app has settled
 })();
