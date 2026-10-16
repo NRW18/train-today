@@ -11,7 +11,7 @@ class DecodedImage {
 }
 function app(fail = () => false) {
   const messages = [], storage = new Map();
-  const a = load(["decodeThumbnail", "decodeScanThumbs", "rememberShotSelection", "scanExerciseFor", "shotSelectionKey", "cleanThumbnail", "cleanScanThumbs", "save", "snapshot", "dayKey", "applyShot", "rebuildEx", "importBackup", "dataList", "draftTicked", "strList", "cleanGuide", "cleanCustom", "cleanEn", "cleanLog", "okTs", "cleanFood", "cleanW", "cleanRuns", "validate"], {
+  const a = load(["decodeThumbnail", "decodeScanThumbs", "rememberShotSelection", "scanExerciseFor", "shotSelectionKey", "cleanThumbnail", "cleanScanThumbs", "save", "snapshot", "dayKey", "applyShot", "rebuildEx", "importBackup", "dataList", "draftTicked", "strList", "cleanGuide", "cleanCustom", "cleanEn", "cleanLog", "okTs", "cleanFood", "cleanW", "gpsCoordinate", "cleanRoute", "cleanRuns", "validate"], {
     atob, Image: DecodedImage, KEY: "train-today-v1", DATA_WORDS: {},
     S: { log: [{ ts: Date.now(), day: "push", entries: [{ ex: "press", sets: [{ kg: 25, reps: 10 }] }] }], custom: [], seen: [], off: [], today: { skip: [], add: [] }, food: [], runs: [], weights: [], prefs: { rest: 90 }, draft: {}, scanThumbs: {} },
     BASE_EX: [{ id: "press", name: "Press", m: ["chest"], j: ["shoulder"], t: "kg" }], EXBY: {}, EX: [],

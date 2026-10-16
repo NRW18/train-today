@@ -136,6 +136,12 @@
 
   /* run tab */
   .run-type { margin-top: 10px; }
+  .gps-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  .gps-actions .btn { flex: 1 1 120px; min-width: 0; white-space: normal; }
+  .gps-route { display: block; width: 100%; height: 180px; background: var(--sunk); border-radius: 22px; margin-top: 12px; }
+  .gps-route polyline { stroke: var(--blue); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .gps-route circle { fill: var(--green); }
+  .gps-card { overflow-wrap: anywhere; }
   .chip[aria-pressed="true"], .chip.on { background: var(--blue-bg); color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); font-weight: 600; }
   .seg-wrap { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); border-radius: 22px; }
   .kmbars { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; height: 150px; align-items: end; }
@@ -725,6 +731,33 @@
 
   <!-- RUN: log, weekly distance, shoe mileage, shoe finder -->
   <main id="v-run" hidden>
+    <section class="card gps-card" aria-labelledby="gps-h">
+      <h2 id="gps-h">วิ่งด้วย GPS</h2>
+      <p class="hint">เปิดแอปและหน้าจอค้างไว้ การติดตามเบื้องหลังไม่รับประกัน แอปจะพักเมื่อซ่อนหน้าจอ</p>
+      <p class="hint">ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก</p>
+      <div class="stats gps-metrics" aria-live="off">
+        <div class="stat"><div class="v" id="gps-distance">0.00</div><div class="k">ระยะทาง (กม.)</div></div>
+        <div class="stat"><div class="v" id="gps-time">00:00</div><div class="k">เวลาที่วิ่งจริง</div></div>
+        <div class="stat"><div class="v" id="gps-current">—</div><div class="k">pace ปัจจุบัน (นาที/กม.)</div></div>
+        <div class="stat"><div class="v" id="gps-average">—</div><div class="k">pace เฉลี่ย (นาที/กม.)</div></div>
+      </div>
+      <p id="gps-status" class="hint" role="status"></p>
+      <p id="gps-storage" class="hint" role="status"></p>
+      <p id="gps-wake" class="hint"></p>
+      <div id="gps-route"></div>
+      <p id="gps-splits" class="hint" role="status"></p>
+      <div class="gps-actions">
+        <button type="button" class="btn" id="gps-start">เริ่ม GPS</button>
+        <button type="button" class="btn line" id="gps-pause" hidden>พักการวิ่ง</button>
+        <button type="button" class="btn" id="gps-resume" hidden>วิ่งต่อ</button>
+        <button type="button" class="btn line" id="gps-finish" hidden>จบการวิ่ง</button>
+        <button type="button" class="btn" id="gps-save" hidden>บันทึกผล GPS</button>
+        <button type="button" class="btn line" id="gps-export" hidden>สำรองผลที่รอบันทึก</button>
+        <button type="button" class="btn line" id="gps-discard" hidden>ยกเลิกผล GPS</button>
+      </div>
+      <button type="button" class="linkbtn" id="gps-manual">บันทึกวิ่งด้วยตัวเอง</button>
+      <p class="hint">ใช้ประเภทการวิ่งจากตัวเลือกด้านล่างก่อนเริ่ม GPS</p>
+    </section>
     <section class="card" aria-labelledby="run-h">
       <h2 id="run-h">บันทึกการวิ่ง</h2>
       <div class="grid2">
@@ -745,6 +778,7 @@
     <section class="card" aria-labelledby="rw-h">
       <h2 id="rw-h">ระยะวิ่ง 8 สัปดาห์</h2>
       <div id="run-week"></div>
+      <div id="gps-saved-routes"></div>
     </section>
 
     <section class="card" aria-labelledby="shoe-h">
@@ -986,8 +1020,8 @@
     <section class="card" aria-labelledby="permissions-h">
       <h2 id="permissions-h">สิทธิ์การใช้งาน</h2>
       <div class="permission-row"><strong>กล้อง</strong><p class="hint" id="permission-camera-status" role="status"></p><p class="hint">สถานะเบราว์เซอร์อาจต่างจากกล้องของโทรศัพท์</p><button type="button" class="linkbtn" id="permission-camera-help">วิธีเปิดกล้องและทางเลือก</button></div>
-      <div class="permission-row"><strong>ตำแหน่ง (GPS)</strong><p class="hint">ยังไม่พร้อมใช้งาน — ยังไม่มีการติดตาม GPS</p><p class="hint">เมื่อมี GPS ตำแหน่งจะเก็บในเครื่อง ไม่ส่งออก ตอนนี้บันทึกระยะและเวลาเองได้ที่แท็บวิ่ง</p><button type="button" class="linkbtn" id="permission-run-manual">บันทึกวิ่งด้วยตัวเอง</button></div>
-      <div class="permission-row"><strong>การสั่น</strong><p class="hint" id="permission-vibration-status" role="status"></p><label class="toggle"><span class="lbl">สั่นเมื่อหมดเวลาพัก</span><input type="checkbox" id="permission-vibration-on"></label><p class="hint">การสั่นไม่มีหน้าขอสิทธิ์ของเบราว์เซอร์ และแอปไม่เพิ่มการแจ้งเตือน</p></div>
+      <div class="permission-row"><strong>ตำแหน่ง (GPS)</strong><p class="hint" id="permission-location-status" role="status"></p><p class="hint">ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก</p><button type="button" class="linkbtn" id="permission-run-manual">บันทึกวิ่งด้วยตัวเอง</button></div>
+      <div class="permission-row"><strong>การสั่น</strong><p class="hint" id="permission-vibration-status" role="status"></p><label class="toggle"><span class="lbl">สั่นเมื่อหมดเวลาพักหรือครบกิโลเมตร</span><input type="checkbox" id="permission-vibration-on"></label><p class="hint">การสั่นไม่มีหน้าขอสิทธิ์ของเบราว์เซอร์ และแอปไม่เพิ่มการแจ้งเตือน</p></div>
       <div class="permission-row"><strong>สถิติแบบไม่ระบุตัวตน</strong><label class="toggle"><span class="lbl">ส่งสถิติการใช้งานแบบไม่ระบุตัวตน</span><input type="checkbox" id="permission-stats-on"></label><p class="hint">ใช้การตั้งค่าเดียวกับสถิติการใช้งาน ไม่ส่งข้อมูลส่วนตัว</p></div>
     </section>
     <section class="card" aria-labelledby="stats-h">
@@ -1247,6 +1281,7 @@
   // "Delete all data": everything the app stored goes. Only the language and the user's own Gemini key
   // (kept under their own keys, outside S) stay, and the welcome screens are not shown again.
   function wipe() {
+    if (typeof gpsSession !== "undefined") { stopGPSResources(); gpsSession = null; gpsForeign = false; try { localStorage.removeItem(GPS_KEY); } catch (e) {} }
     var seenIntro = S.onboarded;
     S = blankState(); S.onboarded = seenIntro;
     rebuildEx(); save();
@@ -1361,7 +1396,7 @@
   function cleanFood(a) { return (Array.isArray(a) ? a : []).filter(okTs).map(function (f) { var o = { ts: f.ts, name: String(f.name || t("อาหาร")).slice(0, 60), kcal: Math.max(0, Math.min(5000, +f.kcal || 0)), p: Math.max(0, Math.min(300, +f.p || 0)) }; if ([0.5, 1.5, 2].indexOf(+f.x) >= 0) o.x = +f.x; return o; }); }
   function cleanW(a) { return (Array.isArray(a) ? a : []).filter(function (w) { return okTs(w) && +w.kg > 20 && +w.kg < 300; }).map(function (w) { return { ts: w.ts, kg: +w.kg }; }); }
   var RUN_TYPES = { easy: t("วิ่งเบา"), tempo: t("วิ่งเร็ว"), long: t("วิ่งยาว"), race: t("แข่ง") };
-  function cleanRuns(a) { return (Array.isArray(a) ? a : []).filter(function (r) { return okTs(r) && +r.km > 0 && +r.km < 100 && +r.min > 0; }).map(function (r) { var o = { ts: r.ts, km: +r.km, min: +r.min }; if (RUN_TYPES[r.t]) o.t = r.t; return o; }); }
+  function cleanRuns(a) { return (Array.isArray(a) ? a : []).filter(function (r) { return okTs(r) && +r.km > 0 && +r.km < 100 && Number.isFinite(+r.min) && +r.min > 0; }).map(function (r) { var o = { ts: r.ts, km: +r.km, min: +r.min }; if (RUN_TYPES[r.t]) o.t = r.t; if (typeof r.gpsId === "string" && /^[a-zA-Z0-9-]{8,80}$/.test(r.gpsId)) o.gpsId = r.gpsId; if (Array.isArray(r.route)) { var route = cleanRoute(r.route); if (route.length) o.route = route; } return o; }); }
   function cleanProfile(p) {
     var d = { sex: null, age: null, h: null, act: 1.55 };
     if (!p || typeof p !== "object") return d;
@@ -1811,7 +1846,7 @@
         return "<li>" + esc(ex ? ex.name : entry.ex) + " · " + entry.sets.length + " " + t("เซ็ต") + "</li>";
       }).join("") + "</ul></section>";
     });
-    runs.forEach(function (run) { h += '<section class="day-history"><h3>' + t("วิ่ง") + " · " + esc(fmtTime(run.ts)) + "</h3><p>" + run.km + " " + t("กม.") + " · " + run.min + " " + t("นาที") + "</p></section>"; });
+    runs.forEach(function (run) { h += '<section class="day-history"><h3>' + t("วิ่ง") + " · " + esc(fmtTime(run.ts)) + "</h3><p>" + (run.gpsId ? run.km.toFixed(2) : run.km) + " " + t("กม.") + " · " + (run.gpsId ? run.min.toFixed(1) : run.min) + " " + t("นาที") + "</p></section>"; });
     if (!logs.length && !runs.length) h += '<p class="empty">' + t("ไม่มีกิจกรรม") + "</p>";
     sheet.innerHTML = h;
     sheet.onclick = function (ev) { if (ev.target.closest("[data-close]")) closeSheet(); };
@@ -2147,7 +2182,7 @@
       return { ts: s.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill ' + s.day + '">' + DAYS[s.day].name + "</span> " + fmtDate(s.ts) + " " + fmtTime(s.ts) + "</span><span>" + (vol ? Math.round(vol).toLocaleString(LOCALE) + t(" กก. รวม") : "") + "</span></div>" +
         '<div class="sess-ex">' + s.entries.map(function (en) { var e = EXBY[en.ex]; return (e ? esc(e.name) : t("ท่าที่ลบแล้ว")) + " " + en.sets.length + t(" เซ็ต"); }).join(" · ") + "</div></div>" };
     }).concat(S.runs.map(function (r) {
-      return { ts: r.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill run">RUN</span> ' + (r.t ? RUN_TYPES[r.t] + " " : "") + fmtDate(r.ts) + " " + fmtTime(r.ts) + "</span><span>" + r.km + t(" กม. · ") + Math.round(r.min) + t(" นาที</span></div>") +
+      return { ts: r.ts, html: '<div class="sess"><div class="sess-top"><span><span class="pill run">RUN</span> ' + (r.t ? RUN_TYPES[r.t] + " " : "") + fmtDate(r.ts) + " " + fmtTime(r.ts) + "</span><span>" + (r.gpsId ? r.km.toFixed(2) : r.km) + t(" กม. · ") + Math.round(r.min) + t(" นาที</span></div>") +
         '<div class="sess-ex">pace ' + pace(r.km, r.min) + ' <button type="button" class="del" data-delrun="' + r.ts + t('">ลบ</button></div></div>') };
     })).sort(function (a, b) { return b.ts - a.ts; });
     if (!rows.length) {
@@ -2556,10 +2591,10 @@
 
   /* ---------- feature explanations; these are not browser permission grants ---------- */
   var EXPLANATION_KEY = "kryvos-permission-explanations-v1", VIBRATION_KEY = "kryvos-vibration-enabled";
-  var explainedHere = {}, vibrationHere = null, cameraState = "unknown";
+  var explainedHere = {}, vibrationHere = null, cameraState = "unknown", locationState = "unknown";
   function readExplanations() {
     var out = {};
-    try { var data = JSON.parse(localStorage.getItem(EXPLANATION_KEY) || "{}"); if (data && typeof data === "object") ["machine", "food", "vibration"].forEach(function (key) { if (data[key] === true) out[key] = true; }); } catch (e) {}
+    try { var data = JSON.parse(localStorage.getItem(EXPLANATION_KEY) || "{}"); if (data && typeof data === "object") ["machine", "food", "vibration", "location"].forEach(function (key) { if (data[key] === true) out[key] = true; }); } catch (e) {}
     return out;
   }
   function explanationSeen(feature) { return explainedHere[feature] === true || readExplanations()[feature] === true; }
@@ -2596,13 +2631,14 @@
   }
   function renderPermissions() {
     $("permission-camera-status").textContent = cameraStatusText(cameraState);
+    $("permission-location-status").textContent = !navigator.geolocation ? t("เบราว์เซอร์นี้ไม่รองรับ GPS") : cameraStatusText(locationState);
     var supported = typeof navigator.vibrate === "function";
     $("permission-vibration-status").textContent = supported ? t("รองรับ API การสั่น แต่ไม่รับประกันว่าอุปกรณ์จะสั่น") : t("เบราว์เซอร์นี้ไม่รองรับการสั่น");
     $("permission-vibration-on").disabled = !supported; $("permission-vibration-on").checked = supported && vibrationEnabled();
     $("permission-stats-on").checked = $("stats-on").checked = statsOn();
   }
   function permissionIcon(feature) {
-    var path = feature === "vibration" ? '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 7v10M21 7v10M11 17h2"/>' : '<path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/>';
+    var path = feature === "location" ? '<path d="M12 22S4 14 4 9a8 8 0 0 1 16 0c0 5-8 13-8 13Z"/><circle cx="12" cy="9" r="3"/>' : feature === "vibration" ? '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 7v10M21 7v10M11 17h2"/>' : '<path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/>';
     return '<svg class="permission-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>';
   }
   function explainOnce(feature, proceed, back) {
@@ -2612,7 +2648,9 @@
     var title = feature === "machine" ? t("ก่อนถ่ายรูปเครื่องเล่น") : feature === "food" ? t("ก่อนถ่ายรูปอาหาร") : t("การสั่นของตัวจับเวลาพัก");
     var purpose = feature === "machine" ? t("ใช้รูปเครื่องเพื่อระบุท่าและเพิ่มเครื่องในยิมของคุณ") : feature === "food" ? t("ใช้รูปอาหารเพื่อประเมินแคลอรี่และโปรตีน ให้คุณแก้ไขก่อนบันทึก") : t("เมื่อหมดเวลาพัก แอปจะสั่นสั้น ๆ หากอุปกรณ์รองรับ ตัวจับเวลาและเสียงยังทำงานเมื่อปิดการสั่น");
     var handling = feature === "vibration" ? t("การสั่นทำงานในเครื่อง ไม่มีหน้าขอสิทธิ์ของเบราว์เซอร์ ไม่ส่งข้อมูลออก และไม่เพิ่มการแจ้งเตือน") : t("ภาพที่เลือกจะส่งไป Google Gemini เพื่อวิเคราะห์ครั้งนี้ (แผนฟรี Google อาจนำไปปรับปรุงบริการ)");
-    sheet.innerHTML = sheetHead(title,false) + permissionIcon(feature) + '<p>' + purpose + '</p><p class="hint">' + handling + '</p>' + (feature === "vibration" ? '<p class="hint">' + t("หากไม่สั่น ให้ตรวจโหมดเงียบ โหมดห้ามรบกวน และการตั้งค่าการสั่นของโทรศัพท์") + '</p>' : '<p class="hint">' + t("ใช้รูปจากแกลเลอรีหรือกรอกเองได้ หากเปิดกล้องไม่ได้") + '</p>') + '<div class="permission-actions"><button type="button" class="btn" data-permission-continue>' + t("ดำเนินการต่อ") + '</button><button type="button" class="btn line" data-close>' + t("ไม่ตอนนี้") + '</button></div>';
+    if (feature === "vibration") { title = t("การสั่นในแอป"); purpose = t("แอปจะสั่นสั้น ๆ เมื่อหมดเวลาพักหรือวิ่งครบกิโลเมตร หากอุปกรณ์รองรับ ปิดได้ที่สิทธิ์การใช้งาน ตัวจับเวลาและเสียงพักยังทำงานเมื่อปิดการสั่น"); }
+    if (feature === "location") { title = t("ก่อนเริ่มวิ่งด้วย GPS"); purpose = t("ใช้ตำแหน่งคำนวณระยะและ pace ขณะวิ่ง เปิดแอปและหน้าจอค้างไว้ หรือบันทึกระยะและเวลาเองได้"); handling = t("ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก"); }
+    sheet.innerHTML = sheetHead(title,false) + permissionIcon(feature) + '<p>' + purpose + '</p><p class="hint">' + handling + '</p>' + (feature === "location" ? '' : feature === "vibration" ? '<p class="hint">' + t("หากไม่สั่น ให้ตรวจโหมดเงียบ โหมดห้ามรบกวน และการตั้งค่าการสั่นของโทรศัพท์") + '</p>' : '<p class="hint">' + t("ใช้รูปจากแกลเลอรีหรือกรอกเองได้ หากเปิดกล้องไม่ได้") + '</p>') + '<div class="permission-actions"><button type="button" class="btn" data-permission-continue>' + t("ดำเนินการต่อ") + '</button><button type="button" class="btn line" data-close>' + t("ไม่ตอนนี้") + '</button></div>';
     sheet.onclick = function (ev) {
       if (ev.target.closest('[data-close]')) { closeSheet(); return; }
       if (ev.target.closest('[data-permission-continue]')) { confirmed = true; closeSheet(); proceed(); }
@@ -3139,12 +3177,307 @@
     }
     return next;
   }
+  /* ---------- GPS: device-only draft, explicit finish and transactional save ---------- */
+  var GPS_KEY = "kryvos-gps-run-v1", gpsSession = null, gpsWatch = null, gpsTick = null, gpsEpoch = 0;
+  var gpsWake = null, gpsWakePending = false, gpsWakeEpoch = 0, gpsStorageOK = true, gpsCheckpointAt = 0;
+  var gpsOwner = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2), gpsForeign = false, gpsLastTick = 0, gpsUnlock = null, gpsLockPending = false;
+  function gpsCoordinate(point) {
+    return Array.isArray(point) && point.length === 2 && Number.isFinite(point[0]) && Number.isFinite(point[1]) && Math.abs(point[0]) <= 90 && Math.abs(point[1]) <= 180;
+  }
+  function cleanRoute(raw) {
+    var out = [], count = 0;
+    if (!Array.isArray(raw)) return out;
+    raw.slice(0, 1500).forEach(function (segment) {
+      if (!Array.isArray(segment)) return;
+      // Break at corrupt points rather than drawing a line across missing data.
+      var part = [];
+      segment.slice(0, 10000).forEach(function (point) {
+        if (!gpsCoordinate(point)) { if (part.length) out.push(part); part = []; return; }
+        if (count >= 1500) return;
+        part.push([+point[0].toFixed(5), +point[1].toFixed(5)]); count++;
+      });
+      if (part.length) out.push(part);
+    });
+    return out;
+  }
+  function haversine(a, b) {
+    var rad = Math.PI / 180, lat = (b[0] - a[0]) * rad, lon = (b[1] - a[1]) * rad;
+    var h = Math.sin(lat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(lon / 2) ** 2;
+    return 6371000 * 2 * Math.asin(Math.sqrt(Math.min(1, Math.max(0, h))));
+  }
+  function simplifyRoute(segments, limit) {
+    limit = limit || 1500;
+    // Keep the active tail: the next accepted fix must still append to its own segment.
+    var nonempty = segments.filter(function (part) { return part.length; }).slice(-Math.floor(limit / 2));
+    var total = nonempty.reduce(function (sum, part) { return sum + part.length; }, 0);
+    if (total <= limit) return cleanRoute(nonempty);
+    var base = nonempty.reduce(function (sum, part) { return sum + Math.min(2, part.length); }, 0), extra = limit - base;
+    var weights = total - base, remaining = extra;
+    return cleanRoute(nonempty.map(function (part, i) {
+      var take = Math.min(2, part.length) + (i === nonempty.length - 1 ? remaining : Math.floor(extra * (part.length - Math.min(2, part.length)) / weights));
+      remaining -= take - Math.min(2, part.length);
+      if (take >= part.length) return part;
+      return Array.from({ length: take }, function (_, j) { return part[Math.round(j * (part.length - 1) / (take - 1))]; });
+    }));
+  }
+  function newGPSSession(id, wall, clock, type) {
+    return { id: id, ts: wall, state: "active", ms: 0, since: clock, meters: 0, segments: [], last: null, lastStamp: 0, samples: [], splits: [], type: type || null, status: "waiting", finishedAt: null };
+  }
+  function gpsElapsed(session, clock) { return session.ms + (session.state === "active" ? Math.max(0, clock - session.since) : 0); }
+  function pauseGPSSession(session, clock) {
+    if (session.state !== "active") return;
+    session.ms = gpsElapsed(session, clock); session.state = "paused"; session.last = null; session.samples = [];
+  }
+  function resumeGPSSession(session, clock, wall) {
+    if (session.state !== "paused") return false;
+    session.state = "active"; session.since = clock; session.resumeAt = wall; session.last = null; session.samples = []; session.status = "waiting"; return true;
+  }
+  function acceptGPSPoint(session, position, wall, clock) {
+    if (session.state !== "active") return false;
+    var c = position && position.coords, stamp = position && position.timestamp;
+    if (!c || !gpsCoordinate([c.latitude, c.longitude]) || !Number.isFinite(c.accuracy) || c.accuracy < 0 || c.accuracy > 30) { session.status = "accuracy"; return false; }
+    if (!Number.isFinite(stamp) || stamp <= session.lastStamp || stamp < (session.resumeAt || session.ts) || stamp > wall + 1000 || wall - stamp > 15000) return false;
+    var point = [c.latitude, c.longitude], last = session.last, distance = last ? haversine(last.point, point) : 0, gap = last ? stamp - last.stamp : 0;
+    if (last && distance / (gap / 1000) > 7) { session.status = "jump"; return false; }
+    // GPS gaps never become straight-line distance across an unknown path.
+    if (!last || gap > 15000) { session.segments.push([]); session.samples = []; distance = 0; }
+    session.meters += distance;
+    session.segments[session.segments.length - 1].push(point);
+    if (session.segments.reduce(function (sum, part) { return sum + part.length; }, 0) > 1800) session.segments = simplifyRoute(session.segments, 1500);
+    session.last = { point: point, stamp: stamp }; session.lastStamp = stamp; session.status = "ready";
+    session.samples.push({ stamp: stamp, meters: session.meters });
+    while (session.samples.length > 2 && session.samples[1].stamp < stamp - 30000) session.samples.shift();
+    var km = Math.floor(session.meters / 1000);
+    while (session.splits.length < km) session.splits.push({ km: session.splits.length + 1, ms: gpsElapsed(session, clock) });
+    return true;
+  }
+  function gpsCurrentPace(session, wall) {
+    if (session.state !== "active" || session.status !== "ready" || !session.last || wall - session.last.stamp > 10000 || session.samples.length < 2) return null;
+    var end = session.samples[session.samples.length - 1], target = end.stamp - 30000, start = session.samples[0], distance = end.meters - start.meters, duration = end.stamp - start.stamp;
+    if (start.stamp < target && session.samples.length > 1) {
+      var next = session.samples[1], fraction = (target - start.stamp) / (next.stamp - start.stamp);
+      distance = end.meters - (start.meters + fraction * (next.meters - start.meters)); duration = 30000;
+    }
+    return duration >= 5000 && distance / (duration / 1000) >= 0.3 ? duration / 60000 / (distance / 1000) : null;
+  }
+  function gpsTime(ms) { var sec = Math.floor(ms / 1000); return (sec >= 3600 ? Math.floor(sec / 3600) + ":" : "") + String(Math.floor(sec / 60) % 60).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); }
+  function gpsRouteHTML(segments) {
+    var points = segments.flat(); if (!points.length) return "";
+    var lat = points[0][0], lon = points[0][1], cos = Math.max(0.01, Math.cos(lat * Math.PI / 180));
+    var projected = segments.map(function (part) { return part.map(function (p) { var delta = ((p[1] - lon + 540) % 360) - 180; return [delta * cos, -(p[0] - lat)]; }); });
+    var all = projected.flat(), xs = all.map(function (p) { return p[0]; }), ys = all.map(function (p) { return p[1]; });
+    var minX = Math.min.apply(null, xs), minY = Math.min.apply(null, ys), width = Math.max.apply(null, xs) - minX, height = Math.max.apply(null, ys) - minY, scale = Math.min(280 / Math.max(width, 0.00001), 140 / Math.max(height, 0.00001));
+    function xy(p) { return [(160 + (p[0] - minX - width / 2) * scale).toFixed(1), (90 + (p[1] - minY - height / 2) * scale).toFixed(1)].join(","); }
+    return '<svg class="gps-route" viewBox="0 0 320 180" role="img" aria-label="' + t("เส้นทางวิ่ง ไม่มีแผนที่") + '">' + projected.map(function (part) { return part.length > 1 ? '<polyline points="' + part.map(xy).join(" ") + '"/>' : '<circle cx="' + xy(part[0]).split(",")[0] + '" cy="' + xy(part[0]).split(",")[1] + '" r="3"/>'; }).join("") + '</svg>';
+  }
+  function gpsStoredDraft() { try { return JSON.parse(localStorage.getItem(GPS_KEY) || "null"); } catch (e) { return null; } }
+  function gpsOwnDraft() {
+    var other = gpsStoredDraft();
+    // Lease expiry permits recovery from storage, never a write from an old in-memory session.
+    if (gpsSession) return other ? other.id === gpsSession.id && (other.owner === gpsOwner || gpsSession.recoverFrom === JSON.stringify(other)) : !gpsSession.persisted;
+    return !other || !Number.isFinite(other.updated) || other.owner === gpsOwner || Date.now() - other.updated > 15000;
+  }
+  function checkpointGPS() {
+    if (!gpsSession || !gpsOwnDraft()) return false;
+    var session = gpsSession, data = { id: session.id, ts: session.ts, state: session.state, ms: gpsElapsed(session, performance.now()), meters: session.meters, segments: simplifyRoute(session.segments), splits: session.splits, type: session.type, finishedAt: session.finishedAt, owner: gpsOwner, updated: Date.now() };
+    try { localStorage.setItem(GPS_KEY, JSON.stringify(data)); session.persisted = true; session.recoverFrom = null; gpsStorageOK = true; } catch (e) { gpsStorageOK = false; }
+    gpsCheckpointAt = Date.now(); return gpsStorageOK;
+  }
+  function restoreGPS() {
+    var d = gpsStoredDraft();
+    if (!d || typeof d.id !== "string" || !/^[a-zA-Z0-9-]{8,80}$/.test(d.id) || !Number.isFinite(d.ts) || d.ts <= 0 || !Number.isFinite(d.ms) || d.ms < 0 || !Number.isFinite(d.meters) || d.meters < 0 || d.meters >= 100000 || !["active", "paused", "finished"].includes(d.state)) return;
+    if (S.runs.some(function (run) { return run.gpsId === d.id; })) { try { localStorage.removeItem(GPS_KEY); } catch (e) {} return; }
+    if (d.owner !== gpsOwner && Date.now() - d.updated <= 15000) { gpsForeign = true; setTimeout(function () { if (!gpsSession) { gpsForeign = false; restoreGPS(); renderGPS(); } }, 16000); return; }
+    gpsSession = newGPSSession(d.id, d.ts, 0, Object.prototype.hasOwnProperty.call(RUN_TYPES, d.type) ? d.type : null);
+    Object.assign(gpsSession, { state: d.state === "finished" ? "finished" : "paused", ms: d.ms, meters: d.meters, segments: cleanRoute(d.segments), status: "interrupted", finishedAt: d.finishedAt, persisted: true, recoverFrom: JSON.stringify(d) });
+    // Splits are derived only from accepted distance; never replay vibration after recovery.
+    gpsSession.splits = Array.from({ length: Math.floor(d.meters / 1000) }, function (_, i) { return { km: i + 1, ms: null }; });
+    checkpointGPS();
+  }
+  function releaseGPSWake() {
+    gpsWakeEpoch++; gpsWakePending = false;
+    var lock = gpsWake; gpsWake = null;
+    if (lock) { try { Promise.resolve(lock.release()).catch(function () {}); } catch (e) {} }
+  }
+  function requestGPSWake() {
+    if (!gpsSession || gpsSession.state !== "active" || document.hidden || gpsWake || gpsWakePending || !navigator.wakeLock) return;
+    var epoch = gpsWakeEpoch; gpsWakePending = true;
+    try { Promise.resolve(navigator.wakeLock.request("screen")).then(function (lock) {
+      if (epoch !== gpsWakeEpoch || !gpsSession || gpsSession.state !== "active" || document.hidden) { lock.release().catch(function () {}); return; }
+      gpsWake = lock; gpsWakePending = false;
+      lock.addEventListener("release", function () { if (gpsWake === lock) { gpsWake = null; renderGPS(); } }); renderGPS();
+    }, function () { if (epoch === gpsWakeEpoch) { gpsWakePending = false; renderGPS(); } }); } catch (e) { gpsWakePending = false; }
+  }
+  function stopGPSResources() {
+    gpsEpoch++;
+    gpsLockPending = false;
+    if (gpsWatch !== null) { try { navigator.geolocation.clearWatch(gpsWatch); } catch (e) {} gpsWatch = null; }
+    if (gpsTick !== null) { clearInterval(gpsTick); gpsTick = null; }
+    releaseGPSWake();
+    if (gpsUnlock) { var unlock = gpsUnlock; gpsUnlock = null; unlock(); }
+  }
+  function withGPSLock(proceed) {
+    if (gpsLockPending) return;
+    // Web Locks prevents simultaneous starts across tabs; the local draft lease
+    // and storage events still protect browsers without this API.
+    if (!navigator.locks || typeof navigator.locks.request !== "function") { proceed(); return; }
+    gpsLockPending = true;
+    var epoch = gpsEpoch;
+    navigator.locks.request("kryvos-gps-watch", { ifAvailable: true }, function (lock) {
+      if (epoch !== gpsEpoch) return;
+      gpsLockPending = false;
+      if (!lock) { gpsForeign = true; renderGPS(); return; }
+      return new Promise(function (release) {
+        gpsUnlock = release;
+        if (document.hidden || !gpsOwnDraft()) { gpsUnlock = null; release(); return; }
+        proceed();
+      });
+    }).catch(function () { if (epoch === gpsEpoch) { gpsLockPending = false; gpsForeign = true; renderGPS(); } });
+  }
+  function refreshLocationPermission() {
+    try { return Promise.resolve(navigator.permissions && navigator.permissions.query({ name: "geolocation" })).then(function (status) {
+      function update() { locationState = status && ["granted", "denied", "prompt"].includes(status.state) ? status.state : "unknown"; renderPermissions(); }
+      if (status) status.onchange = update; update();
+    }, function () { locationState = "unknown"; renderPermissions(); }); } catch (e) { locationState = "unknown"; renderPermissions(); return Promise.resolve(); }
+  }
+  function gpsError(code) {
+    if (!gpsSession || gpsSession.state !== "active") return;
+    if (code === 1) { locationState = "denied"; pauseGPS("denied"); renderPermissions(); }
+    else { gpsSession.status = code === 3 ? "timeout" : "unavailable"; gpsSession.last = null; gpsSession.samples = []; renderGPS(); }
+  }
+  function gpsHeartbeat() {
+    var clock = performance.now();
+    if (clock - gpsLastTick > 15000) { pauseGPS("interrupted", gpsLastTick); return false; }
+    gpsLastTick = clock; return true;
+  }
+  function watchGPS() {
+    var epoch = ++gpsEpoch;
+    gpsLastTick = performance.now();
+    gpsTick = setInterval(function () {
+      if (!gpsHeartbeat()) return;
+      if (!gpsOwnDraft()) { pauseGPS("other"); gpsForeign = true; return; }
+      if (Date.now() - gpsCheckpointAt >= 5000) checkpointGPS();
+      renderGPS();
+    }, 1000);
+    try {
+      var watch = navigator.geolocation.watchPosition(function (position) {
+        if (epoch !== gpsEpoch || !gpsSession || gpsSession.state !== "active") return;
+        if (!gpsHeartbeat()) return;
+        if (!gpsOwnDraft()) { gpsForeign = true; pauseGPS("other"); return; }
+        var count = gpsSession.splits.length;
+        if (acceptGPSPoint(gpsSession, position, Date.now(), performance.now())) {
+          if (gpsSession.splits.length > count) vibrateRest();
+          if (gpsSession.meters >= 99000) { pauseGPS("limit"); return; }
+        }
+        renderGPS();
+      }, function (error) { if (epoch === gpsEpoch) gpsError(error && error.code); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+      if (epoch === gpsEpoch) gpsWatch = watch; else navigator.geolocation.clearWatch(watch);
+    } catch (e) { gpsError(e && e.name === "SecurityError" ? 1 : 2); }
+    requestGPSWake(); checkpointGPS(); renderGPS();
+  }
+  function beginGPS() {
+    if (gpsSession || !gpsOwnDraft()) { gpsForeign = !gpsOwnDraft(); renderGPS(); return; }
+    if (!navigator.geolocation || !window.isSecureContext) { toast(t("GPS ต้องใช้เบราว์เซอร์ที่รองรับและ HTTPS หรือ localhost บันทึกวิ่งเองได้ด้านล่าง")); return; }
+    explainOnce("location", function () {
+      withGPSLock(function () {
+        if (gpsSession || !gpsOwnDraft()) { stopGPSResources(); return; }
+        gpsForeign = false; gpsSession = newGPSSession(gpsOwner + "-" + Date.now().toString(36), Date.now(), performance.now(), runType);
+        watchGPS(); $("gps-pause").focus();
+      });
+    }, $("gps-start"));
+  }
+  function pauseGPS(reason, clock) {
+    if (!gpsSession || gpsSession.state !== "active") return;
+    pauseGPSSession(gpsSession, clock == null ? performance.now() : clock); gpsSession.status = reason || "paused";
+    stopGPSResources(); checkpointGPS(); renderGPS();
+  }
+  function resumeGPS() {
+    if (!gpsSession || gpsSession.state !== "paused") return;
+    if (!gpsOwnDraft()) { gpsForeign = true; renderGPS(); return; }
+    explainOnce("location", function () {
+      withGPSLock(function () {
+        if (gpsSession && resumeGPSSession(gpsSession, performance.now(), Date.now())) { gpsForeign = false; watchGPS(); $("gps-pause").focus(); }
+        else stopGPSResources();
+      });
+    }, $("gps-resume"));
+  }
+  function finishGPS() {
+    if (!gpsSession || gpsSession.state === "finished" || !gpsOwnDraft()) return;
+    pauseGPS(); gpsSession.state = "finished"; gpsSession.finishedAt = Date.now(); gpsSession.status = "finished";
+    stopGPSResources(); checkpointGPS();
+    if (gpsRunRecord()) saveGPSRun();
+    else gpsSession.status = "no_data";
+    renderGPS(); $(gpsSession && gpsRunRecord() ? "gps-save" : gpsSession ? "gps-discard" : "gps-start").focus();
+  }
+  function gpsRunRecord() {
+    if (!gpsSession || gpsSession.state !== "finished" || !(gpsSession.meters > 0 && gpsSession.meters < 100000 && gpsSession.ms > 0)) return null;
+    var record = { ts: gpsSession.finishedAt || gpsSession.ts, km: gpsSession.meters / 1000, min: gpsSession.ms / 60000, gpsId: gpsSession.id };
+    if (gpsSession.type) record.t = gpsSession.type;
+    var route = simplifyRoute(gpsSession.segments); if (route.length) record.route = route;
+    return record;
+  }
+  function clearGPSDraft() { if (gpsOwnDraft()) { try { localStorage.removeItem(GPS_KEY); } catch (e) {} } }
+  function saveGPSRun() {
+    var record = gpsRunRecord(); if (!record || !gpsOwnDraft()) return false;
+    if (S.runs.some(function (run) { return run.gpsId === record.gpsId; })) { clearGPSDraft(); gpsSession = null; renderGPS(); return true; }
+    var previous = S.runs; S.runs = previous.concat([record]);
+    if (!save()) { S.runs = previous; gpsSession.status = "save_failed"; checkpointGPS(); renderGPS(); return false; }
+    clearGPSDraft(); gpsSession = null; stopGPSResources(); renderAll(); renderGPS();
+    track("run_gps"); toast(t("บันทึกการวิ่ง GPS แล้ว")); return true;
+  }
+  function exportGPSRun() {
+    var record = gpsRunRecord(); if (!record) return;
+    var out = Object.assign({ app: "train-today", v: 3 }, snapshot());
+    out.runs = S.runs.some(function (run) { return run.gpsId === record.gpsId; }) ? S.runs : S.runs.concat([record]);
+    var url = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: "application/json" })), link = document.createElement("a");
+    link.href = url; link.download = "kryvos-pending-run.json"; link.click(); setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function discardGPS() {
+    if (!gpsSession || !confirm(t("ยกเลิกผล GPS นี้? ผลที่ยังไม่บันทึกจะหายไป"))) return;
+    stopGPSResources(); clearGPSDraft(); gpsSession = null; gpsStorageOK = true; renderGPS();
+  }
+  function gpsText(id, value) { if ($(id).textContent !== value) $(id).textContent = value; }
+  function renderGPS() {
+    var session = gpsSession, active = session && session.state === "active", finished = session && session.state === "finished";
+    var ms = session ? gpsElapsed(session, performance.now()) : 0, meters = session ? session.meters : 0;
+    $("gps-distance").textContent = (meters / 1000).toFixed(2); $("gps-time").textContent = gpsTime(ms);
+    var current = session && gpsCurrentPace(session, Date.now());
+    $("gps-current").textContent = current ? pace(1, current) : "—";
+    $("gps-average").textContent = meters > 0 && ms > 0 ? pace(meters / 1000, ms / 60000) : "—";
+    var status = session ? session.status : "idle";
+    if (active && session.last && Date.now() - session.last.stamp > 10000 && status === "ready") status = "stale";
+    var messages = { idle: t("พร้อมเริ่ม GPS หรือบันทึกวิ่งเองด้านล่าง"), waiting: t("กำลังรอตำแหน่ง GPS ที่แม่นยำ"), ready: t("กำลังติดตาม GPS"), accuracy: t("GPS คลาดเคลื่อนเกิน 30 เมตร ไม่นับจุดนี้ ลองไปที่โล่ง"), jump: t("GPS กระโดดผิดปกติ ไม่นับจุดนี้"), stale: t("GPS ไม่อัปเดต ยังแสดง pace ปัจจุบันไม่ได้"), paused: t("พักอยู่ เวลาและการเคลื่อนที่จะไม่นับ"), hidden: t("พักอัตโนมัติเมื่อซ่อนแอป กดวิ่งต่อเมื่อพร้อม"), interrupted: t("พบผล GPS ที่ค้างไว้ พักอยู่ กรุณาตรวจแล้ววิ่งต่อหรือจบ ไม่มีการบันทึกอัตโนมัติ"), finished: t("จบแล้ว กรุณาบันทึกผล หรือสำรองไฟล์ก่อนปิดแอป"), save_failed: t("บันทึกไม่สำเร็จ ผลยังรออยู่ กดลองบันทึกอีกครั้งหรือสำรองไฟล์"), denied: t("ไม่ได้รับอนุญาตตำแหน่ง เปิดสิทธิ์ตำแหน่งในตั้งค่าเว็บไซต์และโทรศัพท์ แล้วกดวิ่งต่อ หรือบันทึกเอง"), timeout: t("GPS หมดเวลารอ ลองไปที่โล่ง รอตำแหน่งใหม่ หรือพักแล้วบันทึกเอง"), unavailable: t("ยังรับ GPS ไม่ได้ ตรวจบริการตำแหน่ง ไปที่โล่ง หรือบันทึกเอง"), other: t("มีการวิ่ง GPS ในแท็บอื่น กลับไปใช้แท็บนั้น"), limit: t("พัก GPS ใกล้ขีดจำกัด 100 กม. กรุณาจบและบันทึกผล") };
+    gpsText("gps-status", gpsForeign ? messages.other : status === "no_data" ? t("ยังไม่มีระยะ GPS ที่บันทึกได้ บันทึกระยะและเวลาเองด้านล่าง หรือยกเลิกผลนี้") : messages[status] || messages.waiting);
+    gpsText("gps-storage", gpsStorageOK ? "" : t("เก็บผลค้างไม่สำเร็จ อย่าปิดหรือรีโหลดแอป จบแล้วลองบันทึกหรือสำรองไฟล์"));
+    $("gps-wake").textContent = active ? gpsWake ? t("เปิดการค้างหน้าจอแล้ว โปรดเปิดแอปไว้") : t("ค้างหน้าจออัตโนมัติไม่ได้หรือกำลังรอ โปรดตั้งหน้าจอไม่ให้ดับ") : "";
+    $("gps-route").innerHTML = session ? gpsRouteHTML(simplifyRoute(session.segments)) : "";
+    gpsText("gps-splits", session && session.splits.length ? tf(t("ครบ {n} กิโลเมตร"), { n: session.splits.length }) + " · " + session.splits.map(function (split) { return split.km + " " + t("กม.") + (split.ms == null ? "" : " " + gpsTime(split.ms)); }).join(" · ") : "");
+    $("gps-start").hidden = !!session; $("gps-start").disabled = gpsForeign;
+    $("gps-pause").hidden = !active; $("gps-resume").hidden = !session || active || finished;
+    $("gps-finish").hidden = !session || finished; $("gps-save").hidden = !finished; $("gps-export").hidden = !finished;
+    $("gps-save").disabled = !gpsRunRecord() || gpsForeign; $("gps-resume").disabled = $("gps-finish").disabled = gpsForeign;
+    $("gps-export").disabled = !gpsRunRecord(); $("gps-discard").hidden = !session;
+  }
+  function gpsVisibility() { if (document.hidden) { pauseGPS("hidden"); releaseGPSWake(); } else { refreshLocationPermission(); requestGPSWake(); renderGPS(); } }
+  $("gps-start").addEventListener("click", beginGPS);
+  $("gps-pause").addEventListener("click", function () { pauseGPS(); $("gps-resume").focus(); });
+  $("gps-resume").addEventListener("click", function () { resumeGPS(); if (gpsSession && gpsSession.state === "active") $("gps-pause").focus(); });
+  $("gps-finish").addEventListener("click", finishGPS);
+  $("gps-save").addEventListener("click", saveGPSRun);
+  $("gps-export").addEventListener("click", exportGPSRun);
+  $("gps-discard").addEventListener("click", discardGPS);
+  $("gps-manual").addEventListener("click", function () { quickAdd("run"); });
+  document.addEventListener("visibilitychange", gpsVisibility);
+  window.addEventListener("pagehide", function () { pauseGPS("interrupted"); stopGPSResources(); checkpointGPS(); if (gpsSession && gpsOwnDraft()) { try { var d = gpsStoredDraft(); if (d) { d.updated = 0; localStorage.setItem(GPS_KEY, JSON.stringify(d)); } } catch (e) {} } });
+  window.addEventListener("beforeunload", function (ev) { if (gpsSession) { ev.preventDefault(); ev.returnValue = ""; } });
+  window.addEventListener("storage", function (ev) { if (ev.key === GPS_KEY || ev.key === null) { if (ev.newValue === null) { stopGPSResources(); gpsSession = null; gpsForeign = false; gpsStorageOK = true; } else { gpsForeign = !gpsOwnDraft(); if (gpsSession && gpsForeign) pauseGPS("other"); if (!gpsSession) { gpsForeign = false; restoreGPS(); } } renderGPS(); } });
   function renderRun() {
+    renderGPS();
     Array.prototype.forEach.call($("run-type").querySelectorAll("button"), function (b) { b.setAttribute("aria-pressed", b.dataset.v === runType ? "true" : "false"); });
     var w = weeklyKm(8), max = Math.max.apply(null, w.map(function (x) { return x.km; }).concat([1]));
     var month = [t("ม.ค."), t("ก.พ."), t("มี.ค."), t("เม.ย."), t("พ.ค."), t("มิ.ย."), t("ก.ค."), t("ส.ค."), t("ก.ย."), t("ต.ค."), t("พ.ย."), t("ธ.ค.")];
     var recent = S.runs.filter(function (r) { return r.ts >= Date.now() - 28 * 864e5; });
-    var longest = recent.reduce(function (m, r) { return Math.max(m, r.km); }, 0);
+    var longest = r2(recent.reduce(function (m, r) { return Math.max(m, r.km); }, 0));
     var fast = recent.filter(function (r) { return r.km >= 3; }).map(function (r) { return r.min / r.km; }).sort(function (a, b) { return a - b; })[0];
     $("run-week").innerHTML = t('<div class="kmbars" role="img" aria-label="ระยะวิ่งรายสัปดาห์ 8 สัปดาห์ สัปดาห์นี้ ') + w[7].km + t(' กม.">') + w.map(function (x, i) {
       var d = new Date(x.from);
@@ -3154,6 +3487,7 @@
       '<div class="stat"><div class="v">' + (fast ? pace(1, fast) : "–") + t('</div><div class="k">pace ดีสุด (3 กม.ขึ้นไป)</div></div><div class="stat"><div class="v">') + r1(w.reduce(function (a, x) { return a + x.km; }, 0) / 8) + t(' กม.</div><div class="k">เฉลี่ยต่อสัปดาห์</div></div></div>') +
       '<p class="trend" style="margin-top:12px">' + esc(weekAdvice(w)) + "</p>";
     $("shoe-now").innerHTML = shoeHtml();
+    $("gps-saved-routes").innerHTML = S.runs.filter(function (run) { return run.route && run.route.length; }).slice(-10).reverse().map(function (run) { return '<details><summary>' + t("เส้นทาง GPS") + ' · ' + esc(fmtTime(run.ts)) + ' · ' + run.km.toFixed(2) + ' ' + t("กม.") + '</summary>' + gpsRouteHTML(run.route) + '</details>'; }).join("");
     var q = S.shoeQ;
     var brands = q.brands || [];
     var brandButtons = $("sf-brands").querySelectorAll("button");
@@ -3662,7 +3996,7 @@
       if (b.dataset.tab === "gym") renderGym();
       if (b.dataset.tab === "food") renderFood();
       if (b.dataset.tab === "run") renderRun();
-      if (b.dataset.tab === "settings") { renderSettings(); refreshCameraPermission(); }
+      if (b.dataset.tab === "settings") { renderSettings(); refreshCameraPermission(); refreshLocationPermission(); }
       if (b.dataset.tab === "today") renderPlan();
       window.scrollTo(0, 0);
       track("tab_" + b.dataset.tab);
@@ -4015,8 +4349,10 @@
   var nowD = new Date();
   $("today-date").innerHTML = "<b>" + nowD.toLocaleDateString(LOCALE, { weekday: "long" }) + "</b>" + nowD.toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
   load();
+  restoreGPS();
   renderAll();
   refreshCameraPermission();
+  refreshLocationPermission();
   if (!S.onboarded) { try { localStorage.setItem(STATS_OFF, "1"); } catch (e) {} showProfileSetup(); }
   track("open");
   setTimeout(flushStats, 4000); // send what is queued from last time, after the app has settled

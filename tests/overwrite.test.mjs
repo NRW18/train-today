@@ -47,7 +47,7 @@ test("sample data mentions ticked sets that are not saved yet", () => {
 
 // ---- importing a backup ----
 const IMPORT_FNS = ["checkLoadedThumbnails", "decodeThumbnail", "decodeScanThumbs", "cleanThumbnail", "cleanScanThumbs","dataList", "draftTicked", "importBackup", "strList", "cleanGuide", "cleanCustom", "okTs", "cleanFood", "cleanW",
-  "cleanRuns", "cleanLog", "cleanPrefs", "rebuildEx"];
+  "gpsCoordinate", "cleanRoute", "cleanRuns", "cleanLog", "cleanPrefs", "rebuildEx"];
 function importer(S, answer) {
   const asked = [], toasts = [];
   const ctx = load(IMPORT_FNS, {

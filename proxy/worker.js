@@ -96,7 +96,7 @@ const EVENTS = [
   "checkin", "set_done", "workout_done", "ex_skip", "ex_add",
   "howto_open", "video_open", "scan_machine", "gym_group_toggle",
   "food_photo", "food_manual", "food_quick",
-  "run_log", "shoe_finder", "shoe_set",
+  "run_log", "run_gps", "shoe_finder", "shoe_set",
   "weight_log", "goal_set", "ai_summary", "ai_explain",
   "lang_en", "lang_th", "backup", "import", "sample", "onb_done", "onb_skip", "permission_explain", "permission_fallback"
 ];

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load } from "./app.mjs";
 
-const STATE_FNS = ["checkLoadedThumbnails", "decodeThumbnail", "decodeScanThumbs", "cleanThumbnail", "cleanScanThumbs","strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
+const STATE_FNS = ["checkLoadedThumbnails", "decodeThumbnail", "decodeScanThumbs", "cleanThumbnail", "cleanScanThumbs","strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "gpsCoordinate", "cleanRoute", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
   "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "importBackup", "dataList", "draftTicked", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
 
 function fakeStorage(init = {}) {
@@ -55,6 +55,20 @@ test("shoe brand choices and an older named shoe survive save/reload and backup 
   c.importBackup(JSON.stringify(backup));
   assert.equal(c.S.shoeQ.brands.length, 0, "old backups use every brand");
   assert.equal(c.S.shoe.name, "Legacy Pegasus 37");
+});
+
+test("GPS runs, disconnected routes and IDs survive real save/load and backup import; old shoe mileage stays compatible", () => {
+  const a = app(); a.load();
+  a.S.shoe = { ts: 100, base: 40, name: "Original shoe" };
+  a.S.runs = [{ ts: 101, km: 3.25, min: 20, t: "easy", gpsId: "gps-original-run", route: [[[13.123456, 100], [13.124, 100]], [[13.2, 100.2], [13.3, 100.3]]] }, { ts: 99, km: 5, min: 35 }];
+  a.save(); const b = app(a.storage); b.load();
+  assert.equal(b.S.runs[0].gpsId, "gps-original-run"); assert.equal(b.S.runs[0].route.length, 2); assert.equal(b.S.runs[0].route[0][0][0], 13.12346);
+  Object.assign(b, { confirm: () => true, renderAll() {}, DATA_WORDS: {} });
+  b.importBackup(JSON.stringify({ ...a.snapshot(), app: "train-today", v: 3 }));
+  assert.equal(b.S.runs[0].route.length, 2); assert.equal(b.S.runs[1].route, undefined);
+  assert.equal(load(["shoeKm", "r1"], { S: b.S }).shoeKm(), 43.3);
+  b.importBackup(JSON.stringify({ log: [], runs: [{ ts: 102, km: 5, min: 30, route: [[["invalid", 100], [14, 101]]] }] }));
+  assert.equal(b.S.runs[0].km, 5); assert.equal(b.S.runs[0].route[0].length, 1); assert.equal(b.S.shoe.name, "Original shoe");
 });
 
 test("invalid thumbnail imports are dropped without interrupting load of existing workouts", () => {
