@@ -2263,12 +2263,15 @@
     return new Promise(function (resolve, reject) {
       var img = new Image(), url = URL.createObjectURL(file);
       img.onload = function () {
-        var max = 1024, w = img.naturalWidth, h = img.naturalHeight, sc = Math.min(1, max / Math.max(w, h));
-        var c = document.createElement("canvas");
-        c.width = Math.round(w * sc); c.height = Math.round(h * sc);
-        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL("image/jpeg", 0.82));
+        try {
+          var max = 1024, w = img.naturalWidth, h = img.naturalHeight, sc = Math.min(1, max / Math.max(w, h));
+          if (!(w > 0 && h > 0)) throw new Error("read");
+          var c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(w * sc)); c.height = Math.max(1, Math.round(h * sc));
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL("image/jpeg", 0.82));
+        } catch (err) { reject(aiError("image")); }
+        finally { URL.revokeObjectURL(url); }
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("read")); };
       img.src = url;
@@ -2322,10 +2325,40 @@
 
   // One place that talks to Gemini; always asks for JSON back.
   function parseGemini(j) {
-    var txt = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts &&
-      j.candidates[0].content.parts.map(function (p) { return p.text || ""; }).join("");
-    if (!txt) throw new Error("empty");
-    return JSON.parse(txt.replace(/^```(json)?|```$/g, "").trim());
+    var candidate = j && Array.isArray(j.candidates) && j.candidates[0];
+    var finish = candidate && candidate.finishReason;
+    if (j && j.promptFeedback && j.promptFeedback.blockReason || ["SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "IMAGE_SAFETY"].indexOf(finish) >= 0) throw aiError("blocked");
+    if (finish === "MAX_TOKENS" || finish === "CONTINUATION") throw aiError("truncated");
+    if (finish && finish !== "STOP") throw aiError("response_shape");
+    var parts = candidate && candidate.content && candidate.content.parts;
+    if (parts != null && !Array.isArray(parts)) throw aiError("response_shape");
+    var txt = (parts || []).filter(function (part) { return part && part.thought !== true && typeof part.text === "string"; }).map(function (part) { return part.text; }).join("").trim();
+    if (!txt) throw aiError("empty_response");
+    txt = txt.replace(/^```(?:json)?\s*([\s\S]*?)\s*```$/i, "$1").trim();
+    try { return JSON.parse(txt); } catch (err) { throw aiError("invalid_json"); }
+  }
+  // Only fixed codes and HTTP numbers leave these helpers. Never retain Google's error text.
+  function aiError(code, status) {
+    var error = code === "network" ? new TypeError("network") : new Error("ai");
+    error.aiCode = code;
+    if (Number.isInteger(status) && status >= 100 && status <= 599) error.status = status;
+    return error;
+  }
+  function aiHttpError(status, body, proxy) {
+    var upstream = proxy && body && Number.isInteger(body.status) && body.status >= 100 && body.status <= 599 ? body.status : null;
+    var http = upstream || status, code = http === 404 ? "model" : http === 429 ? "quota" : http >= 500 ? "upstream" : http === 402 ? "billing" : http === 401 ? "auth" : http === 403 ? "permission" : "request";
+    if (!proxy) {
+      var details = body && body.error && body.error.details;
+      var reasons = Array.isArray(details) ? details.map(function (detail) { return detail && detail.reason; }) : [];
+      if (http === 401 || reasons.indexOf("API_KEY_INVALID") >= 0 || reasons.indexOf("API_KEY_EXPIRED") >= 0) code = "auth";
+      else if (http === 403 || reasons.some(function (reason) { return ["API_KEY_HTTP_REFERRER_BLOCKED", "API_KEY_SERVICE_BLOCKED", "API_KEY_IP_ADDRESS_BLOCKED", "SERVICE_DISABLED"].indexOf(reason) >= 0; })) code = "permission";
+    }
+    var error = aiError(code, status);
+    if (proxy) { error.proxy = true; error.upstreamStatus = upstream; error.limit = body && body.error === "limit"; error.scope = body && ["app", "user"].indexOf(body.scope) >= 0 ? body.scope : null; }
+    return error;
+  }
+  function readAIResponse(response) {
+    return response.json().catch(function (error) { if (!response.ok) return {}; throw aiError(error && error.name === "SyntaxError" ? "response_json" : "network", response.status); });
   }
   // The proxy sometimes answers 502/503 for a moment, or the gym wifi drops: wait 1.5 s and try once more.
   // Never retry 429 (quota) or 400 (bad request): a second try would fail the same way.
@@ -2336,40 +2369,49 @@
     if (!parts.length || typeof parts[0].text !== "string" || parts[0].text.indexOf(LANG_RULE) >= 0) return parts;
     return [{ text: parts[0].text + LANG_RULE }].concat(parts.slice(1));
   }
-  function callProxy(parts, retried) {
+  function callProxy(parts, retried, diagnostic) {
     function again() {
-      return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return callProxy(parts, true); });
+      return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return callProxy(parts, true, diagnostic); });
     }
+    if (diagnostic) { diagnostic.route = "worker"; diagnostic.stage = "request"; diagnostic.http = null; }
     return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
       .then(function (res) {
+        if (diagnostic) { diagnostic.stage = "response"; diagnostic.http = res.status; }
         if (!res.ok && !retried && (res.status === 502 || res.status === 503)) return again();
-        return res.json().catch(function () { return {}; }).then(function (j) {
-          if (!res.ok) { var pe = new Error("proxy"); pe.status = res.status; pe.proxy = true; pe.limit = j && j.error === "limit"; pe.scope = j && j.scope; throw pe; }
+        return readAIResponse(res).then(function (j) {
+          if (!res.ok) throw aiHttpError(res.status, j, true);
+          if (diagnostic) diagnostic.stage = "parse";
           return parseGemini(j);
         });
       }, function (netErr) {
-        if (retried) throw netErr;
+        if (retried) throw aiError("network");
         return again();
       });
   }
-  function callGemini(parts, i) {
+  function callGemini(parts, i, diagnostic) {
     i = i || 0;
     parts = withLang(parts);
-    if (!navigator.onLine) return Promise.reject(new Error("offline"));
+    if (diagnostic) diagnostic.stage = "request";
+    if (!navigator.onLine) return Promise.reject(Object.assign(aiError("network"), { message: "offline" }));
     if (!getKey()) {
       if (!PROXY_URL) return Promise.reject(new Error("nokey"));
-      return callProxy(parts, false);
+      return callProxy(parts, false, diagnostic);
     }
+    if (diagnostic) { diagnostic.route = "personal"; diagnostic.stage = "request"; diagnostic.model = MODELS[i]; diagnostic.http = null; }
     var body = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } };
     return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + MODELS[i] + ":generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": getKey() },
       body: JSON.stringify(body)
     }).then(function (res) {
-      if (res.status === 404 && i + 1 < MODELS.length) return callGemini(parts, i + 1);
-      if (!res.ok) { var err = new Error("http"); err.status = res.status; throw err; }
-      return res.json().then(parseGemini);
-    });
+      if (diagnostic) { diagnostic.stage = "response"; diagnostic.http = res.status; }
+      if (res.status === 404 && i + 1 < MODELS.length) return callGemini(parts, i + 1, diagnostic);
+      return readAIResponse(res).then(function (j) {
+        if (!res.ok) throw aiHttpError(res.status, j, false);
+        if (diagnostic) diagnostic.stage = "parse";
+        return parseGemini(j);
+      });
+    }, function () { throw aiError("network"); });
   }
 
   // Never trust the model's output blindly: keep only known ids and valid keys.
@@ -2380,15 +2422,15 @@
     S.custom.forEach(function (c) { if (c.hidden) back[c.name.toLowerCase()] = c.id; });
     (r && Array.isArray(r.equipment) ? r.equipment : []).slice(0, 8).forEach(function (q) {
       if (!q) return;
-      var ids = (Array.isArray(q.known) ? q.known : []).filter(function (id) { return EXBY[id] && !EXBY[id].hidden; });
+      var ids = (Array.isArray(q.known) ? q.known : []).filter(function (id) { return typeof id === "string" && Object.prototype.hasOwnProperty.call(EXBY, id) && !EXBY[id].hidden; });
       var label = typeof q.label_th === "string" ? q.label_th.slice(0, 50) : t("เครื่องออกกำลังกาย");
       var conf = typeof q.confidence === "number" ? Math.max(0, Math.min(1, q.confidence)) : 0.5;
       out.equipment.push({ label: label, en: cleanEn(q.label_en), ids: ids, conf: conf });
     });
     (r && Array.isArray(r.new_exercises) ? r.new_exercises : []).slice(0, 5).forEach(function (n) {
-      if (!n || typeof n.name_th !== "string" || !DAYS[n.day]) return;
-      var m = (Array.isArray(n.muscles) ? n.muscles : []).filter(function (k) { return MUSCLES[k]; });
-      var j = (Array.isArray(n.joints) ? n.joints : []).filter(function (k) { return JOINTS[k]; });
+      if (!n || typeof n.name_th !== "string" || !Object.prototype.hasOwnProperty.call(DAYS, n.day)) return;
+      var m = (Array.isArray(n.muscles) ? n.muscles : []).filter(function (k) { return typeof k === "string" && Object.prototype.hasOwnProperty.call(MUSCLES, k); });
+      var j = (Array.isArray(n.joints) ? n.joints : []).filter(function (k) { return typeof k === "string" && Object.prototype.hasOwnProperty.call(JOINTS, k); });
       var name = n.name_th.trim().slice(0, 40);
       if (!m.length || !name || taken[name.toLowerCase()]) return;
       taken[name.toLowerCase()] = 1;
@@ -2398,10 +2440,48 @@
     });
     return out;
   }
+  function validateScan(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw) ||
+      raw.equipment != null && !Array.isArray(raw.equipment) || raw.new_exercises != null && !Array.isArray(raw.new_exercises)) throw aiError("validation");
+    var result = validate(raw);
+    if (result.fresh.length || result.equipment.some(function (item) { return item.ids.length; })) return result;
+    if (Array.isArray(raw.equipment) && !raw.equipment.length && Array.isArray(raw.new_exercises) && !raw.new_exercises.length) return result;
+    throw aiError("validation");
+  }
+  var SCAN_ERRORS = {
+    image: t("เตรียมรูปไม่สำเร็จ ลองเลือกรูป JPEG หรือ PNG จากแกลเลอรี"),
+    network: t("เชื่อมต่อบริการ AI ไม่สำเร็จ ตรวจเครือข่ายหรือข้อจำกัดการเชื่อมต่อแล้วลองใหม่"),
+    auth: t("บริการ AI ไม่ยอมรับคีย์ ตรวจสถานะคีย์ใน Google AI Studio"),
+    permission: t("คีย์ไม่มีสิทธิ์เรียกบริการนี้ ตรวจข้อจำกัดคีย์และการเปิดใช้ API ใน Google AI Studio"),
+    model: t("โมเดลที่ลองใช้ยังเรียกไม่ได้ ตรวจสิทธิ์เข้าถึงและสถานะบริการ AI"),
+    quota: t("คำขอ AI ถูกจำกัดอัตราหรือโควตา รอสักครู่แล้วตรวจโควตาใน Google AI Studio"),
+    billing: t("บริการ AI ต้องตรวจสอบการเรียกเก็บเงินหรือเครดิตใน Google AI Studio"),
+    request: t("บริการ AI ปฏิเสธรูปแบบคำขอ ตรวจรายละเอียด HTTP ด้านล่าง"),
+    upstream: t("บริการ AI มีปัญหาชั่วคราว ลองใหม่ภายหลัง"),
+    response_json: t("บริการ AI ส่งข้อมูลตอบกลับที่อ่านเป็น JSON ไม่ได้ ลองใหม่ภายหลัง"),
+    response_shape: t("คำตอบจากบริการ AI มีโครงสร้างที่แอปอ่านไม่ได้ ลองใหม่ภายหลัง"),
+    invalid_json: t("สแกนไม่สำเร็จ: AI ตอบกลับเป็น JSON ที่อ่านไม่ได้ ลองวิเคราะห์ใหม่"),
+    empty_response: t("AI ไม่ส่งคำตอบสำหรับการวิเคราะห์ครั้งนี้ ลองใหม่ภายหลัง"),
+    blocked: t("บริการ AI ระงับคำตอบตามนโยบาย จึงยังระบุเครื่องไม่ได้"),
+    truncated: t("คำตอบ AI ถูกตัดก่อนจบ จึงยังอ่านผลไม่ได้ ลองใหม่ภายหลัง"),
+    validation: t("คำตอบ AI ไม่ผ่านการตรวจข้อมูลท่า ยังเพิ่มเครื่องไม่ได้ เลือกท่าเองหรือลองวิเคราะห์ใหม่"),
+    render: t("แสดงผลสแกนไม่สำเร็จ ผลเดิมและข้อมูลการซ้อมยังอยู่ในเครื่อง"),
+    unknown: t("สแกนไม่สำเร็จ ดูรายละเอียดขั้นตอนด้านล่าง หรือเลือกท่าเอง")
+  };
+  function scanDiagnosticHtml(diagnostic) {
+    var info = diagnostic || {}, rows = [];
+    if (["personal", "worker"].indexOf(info.route) >= 0) rows.push(info.route === "personal" ? t("คีย์ส่วนตัว") : t("AI ของแอป"));
+    if (["image", "request", "response", "parse", "validate", "render", "done"].indexOf(info.stage) >= 0) rows.push(info.stage);
+    if (MODELS.indexOf(info.model) >= 0) rows.push(info.model);
+    if (Number.isInteger(info.http) && info.http >= 100 && info.http <= 599) rows.push("HTTP " + info.http);
+    if (Number.isInteger(info.upstream) && info.upstream >= 100 && info.upstream <= 599) rows.push("upstream HTTP " + info.upstream);
+    if (Object.prototype.hasOwnProperty.call(SCAN_ERRORS, info.code)) rows.push(info.code);
+    return '<details class="scan-diagnostics"><summary>' + t("รายละเอียดการสแกน (ไม่มีคีย์หรือรูป)") + '</summary><p class="hint">' + rows.map(esc).join(" · ") + '</p><p class="hint">' + t("รายละเอียดนี้อยู่เฉพาะแท็บนี้ ไม่บันทึกใน backup และไม่ส่งไปสถิติ") + '</p></details>';
+  }
 
   // job: what the AI was asked to do ("scan", "food", "week", "explain"), so a bad answer gets the right message
   var AI_FAIL = {
-    scan: t("สแกนไม่สำเร็จ ลองถ่ายใหม่ให้เห็นเครื่องชัด ๆ"),
+    scan: t("สแกนไม่สำเร็จ ดูรายละเอียดขั้นตอนด้านล่าง หรือเลือกท่าเอง"),
     food: t("ประเมินอาหารไม่สำเร็จ ลองถ่ายใหม่ให้เห็นอาหารชัด ๆ"),
     week: t("AI สรุปไม่สำเร็จ ลองกดใหม่อีกครั้ง"),
     explain: t("AI อธิบายท่าไม่สำเร็จ ลองกดใหม่อีกครั้ง")
@@ -2409,6 +2489,13 @@
   function errText(e, job) {
     if (e && e.message === "nokey") return t("ยังไม่ได้ใส่ Gemini key (ใส่ที่แท็บเครื่อง)");
     if (!navigator.onLine || (e && e.message === "offline")) return t("ไม่มีอินเทอร์เน็ต ส่วนที่ใช้ AI ต้องต่อเน็ต (ส่วนอื่นของแอปใช้ออฟไลน์ได้)");
+    if (job === "scan" && !(e && e.proxy && e.limit)) {
+      if (e && e.proxy && ["auth", "permission"].indexOf(e.aiCode) >= 0) return t("AI ของแอปมีปัญหาสิทธิ์เข้าถึงบริการ กรุณาแจ้งผู้ดูแลหรือลองใช้คีย์ส่วนตัว");
+      if (e && e.proxy && e.aiCode === "quota") return t("AI ของแอปถูกจำกัดอัตราหรือโควตา ลองใหม่ภายหลังหรือใช้คีย์ส่วนตัว");
+      if (e && Object.prototype.hasOwnProperty.call(SCAN_ERRORS, e.aiCode)) return SCAN_ERRORS[e.aiCode];
+      if (e instanceof SyntaxError) return SCAN_ERRORS.invalid_json;
+      if (e && e.message === "read") return SCAN_ERRORS.image;
+    }
     if (e && e.proxy) {
       if (e.limit && e.scope === "app") return t("วันนี้ AI ของแอปถูกใช้ครบโควตารวมแล้ว พรุ่งนี้ใช้ได้ใหม่ (หรือใส่คีย์ของตัวเองที่แท็บเครื่อง)");
       if (e.limit) return t("วันนี้คุณใช้ AI ครบ 40 ครั้งแล้ว พรุ่งนี้ใช้ได้ใหม่ (หรือใส่คีย์ของตัวเองที่แท็บเครื่อง)");
@@ -2569,20 +2656,29 @@
   /* ---------- scan results: a short row per photo on the Gym tab, the full result in a dark sheet ---------- */
   var shots = {}, shotSheet = null;
   function scan(file) {
-    var id = "shot" + (++shotN), s = shots[id] = { state: "busy", img: "" };
+    var id = "shot" + (++shotN), s = shots[id] = { state: "busy", img: "", diagnostic: { stage: "image", route: getKey() ? "personal" : "worker" } };
     drawShots(); openShot(id);
     $("scan-label").classList.add("busy");
-    shrink(file).then(function (dataUrl) {
+    return shrink(file).then(function (dataUrl) {
       return makeThumbnail(dataUrl).then(function (thumb) {
         s.img = thumb; shotChanged(id);
-        return callGemini([{ text: buildPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }]);
+        return callGemini([{ text: buildPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }], 0, s.diagnostic);
       });
     }).then(function (raw) {
-      s.r = validate(raw);
+      s.diagnostic.stage = "validate";
+      s.r = validateScan(raw);
       s.state = s.r.equipment.length || s.r.fresh.length ? "done" : "empty";
+      s.diagnostic.stage = "render";
+      $("scan-label").classList.remove("busy"); shotChanged(id);
+      s.diagnostic.stage = "done";
     }).catch(function (e) {
-      s.state = "err"; s.err = errText(e, "scan");
-    }).then(function () { $("scan-label").classList.remove("busy"); shotChanged(id); });
+      var code = e && Object.prototype.hasOwnProperty.call(SCAN_ERRORS, e.aiCode) ? e.aiCode : { image: "image", validate: "validation", render: "render" }[s.diagnostic.stage] || "unknown";
+      s.diagnostic.code = code;
+      if (e && Number.isInteger(e.upstreamStatus)) s.diagnostic.upstream = e.upstreamStatus;
+      var report = e && (e.message === "offline" || e.message === "nokey" || e.limit) ? e : Object.assign(aiError(code), { proxy: !!(e && e.proxy) });
+      s.state = "err"; s.err = errText(report, "scan");
+      $("scan-label").classList.remove("busy"); shotChanged(id);
+    });
   }
   function shotChanged(id) { drawShots(); if (shotSheet === id) drawShot(id); }
   function shotTitle(s) { return s.r ? s.r.equipment.map(function (q) { return q.label; }).concat(s.r.equipment.length ? [] : s.r.fresh.map(function (n) { return n.name; })).join(", ") : ""; }
@@ -2618,7 +2714,7 @@
   function drawShot(id) {
     var s = shots[id], h = sheetHead(t("เครื่องเล่นที่คุณถ่าย"), s.state === "done") + '<img data-scan-thumbnail class="sh-img" alt="' + t("รูปเครื่องที่ถ่าย") + '"' + (s.img ? ' src="' + s.img + '"' : "") + ">";
     if (s.state === "busy") h += '<p class="sh-msg" role="status">' + t("AI กำลังดูรูป…") + "</p>";
-    else if (s.state === "err") h += '<p class="sh-msg err" role="alert">' + esc(s.err) + "</p>";
+    else if (s.state === "err") h += '<p class="sh-msg err" role="alert">' + esc(s.err) + "</p>" + scanDiagnosticHtml(s.diagnostic);
     else if (s.state === "empty") h += '<p class="sh-msg">' + t("ไม่เห็นเครื่องออกกำลังกายในรูปนี้ ลองถ่ายใหม่ให้เห็นทั้งเครื่อง") + "</p>";
     else {
       var r = s.r;

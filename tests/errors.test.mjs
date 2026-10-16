@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { load, html } from "./app.mjs";
 
-const a = load(["errText"], { navigator: { onLine: true } }, ["AI_FAIL"]);
+const a = load(["errText"], { navigator: { onLine: true } }, ["AI_FAIL", "SCAN_ERRORS"]);
 
 test("an unreadable answer gets a message for that job", () => {
   const bad = new SyntaxError("Unexpected token");

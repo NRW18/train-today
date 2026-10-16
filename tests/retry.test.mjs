@@ -4,12 +4,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { fnSource } from "./app.mjs";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const start = html.indexOf("function callProxy(");
 const end = html.indexOf("function callGemini(");
 assert.ok(start > 0 && end > start, "callProxy not found in index.html");
-const src = html.slice(start, end);
+const src = ["aiError", "aiHttpError", "readAIResponse"].map(fnSource).join("\n") + "\n" + html.slice(start, end);
 
 // Build callProxy with a fake fetch. Each step is a status number, or "net" for a dropped connection.
 function setup(...steps) {
@@ -61,7 +62,7 @@ test("502 twice: gives up after one retry with the proxy error", async () => {
 
 test("network drop twice: gives up after one retry", async () => {
   const { callProxy, calls } = setup("net", "net");
-  await assert.rejects(callProxy(parts), TypeError);
+  await assert.rejects(callProxy(parts), (e) => e.aiCode === "network");
   assert.equal(calls.fetch, 2);
 });
 
