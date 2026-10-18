@@ -113,6 +113,16 @@ async function noOverflow(page, label) {
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await page.reload();
     await page.locator('[data-tab="gym"]').click();
+    assert.equal(await page.locator('#machine-grid .machine-example').count(), 15);
+    for (const photo of await page.locator('#machine-grid .machine-example').all()) {
+      await photo.scrollIntoViewIfNeeded();
+      await photo.evaluate(image => image.decode());
+      assert.ok(await photo.evaluate(image => image.naturalWidth > 0));
+    }
+    await page.locator('#machine-photo-credits').click();
+    assert.equal(await page.locator('.sheet .photo-credits li').count(), 15);
+    await page.keyboard.press('Escape');
+    console.log('PASS all 15 real photo cards decoded and source/license credits remain accessible');
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
     assert.equal(await page.locator('#machine-grid button').count(), 15);
@@ -125,6 +135,9 @@ async function noOverflow(page, label) {
     await page.reload();
     await page.locator('[data-tab="gym"]').click();
     assert.equal(await page.locator('#machine-grid button').count(), 15);
+    const offlinePhoto = page.locator('#machine-grid .machine-example').first();
+    await offlinePhoto.scrollIntoViewIfNeeded();
+    await offlinePhoto.evaluate(image => image.decode());
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
     await page.locator('[data-machine-pick="leg_press"]').click();

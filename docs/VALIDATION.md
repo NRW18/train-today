@@ -93,3 +93,23 @@ just functional browser checks while iterating; final validation used the full s
   actual PWA offline/manual fallback is browser tested. Cache eviction remains a
   browser limitation, disclosed in UI and model README.
 - No backend or worker deployment, no merge to main. Owner review remains required.
+
+## Real-photo presentation follow-up (2026-10-18)
+
+- Replaced the default schematic presentation with 14 real photographs / credited
+  photographic video stills for all 15 original exercise IDs. Pec-deck and rear-delt
+  deliberately share the same apparatus example. No exercise or recognition data
+  was replaced. Existing personal scan thumbnails still take priority; custom IDs
+  and failed photo loads retain their schematic fallback.
+- Sources, authors, license links, transformation notes and apparatus/variant
+  caveats are recorded in `assets/machines/CREDITS.md` and `machine-photos.js`.
+  Equipment has an accessible Photo credits dialog. No remote photo hotlinks are
+  required: WebP assets total 627,802 bytes and are part of the v59 offline shell.
+- Node tests: **249/249 passed**, including four photo/credit/cache/fallback tests.
+- Full browser acceptance: **16/16** layouts passed; all 15 images decoded, credits
+  opened/closed, and a real photo decoded after offline reload. Original machine
+  confirmation, timer and local-no-upload checks also passed. Thai dark equipment
+  screenshot visually inspected at 375px width after replacing the pictures.
+- This changes presentation assets only. It does not train the recognition model,
+  assess model accuracy, fix the separately reviewed modal-return-focus issue, or
+  add physical-device testing. No worker redeployment is needed.

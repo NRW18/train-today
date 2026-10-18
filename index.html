@@ -944,8 +944,10 @@
       <p class="hint" id="machine-status" role="status"></p>
       <div id="machine-results" aria-live="polite" tabindex="-1"></div>
       <details id="machine-manual" open><summary>เลือกเครื่องเอง</summary>
+        <p class="hint">รูปอุปกรณ์ตัวอย่าง แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม</p>
         <div id="machine-grid" class="machine-grid"></div>
       </details>
+      <button type="button" class="linkbtn" id="machine-photo-credits">ที่มารูปภาพ</button>
     </section>
     <details class="card" id="gemini-option"><summary>สแกนด้วย Gemini (ส่งรูปออนไลน์)</summary>
     <section class="card shoot" aria-labelledby="scan-h">
@@ -1118,6 +1120,7 @@
 <script src="en.js"></script>
 <script src="machines-config.js"></script>
 <script src="machine-recognition.js"></script>
+<script src="machine-photos.js"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -2333,7 +2336,25 @@
     var thumb = thumbnailHtml(id);
     if (thumb) return thumb;
     var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : "generic";
-    return '<svg class="machine-art" viewBox="0 0 120 90" role="img" aria-label="' + esc(t("ภาพประกอบเครื่องและท่า")) + '"><use href="assets/machines.svg#' + symbol + '"></use></svg>';
+    var photo = typeof MACHINE_PHOTOS !== "undefined" && MACHINE_PHOTOS[id];
+    var fallback = '<svg class="machine-art"' + (photo ? ' hidden' : '') + ' viewBox="0 0 120 90" role="img" aria-label="' + esc(t("ภาพประกอบเครื่องและท่า")) + '"><use href="assets/machines.svg#' + symbol + '"></use></svg>';
+    return (photo ? '<img class="machine-example" src="' + esc(photo.src) + '" alt="' + esc(EXBY[id].name) + '" width="640" height="480" loading="lazy" decoding="async">' : '') + fallback;
+  }
+  function machinePhotoFailed(image) {
+    image.hidden = true;
+    var fallback = image.nextElementSibling;
+    if (fallback && fallback.classList.contains("machine-art")) fallback.hidden = false;
+  }
+  function showMachinePhotoCredits() {
+    openSheet("", null, $("machine-photo-credits"));
+    var photos = typeof MACHINE_PHOTOS !== "undefined" ? MACHINE_PHOTOS : {};
+    sheet.innerHTML = sheetHead(t("ที่มารูปภาพ"), false) + '<p class="hint">' + t("ภาพถูกย่อขนาด บางภาพเป็นภาพนิ่งจากวิดีโอ เครดิตและสิทธิ์ของแต่ละภาพอยู่ด้านล่าง") + '</p><ul class="photo-credits">' + EX.filter(function (ex) { return photos[ex.id]; }).map(function (ex) {
+      var photo = photos[ex.id];
+      var author = photo.authorUrl ? '<a href="' + esc(photo.authorUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.author) + '</a>' : esc(photo.author);
+      return '<li><strong>' + esc(ex.name) + '</strong><br><a href="' + esc(photo.source) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.title) + '</a><br>' + author + ' · <a href="' + esc(photo.licenseUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.license) + '</a></li>';
+    }).join("") + '</ul>';
+    sheet.onclick = function (ev) { if (ev.target.closest("[data-close]")) closeSheet(); };
+    sheet.focus();
   }
   function machineCard(row, action) {
     var ex = EXBY[row.id]; if (!ex || ex.hidden) return "";
@@ -3782,6 +3803,7 @@
   $("machine-gallery").addEventListener("click", function () {
     try { $("machine-gallery-input").click(); } catch (error) { $("machine-manual").open = true; $("machine-status").textContent = t("อ่านรูปไม่ได้ ลองรูปอื่นหรือเลือกเครื่องเอง"); }
   });
+  $("machine-photo-credits").addEventListener("click", showMachinePhotoCredits);
   $("machine-prepare").addEventListener("click", async function () {
     var button = this; button.disabled = true;
     $("machine-status").textContent = t("กำลังเตรียมโมเดล… ยังเลือกเครื่องเองได้");
@@ -3935,6 +3957,7 @@
   }); });
   document.addEventListener("error", function (ev) {
     if (ev.target.matches && ev.target.matches(".gym-thumb, [data-scan-thumbnail]")) hideBrokenThumbnail(ev.target);
+    if (ev.target.matches && ev.target.matches(".machine-example")) machinePhotoFailed(ev.target);
   }, true);
   $("scan-results").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-open]"); if (b) openShot(b.dataset.open);
