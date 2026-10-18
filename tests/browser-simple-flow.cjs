@@ -122,7 +122,7 @@ async function noOverflow(page, label) {
     await page.locator('#machine-photo-credits').click();
     assert.equal(await page.locator('.sheet .photo-credits li').count(), 15);
     await page.keyboard.press('Escape');
-    console.log('PASS all 15 real photo cards decoded and source/license credits remain accessible');
+    console.log('PASS all 15 equipment cutout cards decoded and source/license credits remain accessible');
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
     assert.equal(await page.locator('#machine-grid button').count(), 15);

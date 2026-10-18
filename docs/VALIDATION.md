@@ -113,3 +113,31 @@ just functional browser checks while iterating; final validation used the full s
 - This changes presentation assets only. It does not train the recognition model,
   assess model accuracy, fix the separately reviewed modal-return-focus issue, or
   add physical-device testing. No worker redeployment is needed.
+
+## People-free transparent equipment follow-up (2026-10-18)
+
+- Replaced the default images with **12 transparent equipment cutouts covering
+  all 15 existing exercise IDs**. No people are present. Pec-deck/rear-delt share
+  one apparatus; lateral-raise/curl share dumbbells; pushup/plank share an empty
+  mat. Exercise instructions, recognition mappings, recommendations, rest timer,
+  navigation and saved personal thumbnails retain their existing behavior.
+- These are AI-edited photographic-style examples, with reconstructed equipment
+  parts, not untouched product photos. This is disclosed in Thai and English on
+  the equipment page and in Photo credits. The shoulder-press example depicts an
+  upright overhead press, correcting the incline-press reference. Provenance,
+  original attribution, derivative licenses and the prompt set are retained in
+  `assets/machines/`. AI edits used the built-in image tool; only resize/WebP
+  encoding was performed afterward, preserving alpha.
+- Final WebP assets: **543,490 bytes**, maximum 640 px per side. Real transparency
+  and appearance were inspected against a contrasting background and in the app.
+  The v60 offline shell caches these 12 files instead of the 14 old photo defaults.
+  Original reference photographs remain in the repository with their credits.
+- Node tests: **250/250 passed**, including preserved photo priority/fallback,
+  attribution, alpha-bearing WebP, shared apparatus and canonical ID coverage.
+- Browser acceptance: **16/16** layouts passed (320/360/375/430 px, Thai/English,
+  light/dark), all 15 cards decoded, credits remained reachable, PWA offline reload
+  and manual/confirmed machine → correct guide/rest timer passed. Controlled
+  remote recognition, resize, consent and network-fallback checks also passed.
+  The Thai dark 375px equipment screenshot was visually inspected.
+- No model training, model-accuracy claim, backend change, physical-device test or
+  merge is included. The earlier modal-return-focus finding remains outstanding.

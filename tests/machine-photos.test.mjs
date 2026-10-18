@@ -9,22 +9,36 @@ vm.runInNewContext(readFileSync(new URL("../machine-photos.js", import.meta.url)
 const photos = scope.MACHINE_PHOTOS;
 const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
 
-test("every canonical exercise has a local photograph, attribution and offline shell entry", () => {
+test("every canonical exercise has a transparent equipment cutout, attribution and offline shell entry", () => {
   const base = html.slice(html.indexOf("var BASE_EX = ["), html.indexOf("var EN_NAME = {"));
   const ids = [...base.matchAll(/id: "([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(Object.keys(photos).sort(), ids.sort());
   assert.ok(sw.includes('"machine-photos.js"'));
   for (const photo of Object.values(photos)) {
-    assert.match(photo.src, /^assets\/machines\/[a-z-]+\.webp$/);
+    assert.match(photo.src, /^assets\/machines\/cutouts\/[a-z-]+\.webp$/);
     assert.ok(existsSync(new URL("../" + photo.src, import.meta.url)));
     const bytes = readFileSync(new URL("../" + photo.src, import.meta.url));
     assert.equal(bytes.toString("ascii", 0, 4), "RIFF");
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
+    assert.equal(bytes.toString("ascii", 12, 16), "VP8X");
+    assert.ok(bytes[20] & 0x10, photo.src + " must retain transparency");
+    assert.equal(photo.presentation, "ai-edited-cutout");
+    assert.match(photo.changes, /AI-/);
     assert.ok(sw.includes(JSON.stringify(photo.src)), photo.src + " unavailable offline");
     assert.match(photo.source, /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
     assert.ok(photo.author && photo.title && photo.license && photo.changes);
     assert.match(photo.licenseUrl, /^https:\/\/(creativecommons\.org|commons\.wikimedia\.org)\//);
   }
+});
+
+test("shared equipment uses one file without changing the original exercise IDs", () => {
+  assert.equal(new Set(Object.values(photos).map(photo => photo.src)).size, 12);
+  assert.equal(photos.pec_deck.src, photos.rear_delt.src);
+  assert.equal(photos.lateral_raise.src, photos.db_curl.src);
+  assert.equal(photos.pushup.src, photos.plank.src);
+  assert.match(photos.pushup.src, /exercise-mat/);
+  assert.equal(photos.seated_row.source, photos.triceps_pushdown.source);
+  assert.match(photos.shoulder_press.changes, /upright overhead/);
 });
 
 test("personal thumbnails keep priority; curated photos use canonical names; unknown custom IDs keep illustration", () => {

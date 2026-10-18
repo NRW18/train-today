@@ -944,7 +944,7 @@
       <p class="hint" id="machine-status" role="status"></p>
       <div id="machine-results" aria-live="polite" tabindex="-1"></div>
       <details id="machine-manual" open><summary>เลือกเครื่องเอง</summary>
-        <p class="hint">รูปอุปกรณ์ตัวอย่าง แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม</p>
+        <p class="hint">ภาพอุปกรณ์แต่งด้วย AI แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม</p>
         <div id="machine-grid" class="machine-grid"></div>
       </details>
       <button type="button" class="linkbtn" id="machine-photo-credits">ที่มารูปภาพ</button>
@@ -2348,7 +2348,7 @@
   function showMachinePhotoCredits() {
     openSheet("", null, $("machine-photo-credits"));
     var photos = typeof MACHINE_PHOTOS !== "undefined" ? MACHINE_PHOTOS : {};
-    sheet.innerHTML = sheetHead(t("ที่มารูปภาพ"), false) + '<p class="hint">' + t("ภาพถูกย่อขนาด บางภาพเป็นภาพนิ่งจากวิดีโอ เครดิตและสิทธิ์ของแต่ละภาพอยู่ด้านล่าง") + '</p><ul class="photo-credits">' + EX.filter(function (ex) { return photos[ex.id]; }).map(function (ex) {
+    sheet.innerHTML = sheetHead(t("ที่มารูปภาพ"), false) + '<p class="hint">' + t("ภาพผ่านการแต่งด้วย AI เพื่อลบคนและพื้นหลัง รายละเอียดอาจต่างจากเครื่องจริง ดูเครดิตต้นฉบับด้านล่าง") + '</p><ul class="photo-credits">' + EX.filter(function (ex) { return photos[ex.id]; }).map(function (ex) {
       var photo = photos[ex.id];
       var author = photo.authorUrl ? '<a href="' + esc(photo.authorUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.author) + '</a>' : esc(photo.author);
       return '<li><strong>' + esc(ex.name) + '</strong><br><a href="' + esc(photo.source) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.title) + '</a><br>' + author + ' · <a href="' + esc(photo.licenseUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.license) + '</a></li>';

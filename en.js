@@ -3,8 +3,8 @@
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
   "ที่มารูปภาพ": "Photo credits",
-  "รูปอุปกรณ์ตัวอย่าง แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม": "Example equipment photos. Models vary by gym. Read the guide before starting.",
-  "ภาพถูกย่อขนาด บางภาพเป็นภาพนิ่งจากวิดีโอ เครดิตและสิทธิ์ของแต่ละภาพอยู่ด้านล่าง": "Images have been resized; some are video stills. Authors and licenses are listed below.",
+  "ภาพอุปกรณ์แต่งด้วย AI แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม": "AI-edited equipment examples. Models vary by gym. Read the guide before starting.",
+  "ภาพผ่านการแต่งด้วย AI เพื่อลบคนและพื้นหลัง รายละเอียดอาจต่างจากเครื่องจริง ดูเครดิตต้นฉบับด้านล่าง": "AI edits removed people and backgrounds. Equipment details may differ. Original credits are listed below.",
   "เลือกรูปเพื่อเริ่ม หรือเลือกเครื่องเองได้เลย": "Choose a photo to start, or select a machine manually.",
   "ยังไม่ได้เตรียมโมเดล เลือกเครื่องเองได้ หรือใช้ Gemini ด้านล่าง": "Model not prepared. Choose manually or use Gemini below.",
   "เมื่อยหรือเจ็บตรงไหน?": "Any soreness or pain?",
