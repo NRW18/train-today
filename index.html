@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=65">
+<link rel="stylesheet" href="theme.css?v=67">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,7 +672,7 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=65">
+<link rel="stylesheet" href="simple-flow.css?v=67">
 </head>
 <body class="home">
 <div class="app">
@@ -1009,6 +1009,7 @@
       <h2 id="wk-h">สรุป 7 วันที่ผ่านมา</h2>
       <div id="week-stats"></div>
       <button class="btn" type="button" id="week-ai">ให้ AI สรุปและแนะนำ</button>
+      <button class="btn line" type="button" id="week-ai-refresh" hidden>สรุปใหม่</button>
       <div id="week-out" aria-live="polite"></div>
     </section>
     <section class="card">
@@ -1123,10 +1124,11 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=65"></script>
-<script src="machines-config.js?v=65"></script>
-<script src="machine-recognition.js?v=65"></script>
-<script src="machine-photos.js?v=65"></script>
+<script src="en.js?v=67"></script>
+<script src="ai-config.js?v=67"></script>
+<script src="machines-config.js?v=67"></script>
+<script src="machine-recognition.js?v=67"></script>
+<script src="machine-photos.js?v=67"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -2160,7 +2162,7 @@
       "Return JSON only: {\"how\":[3 short steps, each under 70 characters],\"miss\":[2 common mistakes, each under 60 characters]}",
       "No medical claims. Plain everyday " + AI_LANG + "."
     ].join("\n");
-    callGemini([{ text: p }]).then(function (r) {
+    callGemini([{ text: p }], 0, null, "explain").then(function (r) {
       var g = cleanGuide(r);
       if (!g || !g.how.length) throw new Error("empty");
       S.custom.forEach(function (c) { if (c.id === id) c.guide = g; });
@@ -2569,6 +2571,7 @@
   function aiHttpError(status, body, proxy) {
     var upstream = proxy && body && Number.isInteger(body.status) && body.status >= 100 && body.status <= 599 ? body.status : null;
     var http = upstream || status, code = http === 404 ? "model" : http === 429 ? "quota" : http >= 500 ? "upstream" : http === 402 ? "billing" : http === 401 ? "auth" : http === 403 ? "permission" : "request";
+    if (proxy && status === 422 && body && body.error === "truncated") code = "truncated";
     if (!proxy) {
       var details = body && body.error && body.error.details;
       var reasons = Array.isArray(details) ? details.map(function (detail) { return detail && detail.reason; }) : [];
@@ -2591,12 +2594,12 @@
     if (!parts.length || typeof parts[0].text !== "string" || parts[0].text.indexOf(LANG_RULE) >= 0) return parts;
     return [{ text: parts[0].text + LANG_RULE }].concat(parts.slice(1));
   }
-  function callProxy(parts, retried, diagnostic) {
+  function callProxy(parts, retried, diagnostic, task) {
     function again() {
-      return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return callProxy(parts, true, diagnostic); });
+      return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return callProxy(parts, true, diagnostic, task); });
     }
     if (diagnostic) { diagnostic.route = "worker"; diagnostic.stage = "request"; diagnostic.http = null; }
-    return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts }) })
+    return fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parts: parts, task: task || "scan" }) })
       .then(function (res) {
         if (diagnostic) { diagnostic.stage = "response"; diagnostic.http = res.status; }
         if (!res.ok && !retried && (res.status === 502 || res.status === 503)) return again();
@@ -2610,25 +2613,28 @@
         return again();
       });
   }
-  function callGemini(parts, i, diagnostic) {
+  function callGemini(parts, i, diagnostic, task) {
     i = i || 0;
+    task = task || "scan";
+    var models = KryvosAI.models(task);
     parts = withLang(parts);
     if (diagnostic) diagnostic.stage = "request";
     if (!navigator.onLine) return Promise.reject(Object.assign(aiError("network"), { message: "offline" }));
     if (!getKey()) {
       if (!PROXY_URL) return Promise.reject(new Error("nokey"));
-      return callProxy(parts, false, diagnostic);
+      return callProxy(parts, false, diagnostic, task);
     }
-    if (diagnostic) { diagnostic.route = "personal"; diagnostic.stage = "request"; diagnostic.model = MODELS[i]; diagnostic.http = null; }
-    var body = { contents: [{ parts: parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } };
-    return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + MODELS[i] + ":generateContent", {
+    if (diagnostic) { diagnostic.route = "personal"; diagnostic.stage = "request"; diagnostic.model = models[i]; diagnostic.http = null; }
+    var body = { contents: [{ parts: parts }], generationConfig: KryvosAI.config(task, models[i]) };
+    return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": getKey() },
       body: JSON.stringify(body)
     }).then(function (res) {
       if (diagnostic) { diagnostic.stage = "response"; diagnostic.http = res.status; }
-      if (res.status === 404 && i + 1 < MODELS.length) return callGemini(parts, i + 1, diagnostic);
+      if (res.status === 404 && i + 1 < models.length) return callGemini(parts, i + 1, diagnostic, task);
       return readAIResponse(res).then(function (j) {
+        if (i + 1 < models.length && KryvosAI.unsupportedConfig(res.status, j)) return callGemini(parts, i + 1, diagnostic, task);
         if (!res.ok) throw aiHttpError(res.status, j, false);
         if (diagnostic) diagnostic.stage = "parse";
         return parseGemini(j);
@@ -2883,6 +2889,31 @@
 
   /* ---------- scan results: a short row per photo on the Gym tab, the full result in a dark sheet ---------- */
   var shots = {}, shotSheet = null;
+  // At most five entries, including pending requests. No photos/results persist to storage.
+  var scanCache = new Map();
+  function scanCacheKey(parts) {
+    if (typeof crypto === "undefined" || !crypto.subtle || typeof TextEncoder === "undefined") return Promise.resolve(null);
+    // Includes the resized photo plus the prompt/known IDs/language, not the original file.
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(withLang(parts))))
+      .then(function (bytes) { return Array.from(new Uint8Array(bytes)).map(function (value) { return value.toString(16).padStart(2, "0"); }).join(""); }, function () { return null; });
+  }
+  function scanAI(parts, diagnostic) {
+    return scanCacheKey(parts).then(function (key) {
+      var pending = key && scanCache.get(key);
+      if (!pending) {
+        pending = callGemini(parts, 0, diagnostic, "scan").then(function (raw) {
+          if (diagnostic) diagnostic.stage = "validate";
+          return validateScan(raw);
+        });
+        if (key) {
+          scanCache.set(key, pending);
+          if (scanCache.size > 5) scanCache.delete(scanCache.keys().next().value);
+          pending.catch(function () { if (scanCache.get(key) === pending) scanCache.delete(key); });
+        }
+      }
+      return pending.then(function (result) { return JSON.parse(JSON.stringify(result)); });
+    });
+  }
   function scan(file) {
     var id = "shot" + (++shotN), s = shots[id] = { state: "busy", img: "", diagnostic: { stage: "image", route: getKey() ? "personal" : "worker" } };
     drawShots(); openShot(id);
@@ -2890,11 +2921,11 @@
     return shrink(file).then(function (dataUrl) {
       return makeThumbnail(dataUrl).then(function (thumb) {
         s.img = thumb; shotChanged(id);
-        return callGemini([{ text: buildPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }], 0, s.diagnostic);
+        return scanAI([{ text: buildPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }], s.diagnostic);
       });
-    }).then(function (raw) {
+    }).then(function (result) {
       s.diagnostic.stage = "validate";
-      s.r = validateScan(raw);
+      s.r = result;
       s.state = s.r.equipment.length || s.r.fresh.length ? "done" : "empty";
       s.diagnostic.stage = "render";
       $("scan-label").classList.remove("busy"); shotChanged(id);
@@ -3189,7 +3220,7 @@
     $("food-label").classList.add("busy");
     shrink(file).then(function (dataUrl) {
       s.img = dataUrl; if (foodShot === s) drawFoodSheet();
-      return callGemini([{ text: foodPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }]);
+      return callGemini([{ text: foodPrompt() }, { inline_data: { mime_type: "image/jpeg", data: dataUrl.split(",")[1] } }], 0, null, "food");
     }).then(function (raw) {
       s.r = validFood(raw); s.state = s.r.items.length ? "done" : "empty";
     }).catch(function (e) {
@@ -3745,12 +3776,18 @@
     if (w.foodDays && w.foodDays < 3) h += t('<p class="hint">จดอาหารแค่ ') + w.foodDays + t(" วัน ค่าเฉลี่ยอาจยังไม่ตรง (ไม่นับวันนี้ที่ยังกินไม่ครบ)</p>");
     $("week-stats").innerHTML = h;
     $("week-ai").hidden = !hasAI();
+    $("week-ai-refresh").hidden = !hasAI() || !S.summary || S.summary.cacheKey !== weekCacheKey(w);
     var o = S.summary;
     $("week-out").innerHTML = o ? '<div class="ai-out"><span class="ai-tag">AI</span> <span class="hint">' + fmtDate(o.ts) + "</span><p style=\"margin:6px 0 0\">" + esc(o.text) + "</p>" +
       (o.tips && o.tips.length ? "<ul>" + o.tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>" : "") + "</div>" : "";
   }
-  function weekAI() {
-    var w = weekStats(), btn = $("week-ai");
+  function weekCacheKey(stats) { return JSON.stringify([dayKey(Date.now()), AI_LANG, S.prefs.goal, stats]); }
+  var weekPending = null;
+  function weekAI(force) {
+    var w = weekStats(), btn = $("week-ai"), key = weekCacheKey(w);
+    if (weekPending) return weekPending;
+    if (force !== true && S.summary && S.summary.cacheKey === key) { renderWeek(); return Promise.resolve(); }
+    var owner = S;
     if (!w.sessions && !w.foodDays && !w.runs && !w.weighIns) { toast(t("ยังไม่มีข้อมูล 7 วันที่ผ่านมา บันทึกก่อนแล้วค่อยให้ AI สรุป")); return; }
     btn.disabled = true; btn.textContent = t("AI กำลังสรุป…"); track("ai_summary");
     var p = [
@@ -3761,12 +3798,14 @@
       "If data is sparse, say so and suggest what to log. Write in plain everyday " + AI_LANG + ".",
       'Return JSON only: {"summary_th":"2-3 sentences","tips_th":["3 specific actionable tips, each under 90 characters"]}'
     ].join("\n");
-    callGemini([{ text: p }]).then(function (r) {
+    weekPending = callGemini([{ text: p }], 0, null, "week").then(function (r) {
+      if (S !== owner) return;
       var text = r && typeof r.summary_th === "string" ? r.summary_th.slice(0, 400) : "";
       if (!text) throw new Error("empty");
-      S.summary = { ts: Date.now(), text: text, tips: strList(r.tips_th, 4) };
+      S.summary = { ts: Date.now(), text: text, tips: strList(r.tips_th, 4), cacheKey: key };
       save(); renderWeek();
-    }).catch(function (e) { toast(errText(e, "week")); }).then(function () { btn.disabled = false; btn.textContent = t("ให้ AI สรุปและแนะนำ"); });
+    }).catch(function (e) { toast(errText(e, "week")); }).then(function () { weekPending = null; btn.disabled = false; btn.textContent = t("ให้ AI สรุปและแนะนำ"); });
+    return weekPending;
   }
 
   /* ---------- sample data ---------- */
@@ -4175,6 +4214,7 @@
     save(); renderFood(); toast(t("บันทึกเป้าหมายแล้ว")); trackOnce("goal_set");
   });
   $("week-ai").addEventListener("click", weekAI);
+  $("week-ai-refresh").addEventListener("click", function () { weekAI(true); });
 
   $("export").addEventListener("click", function () {
     var o = snapshot(); o.app = "train-today"; o.v = 3;

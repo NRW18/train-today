@@ -46,7 +46,9 @@ export function varSource(name) {
 export function load(names, globals = {}, vars = []) {
   // the app's language helpers, in Thai (the language the code is written in); a test can override them
   const lang = { t: (x) => x, tf: (x, o) => String(x).replace(/\{(\w+)\}/g, (m, k) => (o[k] != null ? o[k] : m)), LANG: "th", LOCALE: "th-TH", AI_LANG: "Thai", track: () => {}, trackOnce: () => {} };
-  const ctx = vm.createContext({ ...lang, ...globals });
+  const policy = {};
+  vm.runInNewContext(readFileSync(new URL("../ai-config.js", import.meta.url), "utf8"), policy);
+  const ctx = vm.createContext({ ...lang, KryvosAI: policy.KryvosAI, ...globals });
   vm.runInContext(vars.map(anyVar).concat(names.map(fnSource)).join("\n"), ctx);
   return ctx;
 }
