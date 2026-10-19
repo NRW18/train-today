@@ -24,6 +24,7 @@ Locations below use searchable symbols so they survive line movement.
 | Existing capability | Source location | Verification / preservation criterion |
 |---|---|---|
 | Canonical exercise knowledge, muscles/joints, how-to and common mistakes | `BASE_EX`, `GUIDE`, `guideHtml`, `explain`, `EXBY` | videos/scan-results tests; keep original IDs and guides |
+| Expanded optional strength catalog, bilingual manual search, folded categories with remembered open state | `BASE_EX` optional entries, `machineMatches`, `renderMachineGrid`, `machineGroups`, assets/machines.svg | catalog tests and browser-catalog; all old metadata preserved, new entries default off, no custom-exercise merge; cardio awaits type approval |
 | YouTube Thai/English video searches, equipment search | `ytUrl`, `ytLinks`, `exVideos`, `howtoHtml`, `#howto-q` | videos/language tests; links/search remain |
 | Enable/disable exercises, folded groups with remembered choice, custom group | `renderGym`, `gymGroupItems`, `toggleGymGroup`, `S.off` | gym tests; checkbox state and group persistence |
 | Gym/home/both selection, only scanned equipment | `setTrainingPlace`, `placeOff`, `#only-seen`, `S.seen` | home/gym/state tests; retain place and availability rules |

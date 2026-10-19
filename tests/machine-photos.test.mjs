@@ -9,9 +9,11 @@ vm.runInNewContext(readFileSync(new URL("../machine-photos.js", import.meta.url)
 const photos = scope.MACHINE_PHOTOS;
 const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
 
-test("every canonical exercise has a transparent equipment cutout, attribution and offline shell entry", () => {
+test("all original 15 canonical exercises retain their transparent cutouts, attribution and offline shell entries", () => {
   const base = html.slice(html.indexOf("var BASE_EX = ["), html.indexOf("var EN_NAME = {"));
-  const ids = [...base.matchAll(/id: "([^"]+)"/g)].map(match => match[1]);
+  const data={t:value=>value};vm.runInNewContext(base,data);
+  const ids = Array.from(data.BASE_EX.filter(ex=>!ex.optional),ex=>ex.id);
+  assert.equal(ids.length,15);
   assert.deepEqual(Object.keys(photos).sort(), ids.sort());
   assert.ok(sw.includes('"machine-photos.js"'));
   for (const photo of Object.values(photos)) {

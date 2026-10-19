@@ -12,11 +12,11 @@ const { execFileSync } = require('node:child_process');
 const { createHash } = require('node:crypto');
 const root = path.resolve(__dirname, '..');
 // GitHub Pages serves Git's LF text; Windows checkouts can use CRLF.
-const hash = (file, bytes) => createHash('sha256').update(/\.(html|css|js)$/.test(file) ? Buffer.from(bytes).toString('utf8').replace(/\r\n/g,'\n') : bytes).digest('hex');
+const hash = (file, bytes) => createHash('sha256').update(/\.(html|css|js|svg)$/.test(file) ? Buffer.from(bytes).toString('utf8').replace(/\r\n/g,'\n') : bytes).digest('hex');
 const scope = {};
 vm.runInNewContext(fs.readFileSync(path.join(root, 'machine-photos.js'), 'utf8'), scope);
 const photoFiles = [...new Set(Object.values(scope.MACHINE_PHOTOS).map(photo => photo.src))];
-const appFiles = ['index.html','en.js','theme.css','simple-flow.css','machine-photos.js','machine-recognition.js','machines-config.js','sw.js',...photoFiles];
+const appFiles = ['assets/machines.svg','index.html','en.js','theme.css','simple-flow.css','machine-photos.js','machine-recognition.js','machines-config.js','sw.js',...photoFiles];
 const version = fs.readFileSync(path.join(root, 'sw.js'), 'utf8').match(/var VERSION = "([^"]+)"/)[1];
 const mime = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.json':'application/json'};
 let revision = null;
@@ -73,7 +73,7 @@ async function exactAssets(page, base) {
     for (const file of files) {
       const response = await fetch(new URL(file,base));
       if (!response.ok) throw Error(file + ': HTTP ' + response.status);
-      const bytes = /\.(html|css|js)$/.test(file) ? new TextEncoder().encode((await response.text()).replace(/\r\n/g,'\n')) : await response.arrayBuffer();
+      const bytes = /\.(html|css|js|svg)$/.test(file) ? new TextEncoder().encode((await response.text()).replace(/\r\n/g,'\n')) : await response.arrayBuffer();
       const digest = await crypto.subtle.digest('SHA-256', bytes);
       result.push([file, [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2,'0')).join('')]);
     }
@@ -88,6 +88,7 @@ async function exactAssets(page, base) {
 }
 async function checkCards(page) {
   await page.locator('[data-tab="gym"]').click();
+  for(const group of await page.locator('#machine-grid details').all())if(!await group.evaluate(el=>el.open))await group.locator('summary').click();
   const photos = page.locator('#machine-grid .machine-example');
   assert.equal(await photos.count(), 15);
   for (const photo of await photos.all()) {
@@ -102,6 +103,11 @@ async function checkCards(page) {
   await page.locator('#machine-photo-credits').click();
   assert.equal(await page.locator('.photo-credits li').count(), 15);
   await page.keyboard.press('Escape');
+  await page.locator('#machine-search').fill('Smith machine squat');
+  await page.locator('[data-machine-pick="smith_squat"]').click();
+  await page.waitForFunction(()=>document.querySelector('.sheet .machine-art use').getBBox().width>0);
+  await page.keyboard.press('Escape');
+  await page.locator('#machine-search').fill('');
 }
 (async () => {
   await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));

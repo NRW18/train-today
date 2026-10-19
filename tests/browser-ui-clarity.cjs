@@ -4,6 +4,7 @@
  */
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const assert=require('node:assert/strict');
+const catalogCount=require('./catalog-data.cjs').length;
 const fs=require('node:fs');
 const path=require('node:path');
 const http=require('node:http');
@@ -65,7 +66,7 @@ async function targets(page){
         assert.equal(await page.locator('#machine-prepare').isVisible(),false);
         assert.equal(await page.locator('section[aria-labelledby="machine-h"] > button.btn:not(.line)').count(),1);
         assert.ok(await page.locator('#machine-gallery').evaluate(el=>el.matches('.btn.line')));
-        assert.equal(await page.locator('#machine-grid button').count(),15);
+        assert.equal(await page.locator('#machine-grid button').count(),catalogCount);
         assert.doesNotMatch(await page.locator('#machine-status').innerText(),/model|on-device|โมเดล|โหมดในเครื่อง/i);
         await targets(page);
         await page.locator('#machine-settings > summary').click();
