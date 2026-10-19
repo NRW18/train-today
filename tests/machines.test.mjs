@@ -157,7 +157,7 @@ test("manual grid always retains canonical exercise names and IDs; high/low scor
 test("confirmation opens the original guide and the same exercise's rest timer", () => {
   const ex = { id: "leg_press", name: "Leg Press", m: [], j: [] }, labels = {};
   const sheet = { focus() {} }; let started = false, guide;
-  const a = load(["openMachineInfo"], { EXBY: { leg_press: ex }, MACHINE_RELATIONS: {}, machineSequence: 0,
+  const a = load(["openMachineInfo", "machineFocusReturn"], { EXBY: { leg_press: ex }, MACHINE_RELATIONS: {}, machineSequence: 0, sheetBack: null,
     S: { prefs: { rest: 90 } }, openGuides: {}, document: { activeElement: {} }, sheet,
     openSheet() {}, closeSheet() {}, sheetHead: name => name, esc: value => value,
     machineArt: () => "", isPainful: () => false, guideHtml: item => { guide = item; return "guide"; },
@@ -210,4 +210,15 @@ test("a late recognition response cannot replace the manual selection", async ()
   await new Promise(done => setImmediate(done));
   a.machineSequence++; resolve([row("leg_press", 1)]); await pending;
   assert.equal(a.machineResults.length, 0);
+});
+
+test("machine focus resolves a replacement card after redraw and retains the original trigger across guide redraws", () => {
+  const original = {}, replacement = {dataset:{machinePick:"leg_press"}}, camera = {}, live = new Set([original]);
+  const a = load(["machineFocusReturn"], {document:{contains: node => live.has(node)}, $: id => id === "machine-camera" ? camera : {querySelectorAll: () => [replacement]}});
+  const resolve = a.machineFocusReturn(original, "leg_press");
+  assert.equal(resolve(), original);
+  live.delete(original);
+  assert.equal(resolve(), replacement);
+  assert.equal(a.machineFocusReturn(resolve, "pec_deck"), resolve, "nested and refreshed guides retain the outside origin");
+  assert.equal(a.machineFocusReturn(original, "missing")(), camera);
 });

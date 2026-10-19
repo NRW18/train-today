@@ -22,7 +22,8 @@ test("local stylesheets used by app and stats exist and are available offline", 
   for (const page of [html, stats]) {
     const links = [...page.matchAll(/<link rel="stylesheet" href="([^":]+)">/g)];
     assert.ok(links.length, "shared local stylesheet missing");
-    for (const [, file] of links) {
+    for (const [, href] of links) {
+      const file = href.split("?")[0]; // release-tagged URLs still map to the same local shell file
       assert.ok(existsSync(new URL("../" + file, import.meta.url)), file + " missing");
       assert.ok(sw.includes('"' + file + '"'), file + " missing from offline shell");
     }

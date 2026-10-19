@@ -141,3 +141,45 @@ just functional browser checks while iterating; final validation used the full s
   The Thai dark 375px equipment screenshot was visually inspected.
 - No model training, model-accuracy claim, backend change, physical-device test or
   merge is included. The earlier modal-return-focus finding remains outstanding.
+
+## Approved release checks (2026-10-19)
+
+- Owner approved publishing PR #19, including image commits `8ca3290` and
+  `1161af5`. Both commits are retained. The current defaults are 12 AI-edited
+  transparent equipment examples for all 15 original exercise IDs, with original
+  source credits and derivative licenses. They are not trained recognition models.
+- Reproduced the outstanding return-focus failure after adding a machine: drawing
+  the grid removes the trigger node. The guide now retains its outside origin and
+  resolves the replacement card on close. Added unit and browser regressions for
+  save/redraw, nested related guides and recognition confirmation. Existing dialogs
+  retain their previous element-based focus behavior.
+- Reproduced a PWA update failure: older workers can recreate old caches from
+  in-flight requests, and the script loader can retain old same-URL resources.
+  v61 reads the current shell cache, refreshes HTTP cache during installation and
+  tags CSS/scripts with `?v=61`. Only this worker's own release tag aliases the
+  canonical offline asset; a future tag reaches the network instead of receiving
+  an old shell. A read-only version message verifies the actual controlling worker.
+- Node suite: **255/255 passed**, no skips. All prior tests remain; new focused
+  coverage checks focus resolution, release tags, cache isolation and installation.
+- Full browser acceptance: **16/16** layouts (320/360/375/430 × TH/EN × light/dark),
+  all six tabs, decoded images and credits, keyboard/reduced motion, bottom-nav
+  clearance, local/manual fallback and controlled remote flows passed.
+- `tests/browser-release.cjs` successfully upgrades real repository revisions
+  **v57 (`8afaafd`), v59 (`8ca3290`), v60 (`1161af5`) → v61** in synthetic profiles.
+  It closes/reopens the page without deleting localStorage, compares latest
+  HTML/CSS/scripts and all 12 cutouts by SHA-256 (text normalized to Git's LF),
+  verifies all 15 rendered card images/contain sizing and offline reopening, and
+  checks training/custom/seen/availability/food/weight/run/shoe/draft data preserved.
+  Existing optional absent draft flags are compared with their original boolean
+  meaning, while every set, weight, repetition and timestamp remains checked.
+- Diff audited against FEATURES.md: image presentation, focus and PWA caching are
+  the changed layers. Canonical exercise IDs, recommendation/nutrition/shoe/GPS
+  algorithms, data key/load/import/overwrite protection and disclaimer/creator
+  credit remain. No changes to proxy/, stats.html or android/. No worker deployment.
+- PR inspection before final push found no merge conflicts and **zero configured
+  PR check runs/statuses**; there is no Node CI workflow to report as passed.
+  Local test and browser evidence above supplies the acceptance gate. Deployment
+  workflow status and live-site verification are recorded in PR #19 after merging.
+- Physical iPhone/Android, real camera/GPS and real model inference/accuracy remain
+  untested. `models/machines/` still contains documentation only, so recognition
+  accuracy and real-model readiness are not claimed.

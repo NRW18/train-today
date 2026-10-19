@@ -142,6 +142,9 @@ async function noOverflow(page, label) {
     await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
     await page.locator('[data-machine-pick="leg_press"]').click();
     await page.locator('[data-machine-save="leg_press"]').click();
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#machine-grid [data-machine-pick="leg_press"]').evaluate(el => el === document.activeElement), true, 'saving redraws the grid; closing must focus its replacement card');
+    await page.keyboard.press('Enter');
     await page.locator('[data-machine-rest="leg_press"]').click();
     if (await page.locator('[data-permission-continue]').count()) await page.locator('[data-permission-continue]').click();
     assert.match(await page.locator('#rest-lb').innerText(), /Leg press/i);
@@ -149,6 +152,12 @@ async function noOverflow(page, label) {
     await page.reload();
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('train-today-v1')));
     assert.deepEqual(stored.seen, ['leg_press']); assert.equal(stored.custom.length, 0); assert.equal(stored.log.length, 0);
+    await page.locator('[data-tab="gym"]').click();
+    await page.locator('#machine-grid [data-machine-pick="pec_deck"]').click();
+    await page.locator('.sheet [data-machine-pick="rear_delt"]').click();
+    await page.locator('.sheet [data-machine-save="rear_delt"]').click();
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#machine-grid [data-machine-pick="pec_deck"]').evaluate(el => el === document.activeElement), true, 'nested guide and save return to original outside trigger');
     await context.setOffline(false);
     console.log('PASS missing model, prepare failure, unreadable photo, Pages prefix, PWA offline, manual memory/reload and correct rest timer; zero uploads');
     // Controlled recognition responses verify UX, not model accuracy.
@@ -167,6 +176,8 @@ async function noOverflow(page, label) {
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-results [data-machine-confirm="chest_press"]').click();
     assert.equal(await page.locator('[data-machine-rest="chest_press"]').count(), 1);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#machine-results [data-machine-confirm="chest_press"]').evaluate(el => el === document.activeElement), true, 'recognition guide returns focus to its confirm button');
     console.log('PASS controlled high-confidence confirmation, rejection excludes answer, top-three selection and canonical guide/timer');
     await context.close();
     // Real remote adapter with controlled HTTP response and explicit native consent.

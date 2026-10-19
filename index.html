@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=61">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -669,7 +669,7 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css">
+<link rel="stylesheet" href="simple-flow.css?v=61">
 </head>
 <body class="home">
 <div class="app">
@@ -1117,10 +1117,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js"></script>
-<script src="machines-config.js"></script>
-<script src="machine-recognition.js"></script>
-<script src="machine-photos.js"></script>
+<script src="en.js?v=61"></script>
+<script src="machines-config.js?v=61"></script>
+<script src="machine-recognition.js?v=61"></script>
+<script src="machine-photos.js?v=61"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -2397,10 +2397,19 @@
     if (save() === false) { S = JSON.parse(before); return false; }
     return true;
   }
-  function openMachineInfo(id, saved) {
+  function machineFocusReturn(source, id) {
+    if (typeof source === "function") return source;
+    return function () {
+      if (source && document.contains(source)) return source;
+      var cards = $("machine-grid").querySelectorAll("[data-machine-pick]");
+      return Array.prototype.find.call(cards, function (card) { return card.dataset.machinePick === id; }) || $("machine-camera");
+    };
+  }
+  function openMachineInfo(id, saved, back) {
     var ex = EXBY[id]; if (!ex || ex.hidden) return;
     machineSequence++; // a late model result cannot replace a manual choice
-    openSheet("", null, document.activeElement);
+    var origin = back || (sheet ? sheetBack : document.activeElement);
+    openSheet("", null, machineFocusReturn(origin, id));
     var related = (MACHINE_RELATIONS[id] || []).filter(function (key) { return EXBY[key] && !EXBY[key].hidden; });
     openGuides[id] = true;
     sheet.innerHTML = sheetHead(esc(ex.name), false) + machineArt(id) +
@@ -2749,7 +2758,10 @@
     wrap.remove(); document.body.classList.remove("sheet-open");
     sheetBackground.forEach(function (entry) { entry.el.inert = entry.inert; }); sheetBackground = [];
     if (cb) cb();
-    if (!quiet && sheetBack && document.contains(sheetBack)) sheetBack.focus();
+    if (!quiet) {
+      var back = typeof sheetBack === "function" ? sheetBack() : sheetBack;
+      if (back && document.contains(back)) back.focus();
+    }
   }
   // grab bar, title, share (only where the phone can share) and close
   function sheetHead(title, canShare) {
@@ -3818,7 +3830,7 @@
     if (button.dataset.machineReject) rejectMachine(button.dataset.machineReject);
     else if (button.dataset.machineConfirm) {
       var id = button.dataset.machineConfirm;
-      if (rememberMachine(id)) { renderGym(); renderPlan(); openMachineInfo(id, true); }
+      if (rememberMachine(id)) { renderGym(); renderPlan(); openMachineInfo(id, true, button); }
     } else openMachineInfo(button.dataset.machinePick, false);
   });
   window.addEventListener("pagehide", function () { machineSequence++; clearMachinePhoto(); $("machine-results").innerHTML = ""; });
