@@ -9,7 +9,7 @@ const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 export function fnSource(name) {
   const start = html.indexOf("function " + name + "(");
   if (start < 0) throw new Error("function " + name + " not found in index.html");
-  return braced(start, name);
+  return braced(html.slice(start - 6, start) === "async " ? start - 6 : start, name);
 }
 
 // Source of a `var NAME = { ... };` that spans several lines.

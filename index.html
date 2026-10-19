@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=61">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -669,6 +669,7 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
+<link rel="stylesheet" href="simple-flow.css?v=61">
 </head>
 <body class="home">
 <div class="app">
@@ -688,6 +689,31 @@
       <div class="home-number" id="home-value" aria-live="polite"></div>
       <p class="home-label" id="home-label"></p>
       <div class="home-metrics" id="home-metrics"></div>
+      <button class="btn" type="button" id="start-workout">เริ่มฝึก</button>
+      <p id="start-safety" class="alert red" role="alert" hidden>มีอาการเจ็บ แอปข้ามท่าที่โดนส่วนนี้แล้ว ถ้าเจ็บมากหรือไม่หายให้พบแพทย์</p>
+      <p class="hint" id="draft-status" role="status">เก็บร่างอัตโนมัติ จบแล้วกดบันทึกการซ้อม</p>
+    </section>
+    <section class="card ci" id="ci" aria-labelledby="ci-h">
+      <h2 class="ci-h" id="ci-h">เมื่อยหรือเจ็บตรงไหน?</h2>
+      <button type="button" class="cap" id="cap-m" aria-expanded="false" aria-controls="muscles"><span class="cap-k">เจ็บตรงไหน :</span><span id="cap-m-v"></span></button>
+      <div class="chips cap-body" id="muscles" role="group" aria-label="ตรงไหนเมื่อยหรือเจ็บ" hidden></div>
+      <button type="button" class="cap" id="cap-j" aria-expanded="false" aria-controls="joints"><span class="cap-k">ข้อต่อที่เจ็บ :</span><span id="cap-j-v"></span></button>
+      <div class="chips cap-body" id="joints" role="group" aria-label="ข้อต่อที่เจ็บ" hidden></div>
+      <p class="tips">Tips : <span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span> <span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></p>
+      <details class="simple-options"><summary>ตัวเลือกเพิ่มเติม</summary>
+        <p class="q">ซ้อมช่วงไหน</p>
+        <div class="seg" id="slot" role="group" aria-label="ช่วงเวลา">
+          <button type="button" data-v="am">เช้า (ช่วงบน)</button>
+          <button type="button" data-v="pm">เย็น (ขา)</button>
+          <button type="button" data-v="any">ได้หมด</button>
+        </div>
+        <p class="q">แรงวันนี้</p>
+        <div class="seg" id="energy" role="group" aria-label="ระดับพลังงาน">
+          <button type="button" data-v="good">ดีมาก</button>
+          <button type="button" data-v="ok">ปกติ</button>
+          <button type="button" data-v="tired">เหนื่อย</button>
+        </div>
+      </details>
     </section>
     <section class="card" id="today-run-summary" hidden><h2>สรุปการวิ่ง 7 วัน</h2><div id="today-run-numbers"></div></section>
     <div class="today-heading"><h2>วันนี้</h2><button type="button" class="pill-btn" id="act-more">ดูเพิ่มเติม</button></div>
@@ -707,28 +733,7 @@
       <div><strong>ให้แอปรู้ว่ายิมคุณมีเครื่องอะไร</strong><br>ถ่ายรูปเครื่อง แล้ว AI จะเพิ่มท่าให้เอง</div>
       <button type="button" class="btn small-btn" id="go-scan">สแกน</button>
     </section>
-    <section class="card ci" id="ci" aria-labelledby="ci-h">
-      <h2 class="ci-h" id="ci-h">วันนี้ฝึกอะไรกันดี?</h2>
-      <p class="q">ซ้อมช่วงไหน</p>
-      <div class="seg" id="slot" role="group" aria-label="ช่วงเวลา">
-        <button type="button" data-v="am">เช้า (ช่วงบน)</button>
-        <button type="button" data-v="pm">เย็น (ขา)</button>
-        <button type="button" data-v="any">ได้หมด</button>
-      </div>
-      <p class="q">แรงวันนี้</p>
-      <div class="seg" id="energy" role="group" aria-label="ระดับพลังงาน">
-        <button type="button" data-v="good">ดีมาก</button>
-        <button type="button" data-v="ok">ปกติ</button>
-        <button type="button" data-v="tired">เหนื่อย</button>
-      </div>
-      <button type="button" class="cap" id="cap-m" aria-expanded="false" aria-controls="muscles"><span class="cap-k">เจ็บตรงไหน :</span><span id="cap-m-v"></span></button>
-      <div class="chips cap-body" id="muscles" role="group" aria-label="ตรงไหนเมื่อยหรือเจ็บ" hidden></div>
-      <button type="button" class="cap" id="cap-j" aria-expanded="false" aria-controls="joints"><span class="cap-k">ข้อต่อที่เจ็บ :</span><span id="cap-j-v"></span></button>
-      <div class="chips cap-body" id="joints" role="group" aria-label="ข้อต่อที่เจ็บ" hidden></div>
-      <p class="tips">Tips : <span>กดกล้ามเนื้อ 1 ครั้ง = <b>เมื่อย</b> (ปวดล้าหลังซ้อม)</span> <span>กด 2 ครั้ง = <b>เจ็บ</b> (เจ็บแปลบ บวม หรือเจ็บผิดปกติ)</span></p>
-    </section>
-
-    <section class="card plan" id="plan" aria-live="polite"></section>
+    <section class="card plan" id="plan" aria-live="polite" tabindex="-1"></section>
     </div>
     <section class="card" id="today-meals-panel" hidden aria-label="มื้ออาหารวันนี้">
       <div id="today-meals"></div>
@@ -793,6 +798,7 @@
       <div id="gps-saved-routes"></div>
     </section>
 
+    <details class="card secondary-options"><summary>รองเท้าและตัวเลือกเพิ่มเติม</summary>
     <section class="card" aria-labelledby="shoe-h">
       <h2 id="shoe-h">รองเท้าที่ใช้อยู่</h2>
       <div id="shoe-now"></div>
@@ -841,6 +847,7 @@
       </div>
       <div id="sf-out" aria-live="polite"></div>
     </section>
+    </details>
   </main>
 
   <!-- FOOD + BODY WEIGHT -->
@@ -885,6 +892,7 @@
       <div class="trend" id="bw-trend"></div>
     </section>
 
+    <details class="card secondary-options"><summary>เป้าหมายและการคำนวณ</summary>
     <section class="card" aria-labelledby="goal-h">
       <h2 id="goal-h">เป้าหมาย</h2>
       <div class="seg" id="goal" role="group" aria-label="เป้าหมายน้ำหนัก">
@@ -920,10 +928,28 @@
       <p class="hint">แคลอรี่ต่อวัน · โปรตีนต่อวัน · น้ำหนักเป้าหมาย (ไม่ใส่ก็ได้)</p>
       <button class="btn line" type="button" id="g-save">บันทึกเป้าหมาย</button>
     </section>
+    </details>
   </main>
 
   <!-- GYM: scan machines + equipment list -->
   <main id="v-gym" hidden>
+    <section class="card" aria-labelledby="machine-h">
+      <h2 id="machine-h">เครื่องนี้เล่นยังไง?</h2>
+      <button type="button" class="btn machine-camera" id="machine-camera">ถ่ายรูปเครื่อง</button>
+      <input type="file" id="machine-input" accept="image/*" capture="environment" hidden>
+      <button type="button" class="linkbtn" id="machine-gallery">เลือกรูปจากคลัง</button>
+      <input type="file" id="machine-gallery-input" accept="image/*" hidden>
+      <p class="hint" id="machine-privacy"></p>
+      <button type="button" class="linkbtn" id="machine-prepare">เตรียมโมเดลใช้ออฟไลน์</button>
+      <p class="hint" id="machine-status" role="status"></p>
+      <div id="machine-results" aria-live="polite" tabindex="-1"></div>
+      <details id="machine-manual" open><summary>เลือกเครื่องเอง</summary>
+        <p class="hint">ภาพอุปกรณ์แต่งด้วย AI แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม</p>
+        <div id="machine-grid" class="machine-grid"></div>
+      </details>
+      <button type="button" class="linkbtn" id="machine-photo-credits">ที่มารูปภาพ</button>
+    </section>
+    <details class="card" id="gemini-option"><summary>สแกนด้วย Gemini (ส่งรูปออนไลน์)</summary>
     <section class="card shoot" aria-labelledby="scan-h">
       <h2 id="scan-h">ถ่ายรูปเครื่องเล่น</h2>
       <p class="sub">เครื่องเล่นของคุณเป็นแบบไหนเราขอดูหน่อย!</p>
@@ -953,6 +979,7 @@
         <p class="hint">คีย์เก็บไว้ในเครื่องนี้เท่านั้น อย่าส่งคีย์ให้ใคร</p>
       </div>
     </section>
+    </details>
 
     <section class="card" aria-labelledby="howto-h">
       <h2 id="howto-h">สงสัยท่าไหน ดูวิดีโอสอน</h2>
@@ -1090,7 +1117,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js"></script>
+<script src="en.js?v=61"></script>
+<script src="machines-config.js?v=61"></script>
+<script src="machine-recognition.js?v=61"></script>
+<script src="machine-photos.js?v=61"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1501,6 +1531,7 @@
       o.onboarded = S.onboarded;
       o.draft = S.draft; o.draftTs = S.draftTs; // set only when the user types or ticks, so an old draft still expires
       localStorage.setItem(KEY, JSON.stringify(o));
+      if (typeof draftSaveStatus === "function") draftSaveStatus("saved");
       return true;
     } catch (e) {
       // Retry only a scan's new/replaced photos. Never remove previously saved photos.
@@ -1508,11 +1539,13 @@
         o.scanThumbs = previousThumbs;
         try {
           localStorage.setItem(KEY, JSON.stringify(o)); S.scanThumbs = previousThumbs;
+          if (typeof draftSaveStatus === "function") draftSaveStatus("saved");
           toast(t("บันทึกท่าโดยไม่เพิ่มรูปย่อใหม่ รูปเดิมและข้อมูลส่วนตัวยังอยู่ครบ"));
           return true;
         } catch (retryError) {}
       }
       toast(t("บันทึกไม่สำเร็จ พื้นที่ในเครื่องอาจเต็ม ลองสำรองข้อมูลแล้วลบของเก่า"));
+      if (typeof draftSaveStatus === "function") draftSaveStatus("failed");
       return false;
     }
   }
@@ -1823,6 +1856,7 @@
   }
   function renderTodayOverview() {
     if (!current) return;
+    if (typeof renderStartAction === "function") renderStartAction();
     var totals = todayTotals(Date.now()), nutrition = homeMode === "nutrition";
     $("home-value").textContent = nutrition ? totals.left.toLocaleString(LOCALE) : current.rest || current.restAdvice ? t("พัก") : DAYS[current.day].name;
     $("home-label").textContent = nutrition ? t("kcal ที่เหลือ") : t("โปรแกรมวันนี้");
@@ -1868,7 +1902,7 @@
     var target = { run: "run", food: "food", scan: "gym", weight: "food" }[action];
     if (!target) return;
     document.querySelector('nav.tabs button[data-tab="' + target + '"]').click();
-    if (action === "scan") { requestPhoto("machine", false, $("quick-plus")); return; }
+    if (action === "scan") { $("machine-camera").click(); return; }
     if (action === "food") { $("manual").hidden = false; $("manual-toggle").setAttribute("aria-expanded", "true"); }
     var input = $(action === "run" ? "run-km" : action === "weight" ? "bw-input" : "m-name");
     input.scrollIntoView({ block: "center" }); input.focus();
@@ -1963,6 +1997,7 @@
   // After a tick: refresh the meter, the card's badge and the save button without redrawing the list.
   function refreshProgress(exId) {
     var p = progress();
+    if (typeof renderStartAction === "function") renderStartAction();
     var bars = document.querySelectorAll("#plan .meter i"), k = 0;
     current.items.forEach(function (it) {
       var d = setsDone(it.e.id);
@@ -2124,6 +2159,8 @@
       if (!g || !g.how.length) throw new Error("empty");
       S.custom.forEach(function (c) { if (c.id === id) c.guide = g; });
       rebuildEx(); save(); openGuides[id] = true; renderPlan();
+      var machineControl = typeof sheet !== "undefined" && sheet && sheet.querySelector("[data-machine-rest]");
+      if (machineControl && machineControl.dataset.machineRest === id) openMachineInfo(id, S.seen.indexOf(id) >= 0);
     }).catch(function (err) {
       btn.disabled = false; btn.textContent = t("ลองอีกครั้ง"); toast(errText(err, "explain"));
     });
@@ -2260,6 +2297,7 @@
     });
   }
   function renderGym() {
+    if (typeof renderMachineLibrary === "function") renderMachineLibrary();
     var h = "";
     ORDER.concat(["custom"]).forEach(function (d) {
       var items = gymGroupItems(d), open = gymGroupOpen(d);
@@ -2282,6 +2320,137 @@
     $("key-status").innerHTML = k ? t('ใช้คีย์ของคุณ (…') + esc(k.slice(-4)) + t(') · <button type="button" class="linkbtn" data-key="remove">ลบคีย์</button>') :
       PROXY_URL ? t('ใช้ AI ของแอป ไม่ต้องใส่คีย์ (คนละ 40 ครั้งต่อวัน) · <button type="button" class="linkbtn" data-key="own" style="color:var(--blue)">ใช้คีย์ของตัวเองแทน</button>') : "";
     $("scan-hint").hidden = S.scanned;
+  }
+
+  /* ---------- machine memory: existing exercise IDs and existing S.seen ---------- */
+  var machineAdapter = null, machineResults = [], machineRejected = [], machinePhoto = "", machineSequence = 0;
+  var MACHINE_RELATIONS = { pec_deck: ["rear_delt"], rear_delt: ["pec_deck"], lateral_raise: ["db_curl"], db_curl: ["lateral_raise"] };
+  function machineConfig() { return window.MACHINE_CONFIG || { mode: "local", modelPath: "models/machines/", threshold: 0.85, timeoutMs: 15000 }; }
+  function getMachineAdapter() {
+    if (!window.KryvosMachines) throw new Error("model");
+    if (!machineAdapter) machineAdapter = window.KryvosMachines.create(machineConfig(), function () { return EX; });
+    return machineAdapter;
+  }
+  function recognizeMachine(imageBlob) { return getMachineAdapter().recognizeMachine(imageBlob); }
+  function machineArt(id) {
+    var thumb = thumbnailHtml(id);
+    if (thumb) return thumb;
+    var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : "generic";
+    var photo = typeof MACHINE_PHOTOS !== "undefined" && MACHINE_PHOTOS[id];
+    var fallback = '<svg class="machine-art"' + (photo ? ' hidden' : '') + ' viewBox="0 0 120 90" role="img" aria-label="' + esc(t("ภาพประกอบเครื่องและท่า")) + '"><use href="assets/machines.svg#' + symbol + '"></use></svg>';
+    return (photo ? '<img class="machine-example" src="' + esc(photo.src) + '" alt="' + esc(EXBY[id].name) + '" width="640" height="480" loading="lazy" decoding="async">' : '') + fallback;
+  }
+  function machinePhotoFailed(image) {
+    image.hidden = true;
+    var fallback = image.nextElementSibling;
+    if (fallback && fallback.classList.contains("machine-art")) fallback.hidden = false;
+  }
+  function showMachinePhotoCredits() {
+    openSheet("", null, $("machine-photo-credits"));
+    var photos = typeof MACHINE_PHOTOS !== "undefined" ? MACHINE_PHOTOS : {};
+    sheet.innerHTML = sheetHead(t("ที่มารูปภาพ"), false) + '<p class="hint">' + t("ภาพผ่านการแต่งด้วย AI เพื่อลบคนและพื้นหลัง รายละเอียดอาจต่างจากเครื่องจริง ดูเครดิตต้นฉบับด้านล่าง") + '</p><ul class="photo-credits">' + EX.filter(function (ex) { return photos[ex.id]; }).map(function (ex) {
+      var photo = photos[ex.id];
+      var author = photo.authorUrl ? '<a href="' + esc(photo.authorUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.author) + '</a>' : esc(photo.author);
+      return '<li><strong>' + esc(ex.name) + '</strong><br><a href="' + esc(photo.source) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.title) + '</a><br>' + author + ' · <a href="' + esc(photo.licenseUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.license) + '</a></li>';
+    }).join("") + '</ul>';
+    sheet.onclick = function (ev) { if (ev.target.closest("[data-close]")) closeSheet(); };
+    sheet.focus();
+  }
+  function machineCard(row, action) {
+    var ex = EXBY[row.id]; if (!ex || ex.hidden) return "";
+    return '<button type="button" class="machine-card" data-machine-' + action + '="' + esc(ex.id) + '">' + machineArt(ex.id) + '<span>' + esc(ex.name) + '</span></button>';
+  }
+  function renderMachineLibrary() {
+    $("machine-grid").innerHTML = EX.map(function (ex) { return machineCard(ex, "pick"); }).join("");
+    var remote = machineConfig().mode === "remote";
+    $("machine-privacy").textContent = remote ? t("โหมดออนไลน์: ขออนุญาตก่อนส่งรูปที่ย่อแล้ว") : t("โหมดในเครื่อง: ไม่อัปโหลดรูป ไม่มีโมเดลก็เลือกเองได้");
+    $("machine-prepare").hidden = remote;
+    if (!$("machine-status").textContent) $("machine-status").textContent = remote ? t("เลือกรูปเพื่อเริ่ม หรือเลือกเครื่องเองได้เลย") : t("ยังไม่ได้เตรียมโมเดล เลือกเครื่องเองได้ หรือใช้ Gemini ด้านล่าง");
+  }
+  function clearMachinePhoto() { if (machinePhoto) URL.revokeObjectURL(machinePhoto); machinePhoto = ""; }
+  function drawMachineResults() {
+    var threshold = machineConfig().threshold;
+    if (typeof threshold !== "number" || !Number.isFinite(threshold) || threshold < 0 || threshold > 1) threshold = 0.85;
+    var choice = window.KryvosMachines ? window.KryvosMachines.choices(machineResults, threshold, machineRejected) : { confirm: false, items: [] }, h = "";
+    if (machinePhoto) h += '<figure class="machine-photo"><img src="' + machinePhoto + '" alt="' + t("รูปที่คุณถ่ายหรือเลือก") + '"><figcaption>' + t("รูปที่คุณถ่ายหรือเลือก") + '</figcaption></figure>';
+    if (choice.confirm) {
+      var row = choice.items[0];
+      h += '<h3>' + esc(tf(t("เครื่องนี้คือ {name} ใช่ไหม?"), { name: EXBY[row.id].name })) + '</h3><p class="hint">' + t("ภาพตัวอย่างหรือรูปย่อที่เคยบันทึก") + '</p>' + machineArt(row.id) +
+        '<div class="row2"><button type="button" class="btn" data-machine-confirm="' + esc(row.id) + '">' + t("ใช่") + '</button><button type="button" class="btn line" data-machine-reject="' + esc(row.id) + '">' + t("ไม่ใช่") + '</button></div>';
+    } else {
+      h += '<p>' + (choice.items.length ? t("อาจเป็นเครื่องเหล่านี้ เลือกเครื่องที่ตรงกับรูป") : t("ยังระบุเครื่องไม่ได้ เลือกจากตารางด้านล่างได้เลย")) + '</p><div class="machine-grid">' + choice.items.map(function (row) { return machineCard(row, "confirm"); }).join("") + '</div>';
+    }
+    $("machine-results").innerHTML = h;
+  }
+  function rejectMachine(id) {
+    if (machineRejected.indexOf(id) < 0) machineRejected.push(id);
+    drawMachineResults();
+    $("machine-results").focus();
+  }
+  function rememberMachine(id) {
+    var ex = EXBY[id]; if (!ex || ex.hidden) return false;
+    var before = JSON.stringify(S);
+    if (S.seen.indexOf(id) < 0) S.seen.push(id);
+    S.off = S.off.filter(function (item) { return item !== id; });
+    S.prefs.homeAutoOff = (S.prefs.homeAutoOff || []).filter(function (item) { return item !== id; });
+    S.scanned = true;
+    if (save() === false) { S = JSON.parse(before); return false; }
+    return true;
+  }
+  function machineFocusReturn(source, id) {
+    if (typeof source === "function") return source;
+    return function () {
+      if (source && document.contains(source)) return source;
+      var cards = $("machine-grid").querySelectorAll("[data-machine-pick]");
+      return Array.prototype.find.call(cards, function (card) { return card.dataset.machinePick === id; }) || $("machine-camera");
+    };
+  }
+  function openMachineInfo(id, saved, back) {
+    var ex = EXBY[id]; if (!ex || ex.hidden) return;
+    machineSequence++; // a late model result cannot replace a manual choice
+    var origin = back || (sheet ? sheetBack : document.activeElement);
+    openSheet("", null, machineFocusReturn(origin, id));
+    var related = (MACHINE_RELATIONS[id] || []).filter(function (key) { return EXBY[key] && !EXBY[key].hidden; });
+    openGuides[id] = true;
+    sheet.innerHTML = sheetHead(esc(ex.name), false) + machineArt(id) +
+      '<p role="status">' + (saved ? t("จำเครื่องนี้ในยิมแล้ว เปิดแอปใหม่ก็ยังอยู่") : t("ดูวิธีเล่นก่อน แล้วค่อยเพิ่มในยิมได้")) + '</p>' +
+      (isPainful(ex) ? '<p class="alert red">' + t("ท่านี้โดนส่วนที่เจ็บ วันนี้ให้ข้าม ถ้าเจ็บมากหรือไม่หายให้พบแพทย์") + '</p>' : '') +
+      guideHtml(ex) + '<button type="button" class="btn" data-machine-rest="' + esc(id) + '">' + t("เริ่มจับเวลาพัก") + ' · ' + restText(S.prefs.rest) + '</button>' +
+      (!saved ? '<button type="button" class="btn line" data-machine-save="' + esc(id) + '">' + t("เพิ่มในยิมของฉัน") + '</button>' : '') +
+      (related.length ? '<p class="hint">' + t("ท่าที่ใช้อุปกรณ์ลักษณะเดียวกัน ตรวจว่าเครื่องรองรับก่อนเพิ่ม") + '</p><div class="machine-grid">' + related.map(function (key) { return machineCard({ id: key }, "pick"); }).join("") + '</div>' : '');
+    sheet.onclick = function (ev) {
+      var button = ev.target.closest("button"); if (!button) return;
+      if (button.hasAttribute("data-close")) closeSheet();
+      else if (button.dataset.machineRest) { closeSheet(); startRest(); $("rest-lb").textContent = ex.name + " · " + t("พักก่อนเซ็ตต่อไป"); }
+      else if (button.dataset.machineSave) { if (rememberMachine(id)) { renderGym(); renderPlan(); openMachineInfo(id, true); } }
+      else if (button.dataset.machinePick) openMachineInfo(button.dataset.machinePick, false);
+      else if (button.dataset.explain) explain(button.dataset.explain, button);
+    };
+    sheet.focus();
+  }
+  async function scanMachinePhoto(file) {
+    var sequence = ++machineSequence;
+    if (machineConfig().mode === "remote" && !confirm(t("ส่งรูปที่ย่อแล้วไปบริการจำเครื่องออนไลน์ไหม? ไม่ส่งข้อมูลการฝึก") + "\n" + machineConfig().endpoint)) return;
+    clearMachinePhoto(); machineResults = []; machineRejected = [];
+    $("machine-results").innerHTML = "";
+    $("machine-status").textContent = t("กำลังดูรูป… ถ้าไม่พร้อม เลือกเครื่องเองได้เลย");
+    try {
+      if (!window.KryvosMachines) throw new Error("model");
+      var resized = await window.KryvosMachines.resizeImage(file);
+      if (sequence !== machineSequence) return;
+      machinePhoto = URL.createObjectURL(resized);
+      var results = await recognizeMachine(resized);
+      if (sequence !== machineSequence) return;
+      machineResults = results;
+      $("machine-status").textContent = t("ตรวจชื่อเครื่องก่อนยืนยัน ผลจากโมเดลอาจผิดได้");
+      drawMachineResults();
+    } catch (error) {
+      if (sequence !== machineSequence) return;
+      if (error.message === "image") clearMachinePhoto();
+      $("machine-status").textContent = error.message === "image" ? t("อ่านรูปไม่ได้ ลองรูปอื่นหรือเลือกเครื่องเอง") :
+        machineConfig().mode === "local" ? t("โมเดลยังไม่พร้อมหรือออฟไลน์ เลือกเครื่องเองได้ ไม่ได้ส่งรูปออกจากเครื่อง") : t("บริการจำเครื่องไม่พร้อม ลองใหม่หรือเลือกเครื่องเอง");
+      machineResults = []; drawMachineResults();
+    }
   }
 
   /* ---------- AI: recognise gym machines from a photo ---------- */
@@ -2589,7 +2758,10 @@
     wrap.remove(); document.body.classList.remove("sheet-open");
     sheetBackground.forEach(function (entry) { entry.el.inert = entry.inert; }); sheetBackground = [];
     if (cb) cb();
-    if (!quiet && sheetBack && document.contains(sheetBack)) sheetBack.focus();
+    if (!quiet) {
+      var back = typeof sheetBack === "function" ? sheetBack() : sheetBack;
+      if (back && document.contains(back)) back.focus();
+    }
   }
   // grab bar, title, share (only where the phone can share) and close
   function sheetHead(title, canShare) {
@@ -3612,6 +3784,56 @@
   }
 
   /* ---------- events ---------- */
+  function draftSaveStatus(status) {
+    $("draft-status").textContent = status === "dirty" ? t("กำลังแก้ไข ออกจากช่องเพื่อเก็บร่าง") :
+      status === "failed" ? t("ยังเก็บร่างไม่ได้ สำรองข้อมูลแล้วตรวจพื้นที่ในเครื่อง") : t("เก็บร่างในเครื่องแล้ว จบแล้วกดบันทึกการซ้อม");
+  }
+  function renderStartAction() {
+    var button = $("start-workout"), available = current && !current.rest && current.items && current.items.length;
+    $("start-safety").hidden = !Object.keys(S.body).some(function (key) { return S.body[key] === "pain"; });
+    button.hidden = !available;
+    if (!available) return;
+    var p = progress();
+    button.textContent = p.done >= p.total ? t("บันทึกการซ้อม") : p.done ? t("ฝึกต่อ") : t("เริ่มฝึก");
+  }
+  $("start-workout").addEventListener("click", function () {
+    if (!current || current.rest) return;
+    setTodaySection("plan");
+    var p = progress();
+    if (p.total && p.done >= p.total) { finish(); return; }
+    var target = $("plan");
+    target.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    target.focus({ preventScroll: true });
+  });
+  ["machine-input", "machine-gallery-input"].forEach(function (id) {
+    $(id).addEventListener("change", function () { var file = this.files && this.files[0]; this.value = ""; if (file) scanMachinePhoto(file); });
+  });
+  $("machine-camera").addEventListener("click", function () {
+    $("machine-status").textContent = t("ถ้ากล้องไม่เปิด เลือกรูปจากคลังหรือเลือกเครื่องเองได้");
+    try { $("machine-input").click(); } catch (error) { $("machine-manual").open = true; }
+  });
+  $("machine-gallery").addEventListener("click", function () {
+    try { $("machine-gallery-input").click(); } catch (error) { $("machine-manual").open = true; $("machine-status").textContent = t("อ่านรูปไม่ได้ ลองรูปอื่นหรือเลือกเครื่องเอง"); }
+  });
+  $("machine-photo-credits").addEventListener("click", showMachinePhotoCredits);
+  $("machine-prepare").addEventListener("click", async function () {
+    var button = this; button.disabled = true;
+    $("machine-status").textContent = t("กำลังเตรียมโมเดล… ยังเลือกเครื่องเองได้");
+    try {
+      await getMachineAdapter().prepareOffline();
+      $("machine-status").textContent = t("เตรียมโมเดลและไฟล์ออฟไลน์แล้ว เบราว์เซอร์อาจล้างแคชได้");
+    } catch (error) { $("machine-status").textContent = t("โมเดลยังไม่พร้อมหรือออฟไลน์ เลือกเครื่องเองได้ ไม่ได้ส่งรูปออกจากเครื่อง"); }
+    finally { button.disabled = false; }
+  });
+  $("v-gym").addEventListener("click", function (ev) {
+    var button = ev.target.closest("[data-machine-confirm],[data-machine-reject],[data-machine-pick]"); if (!button) return;
+    if (button.dataset.machineReject) rejectMachine(button.dataset.machineReject);
+    else if (button.dataset.machineConfirm) {
+      var id = button.dataset.machineConfirm;
+      if (rememberMachine(id)) { renderGym(); renderPlan(); openMachineInfo(id, true, button); }
+    } else openMachineInfo(button.dataset.machinePick, false);
+  });
+  window.addEventListener("pagehide", function () { machineSequence++; clearMachinePhoto(); $("machine-results").innerHTML = ""; });
   function seg(id, key) {
     $(id).addEventListener("click", function (ev) {
       var b = ev.target.closest("button"); if (!b) return;
@@ -3642,6 +3864,7 @@
   function editSet(exId, i, field, value) {
     var s = S.draft[exId][i];
     s[field] = value; s.ed = true; S.draftTs = Date.now();
+    if (typeof draftSaveStatus === "function") draftSaveStatus("dirty");
   }
   function tickSet(exId, i) { // returns a message if the set cannot be ticked yet
     var s = S.draft[exId][i];
@@ -3746,6 +3969,7 @@
   }); });
   document.addEventListener("error", function (ev) {
     if (ev.target.matches && ev.target.matches(".gym-thumb, [data-scan-thumbnail]")) hideBrokenThumbnail(ev.target);
+    if (ev.target.matches && ev.target.matches(".machine-example")) machinePhotoFailed(ev.target);
   }, true);
   $("scan-results").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-open]"); if (b) openShot(b.dataset.open);

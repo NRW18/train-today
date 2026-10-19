@@ -1,0 +1,2 @@
+# Preserve the downloaded runtime bytes and their documented SHA-256 hashes.
+vendor/*.min.js -text -diff linguist-vendored

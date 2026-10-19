@@ -1,7 +1,8 @@
 // Tests for saving and loading user data (index.html "state"). Run: node --test "tests/*.test.mjs"
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { load } from "./app.mjs";
+import { load, fnSource } from "./app.mjs";
+import vm from "node:vm";
 
 const STATE_FNS = ["checkLoadedThumbnails", "decodeThumbnail", "decodeScanThumbs", "cleanThumbnail", "cleanScanThumbs","strList", "cleanEn", "cleanGuide", "cleanCustom", "cleanDraft", "okTs", "cleanFood", "cleanW", "gpsCoordinate", "cleanRoute", "cleanRuns", "cleanLog", "cleanPrefs", "cleanProfile", "cleanShoe", "cleanShoeQ",
   "load", "snapshot", "save", "rebuildEx", "hideCustom", "blankState", "wipe", "syncFromOtherTab", "importBackup", "dataList", "draftTicked", "dayKey", "lastTrained", "lastEntry", "hoursSince", "editSet", "tickSet", "setMissing", "num"];
@@ -29,6 +30,38 @@ export function app(storage = fakeStorage()) {
   ctx.storage = storage;
   return ctx;
 }
+
+test("confirmed machine memory survives reopening and backup import without duplicate exercises or history", () => {
+  const a = app(); a.load();
+  a.S.log = [{ ts: Date.now() - 5000, day: "push", entries: [{ ex: "chest_press", sets: [{ kg: 20, reps: 10 }] }] }];
+  a.S.off = ["chest_press", "leg_press"];
+  a.S.prefs.homeAutoOff = ["chest_press"];
+  vm.runInContext(fnSource("rememberMachine"), a);
+  assert.equal(a.rememberMachine("chest_press"), true);
+  assert.equal(a.rememberMachine("chest_press"), true);
+  assert.equal(a.rememberMachine("not_real"), false);
+  assert.equal(a.S.custom.length, 0); assert.equal(a.S.log.length, 1);
+  assert.deepEqual(Array.from(a.S.seen), ["chest_press"]);
+  assert.deepEqual(Array.from(a.S.off), ["leg_press"]);
+  assert.equal(a.S.prefs.homeAutoOff.length, 0);
+  const b = app(a.storage); b.load();
+  assert.deepEqual(Array.from(b.S.seen), ["chest_press"]);
+  assert.equal(b.S.log[0].entries[0].ex, "chest_press");
+  Object.assign(b, { confirm: () => true, renderAll() {}, DATA_WORDS: {} });
+  b.importBackup(JSON.stringify(a.snapshot()));
+  assert.equal(b.S.seen.length, 1); assert.equal(b.S.custom.length, 0);
+  b.importBackup(JSON.stringify({ log: a.S.log }));
+  assert.equal(b.S.log.length, 1, "old backup without recognition fields still loads");
+});
+
+test("failed machine memory save rolls back availability, seen and scanned state", () => {
+  const a = app(); a.load(); a.S.off = ["chest_press"];
+  const before = JSON.stringify(a.S);
+  a.save = () => false;
+  vm.runInContext(fnSource("rememberMachine"), a);
+  assert.equal(a.rememberMachine("chest_press"), false);
+  assert.equal(JSON.stringify(a.S), before);
+});
 
 test("shoe brand choices and an older named shoe survive save/reload and backup import", () => {
   const storage = fakeStorage();
