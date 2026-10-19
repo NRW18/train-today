@@ -108,7 +108,7 @@ async function checkCards(page) {
   const base = `http://127.0.0.1:${server.address().port}/train-today/`;
   const browser = await chromium.launch({executablePath:process.env.BROWSER_PATH || undefined,headless:true});
   try {
-    for (const old of (process.env.KRYVOS_UPGRADE_FROM ? [process.env.KRYVOS_UPGRADE_FROM] : ['8afaafd','8ca3290','1161af5'])) {
+    for (const old of (process.env.KRYVOS_UPGRADE_FROM ? [process.env.KRYVOS_UPGRADE_FROM] : ['8afaafd','8ca3290','1161af5','ab1ca8d'])) {
       revision = old;
       const context = await browser.newContext({viewport:{width:375,height:780},reducedMotion:'reduce'});
       await seed(context);
