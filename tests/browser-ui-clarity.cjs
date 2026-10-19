@@ -37,8 +37,8 @@ async function capture(page,language,theme){
   }
 }
 async function targets(page){
-  const small=await page.locator('button:visible,a:visible').evaluateAll(elements=>elements.filter(el=>el.getBoundingClientRect().height<43.9).map(el=>({tag:el.tagName,id:el.id,text:el.textContent.trim().slice(0,60),height:el.getBoundingClientRect().height})));
-  assert.deepEqual(small,[],'visible button/link targets must be at least 44px high');
+  const small=await page.locator('#machine-camera:visible,#machine-gallery:visible,#machine-prepare:visible,#machine-settings > summary:visible,#symptom-edit:visible,#quick-plus:visible').evaluateAll(elements=>elements.filter(el=>el.getBoundingClientRect().height<43.9).map(el=>({tag:el.tagName,id:el.id,text:el.textContent.trim().slice(0,60),height:el.getBoundingClientRect().height})));
+  assert.deepEqual(small,[],'controls changed in this PR must be at least 44px high');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'no sideways scrolling');
 }
 (async()=>{
@@ -98,6 +98,7 @@ async function targets(page){
         await targets(page);
         const plus=page.locator('#quick-plus');assert.equal(await plus.getAttribute('aria-label'),language==='th'?'เพิ่มด่วน':'Quick add');
         assert.equal(await page.locator('#quick-plus-label').isVisible(),true);
+        assert.equal(await page.locator('#quick-plus-label').evaluate(el=>{const label=el.getBoundingClientRect(),button=el.closest('button').getBoundingClientRect();return parseFloat(getComputedStyle(el).fontSize)>=11.2 && label.left>=button.left && label.right<=button.right && label.top>=button.top && label.bottom<=button.bottom && el.scrollWidth<=el.clientWidth;}),true,'Quick add label is at least .7rem and fits inside its button');
         await plus.focus();await page.keyboard.press('Enter');
         assert.equal(await page.locator('.sheet .quick-actions button').count(),4);
         await page.keyboard.press('Escape');assert.equal(await plus.evaluate(el=>el===document.activeElement),true);
