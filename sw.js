@@ -1,6 +1,6 @@
 // Offline support: keep the app shell cached so it opens in the gym without internet.
 // Bump VERSION whenever index.html changes so phones pick up the new version.
-var VERSION = "train-today-v63";
+var VERSION = "train-today-v64";
 var SHELL = ["machine-photos.js", "assets/machines/cutouts/cable-station.webp", "assets/machines/cutouts/calf-raise.webp", "assets/machines/cutouts/chest-press.webp", "assets/machines/cutouts/dumbbells.webp", "assets/machines/cutouts/exercise-mat.webp", "assets/machines/cutouts/lat-pulldown.webp", "assets/machines/cutouts/leg-extension.webp", "assets/machines/cutouts/leg-press.webp", "assets/machines/cutouts/pec-deck.webp", "assets/machines/cutouts/seated-leg-curl.webp", "assets/machines/cutouts/seated-row.webp", "assets/machines/cutouts/shoulder-press.webp", "./", "index.html", "en.js", "theme.css", "simple-flow.css", "machines-config.js", "machine-recognition.js", "assets/machines.svg", "manifest.json", "cover.jpg", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png", "assets/onboarding/athlete-male.webp", "assets/onboarding/athlete-female.webp", "assets/onboarding/runner.webp", "assets/onboarding/runner-mark.png"];
 
 // A read-only release probe, so update checks verify the worker controlling this page.
