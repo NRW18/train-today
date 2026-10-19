@@ -135,3 +135,55 @@ test("Google unreachable: 502 with CORS, not a crash", async () => {
   assert.equal(res.headers.get("Access-Control-Allow-Origin"), ORIGIN);
   assert.equal((await res.json()).error, "upstream");
 });
+
+test("server chooses task budgets/order, ignores client token values, and preserves old clients", async () => {
+  for(const [task,budget] of [["scan",800],["food",500],["explain",300],["week",500],[undefined,800]]){
+    let url,payload;
+    globalThis.fetch=async (request,options)=>{url=request;payload=JSON.parse(options.body);return new Response("{}");};
+    const body={...GOOD_BODY,task,maxOutputTokens:999999,generationConfig:{maxOutputTokens:999999}};
+    const res=await worker.fetch(req(body),{GEMINI_KEY:"test"});
+    assert.equal(res.status,200);assert.equal(payload.generationConfig.maxOutputTokens,budget);
+    assert.equal(payload.generationConfig.thinkingConfig.thinkingLevel,"minimal");
+    assert.match(url,task==="explain"||task==="week"?/gemini-3.1-flash-lite:/ : /gemini-3-flash-preview:/);
+    assert.equal(payload.generationConfig.mediaResolution,["food","scan",undefined].includes(task)?"MEDIA_RESOLUTION_MEDIUM":undefined);
+  }
+  for(const task of ["other",null,{},"__proto__"]){
+    const kv=fakeKV();assert.equal((await worker.fetch(req({...GOOD_BODY,task}),{GEMINI_KEY:"test",RL:kv})).status,400);
+    assert.equal(kv.store.size,0);
+  }
+});
+
+test("quota reads before Google; failures and retries consume only the eventual success", async () => {
+  for(const status of [429,500,502,503,404]){
+    const kv=fakeKV();fakeGoogle(status,status,status);
+    assert.notEqual((await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:kv})).status,200);
+    assert.equal(kv.store.size,0,"upstream "+status+" is not counted");
+    globalThis.fetch=async()=>{assert.equal(kv.store.size,0,"no writes before Google 200");return new Response("{}");};
+    assert.equal((await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:kv})).status,200);
+    assert.deepEqual([...kv.store.values()],["1","1"],"successful retry counted exactly once");
+  }
+  const kv=fakeKV();globalThis.fetch=async()=>{throw Error("network");};
+  await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:kv});assert.equal(kv.store.size,0);
+});
+
+test("unsupported thinking/media config skips only that model; unrelated 400 is not retried", async () => {
+  const kv=fakeKV(),seen=[];
+  globalThis.fetch=async(url,options)=>{seen.push({url,config:JSON.parse(options.body).generationConfig});return seen.length<3 ?
+    new Response('{"error":{"message":"thinkingConfig is not supported"}}',{status:400}):new Response("{}");};
+  const res=await worker.fetch(req({...GOOD_BODY,task:"week"}),{GEMINI_KEY:"test",RL:kv});
+  assert.equal(res.status,200);assert.match(seen[0].url,/3.1-flash-lite:/);assert.match(seen[1].url,/3-flash-preview:/);
+  assert.match(seen[2].url,/flash-latest:/);assert.equal(seen[2].config.thinkingConfig,undefined);
+  assert.ok(seen.every(call=>call.config.maxOutputTokens===500));assert.deepEqual([...kv.store.values()],["1","1"]);
+  fakeGoogle(400,200);calls=[];
+  assert.equal((await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test"})).status,502);assert.equal(calls.length,1);
+});
+
+test("concurrent successes do not overwrite the same isolate's counters; limits remain 40/450", async () => {
+  const kv=fakeKV(),env={GEMINI_KEY:"test",RL:kv};
+  await Promise.all([worker.fetch(req(GOOD_BODY),env),worker.fetch(req(GOOD_BODY),env)]);
+  assert.deepEqual([...kv.store.values()],["2","2"]);
+  const day=new Date().toISOString().slice(0,10);
+  const globalLimit=fakeKV({data:{["all:"+day]:"450"}});calls=[];
+  const res=await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:globalLimit});
+  assert.equal(res.status,429);assert.equal((await res.json()).scope,"app");assert.equal(calls.length,0);
+});

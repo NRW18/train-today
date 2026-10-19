@@ -7,7 +7,7 @@ const envelope = (text, finishReason = "STOP") => ({ candidates: [{ finishReason
 const privateMarker = "PRIVATE_SENTINEL_DO_NOT_DISPLAY";
 function app(steps = [], personal = true) {
   const calls = [], waits = [], nodes = {};
-  const a = load(["aiError", "aiHttpError", "readAIResponse", "parseGemini", "callGemini", "callProxy", "validate", "validateScan", "cleanEn", "errText", "scan", "scanDiagnosticHtml", "snapshot"], {
+  const a = load(["aiError", "aiHttpError", "readAIResponse", "parseGemini", "callGemini", "callProxy", "validate", "validateScan", "cleanEn", "errText", "scanCacheKey", "scanAI", "scan", "scanDiagnosticHtml", "snapshot"], {
     Response, navigator: { onLine: true }, withLang: (parts) => parts,
     getKey: () => personal ? "test-only-not-a-real-key" : "", PROXY_URL: "https://worker.example/",
     S: { log: [], custom: [] }, EX: [{ id: "press", name: "Press" }], EXBY: { press: { id: "press", name: "Press", m: ["chest"] } },

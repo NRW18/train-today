@@ -16,7 +16,7 @@ const hash = (file, bytes) => createHash('sha256').update(/\.(html|css|js)$/.tes
 const scope = {};
 vm.runInNewContext(fs.readFileSync(path.join(root, 'machine-photos.js'), 'utf8'), scope);
 const photoFiles = [...new Set(Object.values(scope.MACHINE_PHOTOS).map(photo => photo.src))];
-const appFiles = ['index.html','en.js','theme.css','simple-flow.css','machine-photos.js','machine-recognition.js','machines-config.js','sw.js',...photoFiles];
+const appFiles = ['ai-config.js','index.html','en.js','theme.css','simple-flow.css','machine-photos.js','machine-recognition.js','machines-config.js','sw.js',...photoFiles];
 const version = fs.readFileSync(path.join(root, 'sw.js'), 'utf8').match(/var VERSION = "([^"]+)"/)[1];
 const mime = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.json':'application/json'};
 let revision = null;

@@ -15,8 +15,10 @@
 //   GET  /stats  totals for the stats page (stats.html); needs the header X-Stats-Key = STATS_KEY.
 // Set the key once from this folder:  npx wrangler secret put STATS_KEY
 
+import "../ai-config.js";
+const AI = globalThis.KryvosAI;
+
 const ALLOWED_ORIGINS = ["https://nrw18.github.io"];
-const MODELS = ["gemini-3-flash-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
 const PER_IP_DAILY = 40;
 const GLOBAL_DAILY = 450;     // each counted call writes KV twice; free KV allows 1,000 writes/day
 const MAX_TEXT = 8000;        // characters of prompt text
@@ -61,7 +63,7 @@ function cleanParts(parts) {
 
 // If KV fails (e.g. the free plan's 1,000 writes/day ran out) we log it and let the request through
 // rather than answering 500: Gemini's own quota is the backstop for that day.
-async function countAndCheck(env, ip) {
+async function checkQuota(env, ip) {
   if (!env.RL) return { ok: true };            // no KV bound: no limits (set it up!)
   const day = new Date().toISOString().slice(0, 10);
   const ipKey = "ip:" + day + ":" + ip, allKey = "all:" + day;
@@ -76,15 +78,31 @@ async function countAndCheck(env, ip) {
   }
   if (a >= PER_IP_DAILY) return { ok: false, why: "user" };
   if (g >= GLOBAL_DAILY) return { ok: false, why: "app" };
-  try {
-    await Promise.all([
-      env.RL.put(ipKey, String(a + 1), { expirationTtl: 172800 }),
-      env.RL.put(allKey, String(g + 1), { expirationTtl: 172800 })
-    ]);
-  } catch (e) {
-    console.log("KV write failed, not counted:", e && e.message);
-  }
-  return { ok: true, left: PER_IP_DAILY - a - 1 };
+  return { ok: true, ipKey, allKey, a, g };
+}
+
+// Serialize only the short accounting stage, never Google calls. Re-read after
+// success: requests that started together must not overwrite one another's count.
+// KV is still eventually consistent across isolates, as with the existing limiter.
+const quotaWrites = new WeakMap();
+async function countSuccess(env, quota) {
+  if (!env.RL || !quota.ipKey) return;
+  const previous = quotaWrites.get(env.RL) || Promise.resolve();
+  const pending = previous.then(async () => {
+    const { ipKey, allKey } = quota;
+    try {
+      const values = await Promise.all([env.RL.get(ipKey), env.RL.get(allKey)]);
+      await Promise.all([
+        env.RL.put(ipKey, String((parseInt(values[0] || "0", 10) || 0) + 1), { expirationTtl: 172800 }),
+        env.RL.put(allKey, String((parseInt(values[1] || "0", 10) || 0) + 1), { expirationTtl: 172800 })
+      ]);
+    } catch (e) {
+      console.log("KV write failed, not counted:", e && e.message);
+    }
+  });
+  quotaWrites.set(env.RL, pending);
+  await pending;
+  if (quotaWrites.get(env.RL) === pending) quotaWrites.delete(env.RL);
 }
 
 /* ---------- usage stats (D1) ---------- */
@@ -230,20 +248,24 @@ export default {
     const parts = cleanParts(body && body.parts);
     if (!parts) return json({ error: "bad_request" }, 400, origin);
 
+    // Missing task supports installed pre-upgrade clients; reject unknown supplied tasks.
+    const task = body.task === undefined ? "scan" : body.task;
+    if (!AI.validTask(task)) return json({ error: "bad_request" }, 400, origin);
+    const models = AI.models(task);
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const lim = await countAndCheck(env, ip);
+    const lim = await checkQuota(env, ip);
     if (!lim.ok) return json({ error: "limit", scope: lim.why, per_user_daily: PER_IP_DAILY }, 429, origin);
 
-    const payload = JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } });
-    for (let i = 0; i < MODELS.length; i++) {
+    for (let i = 0; i < models.length; i++) {
+      const payload = JSON.stringify({ contents: [{ parts }], generationConfig: AI.config(task, models[i]) });
       let res, text;
       try {
-        res = await fetch(UPSTREAM + MODELS[i] + ":generateContent", {
+        res = await fetch(UPSTREAM + models[i] + ":generateContent", {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_KEY },
           body: payload
         });
-        if (res.status === 404 && i + 1 < MODELS.length) continue;
+        if (res.status === 404 && i + 1 < models.length) continue;
         text = await res.text();
       } catch (e) {
         // Google unreachable: answer like any other upstream failure (with CORS), so the app retries once
@@ -251,8 +273,13 @@ export default {
         console.log("Google fetch failed:", e && e.message);
         return json({ error: "upstream", status: 0 }, 502, origin);
       }
+      if (res.status === 400 && i + 1 < models.length) {
+        let error; try { error = JSON.parse(text); } catch (_) {}
+        if (AI.unsupportedConfig(res.status, error)) continue;
+      }
       // Never pass Google's error details through: they can mention the key or project.
       if (!res.ok) return json({ error: "upstream", status: res.status }, res.status === 429 ? 429 : 502, origin);
+      if (res.status === 200) await countSuccess(env, lim);
       return new Response(text, { status: 200, headers: { "Content-Type": "application/json", ...cors(origin) } });
     }
     return json({ error: "no_model" }, 502, origin);

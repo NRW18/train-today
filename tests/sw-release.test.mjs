@@ -49,7 +49,7 @@ test("shell installation refreshes HTTP cache without requiring optional model f
 test("every page CSS/script release tag stays in step with the service worker",()=>{
   const release=version.match(/v(\d+)$/)[1];
   const files=[...html.matchAll(/(?:<script src|<link rel="stylesheet" href)="([^":]+)"/g)].map(match=>match[1]);
-  assert.equal(files.length,6);
+  assert.equal(files.length,7);
   for(const file of files) {
     assert.ok(file.endsWith("?v="+release),file+" must use the current release tag");
     assert.ok(source.includes(JSON.stringify(file.split("?")[0])),file+" must be cached");
