@@ -180,7 +180,7 @@ test("remote consent cancellation never calls adapter; unavailable/invalid image
   a.window.KryvosMachines.resizeImage = async blob => blob;
   a.URL = { createObjectURL: () => "blob:test" };
   a.recognizeMachine = async () => { throw Error("network"); };
-  await a.scanMachinePhoto(new Blob()); assert.match(nodes["machine-status"].textContent, /ไม่พร้อม/);
+  await a.scanMachinePhoto(new Blob()); assert.equal(nodes["machine-status"].textContent, "ตอนนี้ช่วยดูรูปไม่ได้ เลือกจากรูปด้านล่างได้เลย");
 });
 
 test("primary workout action follows actual progress and hides for rest; pain stays visible", () => {

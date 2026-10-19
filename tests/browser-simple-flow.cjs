@@ -124,11 +124,12 @@ async function noOverflow(page, label) {
     await page.keyboard.press('Escape');
     console.log('PASS all 15 equipment cutout cards decoded and source/license credits remain accessible');
     await page.locator('#machine-input').setInputFiles(image);
-    await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
+    await page.locator('#machine-status').filter({ hasText:"Auto-recognition isn't ready yet" }).waitFor();
     assert.equal(await page.locator('#machine-grid button').count(), 15);
     assert.equal(uploads.length, 0, 'local missing model must never upload');
+    await page.locator('#machine-settings > summary').click();
     await page.locator('#machine-prepare').click();
-    await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
+    await page.locator('#machine-status').filter({ hasText:"Auto-recognition isn't ready yet" }).waitFor();
     await page.locator('#machine-input').setInputFiles({ name:'bad.png', mimeType:'image/png', buffer:Buffer.from('unreadable') });
     await page.locator('#machine-status').filter({ hasText:'Unable to read' }).waitFor();
     await context.setOffline(true);
@@ -139,7 +140,7 @@ async function noOverflow(page, label) {
     await offlinePhoto.scrollIntoViewIfNeeded();
     await offlinePhoto.evaluate(image => image.decode());
     await page.locator('#machine-input').setInputFiles(image);
-    await page.locator('#machine-status').filter({ hasText:'Model unavailable' }).waitFor();
+    await page.locator('#machine-status').filter({ hasText:"Auto-recognition isn't ready yet" }).waitFor();
     await page.locator('[data-machine-pick="leg_press"]').click();
     await page.locator('[data-machine-save="leg_press"]').click();
     await page.keyboard.press('Escape');
@@ -205,7 +206,7 @@ async function noOverflow(page, label) {
     await remote.route('https://recognize.example.test/machines', route => route.abort());
     remote.once('dialog', dialog => dialog.accept());
     await remote.locator('#machine-input').setInputFiles(image);
-    await remote.locator('#machine-status').filter({hasText:'Recognition service unavailable'}).waitFor();
+    await remote.locator('#machine-status').filter({hasText:"We can't check your photo right now"}).waitFor();
     assert.equal(await remote.locator('#machine-grid button').count(), 15);
     // Load actual vendored libraries and verify their public API without a fake model.
     await remote.addScriptTag({url:base + 'vendor/tf-4.22.0.min.js'});

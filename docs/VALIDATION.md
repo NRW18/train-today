@@ -183,3 +183,43 @@ just functional browser checks while iterating; final validation used the full s
 - Physical iPhone/Android, real camera/GPS and real model inference/accuracy remain
   untested. `models/machines/` still contains documentation only, so recognition
   accuracy and real-model readiness are not claimed.
+
+## UI clarity follow-up (2026-10-19, separate PR)
+
+1. Gym retains one primary camera button and a smaller `.btn.line` gallery button.
+   Recognition settings default closed and contain privacy/offline preparation;
+   the original illustrated manual grid remains open. Status copy is conversational
+   Thai/English and does not describe an absent model as ready.
+2. Ordinary links and video-link hover use blue. Delete actions remain red;
+   pain/unsafe-exercise/worn-shoe warnings retain red. Informational over-target
+   calorie color and recoverable form/photo errors no longer imply danger. Only
+   color presentation changed; calculations and error handling are unchanged.
+3. A single-line symptom summary below Start reads existing `S.body`, with no
+   new application state. Pain is first and uses red background/ink. Edit opens
+   the existing muscle choices, scrolls to check-in and focuses the first choice,
+   respecting reduced motion. Existing full pain warnings remain visible.
+4. Quick add has an explicit bilingual accessible name and a permanent short
+   label below its icon. No first-use flag or other storage key was introduced.
+5. Service worker and all six CSS/script release tags bumped together to **v62**.
+
+- `node --test "tests/*.test.mjs"`: **260/260 passed**, no skips. Five additional
+  tests cover no symptoms, soreness, painful joints, mixed symptoms/no mutation,
+  and Edit focus/reduced motion. Existing changed-copy assertions were updated to
+  the new expected text while retaining their behavior checks.
+- `tests/browser-ui-clarity.cjs`: **16/16** sizes/languages/themes passed, including
+  44px button/link targets, blue links, collapsed settings, existing grid, symptom
+  updates/red tokens/Edit focus, quick-add dialog/return focus and no overflow.
+- Original `tests/browser-simple-flow.cjs`: **16/16** layouts plus equipment,
+  offline/manual, rest timer, focus and controlled local/remote regression flows
+  passed. `tests/browser-release.cjs` passed **v57/v59/v60/v61 → v62**, including
+  exact latest assets, offline reopening and preserved training/food/body/run/
+  shoe/draft data. No changes to load/save/import, algorithm/config or backend.
+- Review screenshots: [before/after directory](screenshots/ui-clarity/), Today and
+  Gym in Thai/light and English/dark at 375×860. Before is main `ab1ca8d`, after is
+  the UI change, both with the same synthetic empty-workout profile. Reproduce with
+  `node tests/browser-ui-clarity.cjs --before` and `--screenshots-only` using the
+  existing Playwright/browser environment described above.
+- FEATURES.md audited: all existing controls and capabilities remain reachable;
+  only secondary settings moved into a disclosure. No trained recognition model
+  added, no worker redeploy needed, no actual iPhone/Android testing. This separate
+  UI PR is submitted for owner review and is not merged automatically.
