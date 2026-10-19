@@ -229,3 +229,13 @@ just functional browser checks while iterating; final validation used the full s
 - Restored red error messages, including dark machine sheets; calorie over-target text and ring use yellow. Ordinary links remain blue.
 - Removed global button/link sizing. Scoped new target sizing to the changed controls. Quick add label is .7rem, wraps within its button, and passes font/containment checks at all 16 viewport/language/theme combinations including 320px.
 - Re-ran all 260 Node tests, both 16-case browser suites, and local PWA upgrade checks; refreshed the four after screenshots. No algorithm, user-data, backend or model changes. No physical phone testing.
+
+## App-only machine artwork (v65, 2026-10-19)
+
+- Based on main 4ab366a (PRs #20/#21 already merged). machineArt uses MACHINE_PHOTOS or assets/machines.svg; missing canonical photos use their symbol and unknown IDs use #generic. It never reads saved scan photos. Manual grid, confirmation cards and guides share this renderer.
+- Exercise toggles use the same app artwork at 48px. Failed app images retain the SVG fallback. Credits and offline image assets remain unchanged.
+- No changes to load/save/import/export, train-today-v1, S.scanThumbs, exercise IDs, algorithms, Gemini scanning or transient scan comparison. FEATURES.md categories remain available; legacy thumbnail validation/storage and backup tests remain in the full suite.
+- Node: 261 tests passed. App-only artwork browser acceptance: 16 viewport/theme/language combinations (320/360/375/430, light/dark, TH/EN), saved JPEG scan photos retained across reload, missing-photo SVG fallback, manual guide, current scan comparison/confirmation and no horizontal overflow. Toggle close-ups additionally check 48px dimensions at 320/375 in both themes.
+- Original browser-simple-flow suite: 16 combinations plus offline/manual, recognition-controlled flows and rest/focus regression passed. Local PWA upgrade checks from v57/v59/v60/v61 to v65 verify matching assets and retained data.
+- Before/after screenshots: [app-only-machine-art](screenshots/app-only-machine-art/). Before index is 4ab366a; both sides use synthetic gray JPEG scan photos. For this fixture only, the leg_press app-photo entry is omitted at runtime to demonstrate SVG fallback; production MACHINE_PHOTOS is unchanged. Gym overview and expanded toggle close-ups captured at 320/375, Thai, light/dark. Reproduce with tests/browser-machine-art.cjs, adding --before for baseline.
+- No physical iPhone/Android testing; no trained model added or recognition accuracy claim. No backend change or worker deployment required. Submitted as one PR; not merged.

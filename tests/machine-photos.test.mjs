@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import vm from "node:vm";
-import { load, html } from "./app.mjs";
+import { load, html, fnSource } from "./app.mjs";
 
 const scope = {};
 vm.runInNewContext(readFileSync(new URL("../machine-photos.js", import.meta.url), "utf8"), scope);
@@ -41,19 +41,30 @@ test("shared equipment uses one file without changing the original exercise IDs"
   assert.match(photos.shoulder_press.changes, /upright overhead/);
 });
 
-test("curated photos win over personal thumbnails; thumbnails show only without a curated photo; unknown custom IDs keep illustration", () => {
+test("machineArt never reads personal photos, with or without app artwork", () => {
+  const saved = {leg_press:"personal photograph",custom:"personal photograph"};
   const a = load(["machineArt"], {
-    thumbnailHtml: () => "personal photograph", BASE_EX: [{id:"leg_press"}], EXBY: {leg_press:{name:"Leg press"}},
+    thumbnailHtml: () => { throw Error("must never read user thumbnails"); },
+    S: {scanThumbs:saved}, BASE_EX: [{id:"leg_press"}], EXBY: {leg_press:{name:"Leg press"}},
     MACHINE_PHOTOS: photos, esc: value => String(value)
   });
-  assert.match(a.machineArt("leg_press"), /class="machine-example"/, "a scan of a whole home gym must not replace the example photo");
-  assert.equal(a.machineArt("custom"), "personal photograph", "AI-added exercises still show the user's photo");
-  a.thumbnailHtml = () => "";
+  assert.doesNotMatch(fnSource("machineArt"), /thumbnailHtml|scanThumbs/);
   assert.match(a.machineArt("leg_press"), /class="machine-example"/);
   assert.match(a.machineArt("leg_press"), /alt="Leg press"/);
   assert.match(a.machineArt("leg_press"), /class="machine-art" hidden/);
-  assert.doesNotMatch(a.machineArt("custom"), /<img/);
-  assert.match(a.machineArt("custom"), /#generic/);
+  assert.match(a.machineArt("custom"), /assets\/machines.svg#generic/);
+  assert.doesNotMatch(a.machineArt("custom"), /<img|personal photograph/);
+  a.MACHINE_PHOTOS = {};
+  assert.match(a.machineArt("leg_press"), /assets\/machines.svg#leg_press/);
+  assert.doesNotMatch(a.machineArt("leg_press"), /<img|personal photograph/);
+  delete a.MACHINE_PHOTOS;
+  assert.match(a.machineArt("leg_press"), /#leg_press/);
+  assert.deepEqual(a.S.scanThumbs,saved);
+});
+
+test("exercise toggles use the same app artwork, never personal thumbnails", () => {
+  assert.match(fnSource("renderGym"), /machineArt\(e.id\)/);
+  assert.doesNotMatch(fnSource("renderGym"), /thumbnailHtml|scanThumbs/);
 });
 
 test("an unavailable photograph reveals its illustration without touching saved user photos", () => {
