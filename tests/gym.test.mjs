@@ -6,9 +6,10 @@ function app(count = 9, stored = null, blocked = false) {
   const nodes = {};
   const storage = { value: stored, getItem() { if (blocked) throw Error("blocked"); return this.value; }, setItem(key, value) { if (blocked) throw Error("blocked"); this.value = value; } };
   const events = [];
-  const a = load(["thumbnailHtml", "readGymGroups", "gymGroupOpen", "gymGroupItems", "gymGroupLabel", "toggleGymGroup", "updateGymCounts", "renderGym"], {
+  const a = load(["machineArt", "readGymGroups", "gymGroupOpen", "gymGroupItems", "gymGroupLabel", "toggleGymGroup", "updateGymCounts", "renderGym"], {
     esc: (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;"),
     EX: Array.from({ length: count }, (_, i) => ({ id: "ex" + i, name: "Machine " + i, day: i % 2 ? "pull" : "push", ai: i === count - 1 })),
+    BASE_EX: [],
     ORDER: ["push", "pull", "legs"], DAYS: { push: { name: "PUSH" }, pull: { name: "PULL" }, legs: { name: "LEGS" } },
     S: { off: ["ex0"], seen: ["ex1"], scanned: false }, localStorage: storage,
     $: (id) => nodes[id] ||= { value: "", hidden: false },
