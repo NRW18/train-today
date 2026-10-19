@@ -137,7 +137,7 @@ test("Google unreachable: 502 with CORS, not a crash", async () => {
 });
 
 test("server chooses task budgets/order, ignores client token values, and preserves old clients", async () => {
-  for(const [task,budget] of [["scan",800],["food",500],["explain",300],["week",500],[undefined,800]]){
+  for(const [task,budget] of [["scan",2000],["food",1000],["explain",600],["week",800],[undefined,2000]]){
     let url,payload;
     globalThis.fetch=async (request,options)=>{url=request;payload=JSON.parse(options.body);return new Response("{}");};
     const body={...GOOD_BODY,task,maxOutputTokens:999999,generationConfig:{maxOutputTokens:999999}};
@@ -173,7 +173,7 @@ test("unsupported thinking/media config skips only that model; unrelated 400 is 
   const res=await worker.fetch(req({...GOOD_BODY,task:"week"}),{GEMINI_KEY:"test",RL:kv});
   assert.equal(res.status,200);assert.match(seen[0].url,/3.1-flash-lite:/);assert.match(seen[1].url,/3-flash-preview:/);
   assert.match(seen[2].url,/flash-latest:/);assert.equal(seen[2].config.thinkingConfig,undefined);
-  assert.ok(seen.every(call=>call.config.maxOutputTokens===500));assert.deepEqual([...kv.store.values()],["1","1"]);
+  assert.ok(seen.every(call=>call.config.maxOutputTokens===800));assert.deepEqual([...kv.store.values()],["1","1"]);
   fakeGoogle(400,200);calls=[];
   assert.equal((await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test"})).status,502);assert.equal(calls.length,1);
 });
@@ -186,4 +186,18 @@ test("concurrent successes do not overwrite the same isolate's counters; limits 
   const globalLimit=fakeKV({data:{["all:"+day]:"450"}});calls=[];
   const res=await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:globalLimit});
   assert.equal(res.status,429);assert.equal((await res.json()).scope,"app");assert.equal(calls.length,0);
+});
+
+test("MAX_TOKENS returns a safe truncated error with CORS and never consumes quota", async () => {
+  for (const reason of ["MAX_TOKENS", "CONTINUATION"]) {
+    const kv=fakeKV();let requests=0;
+    globalThis.fetch=async()=>{requests++;return new Response(JSON.stringify({candidates:[
+      {finishReason:reason,content:{parts:[{text:"private incomplete output"}]}}
+    ]}));};
+    const res=await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:kv});
+    assert.equal(res.status,422);assert.equal(res.headers.get("Access-Control-Allow-Origin"),ORIGIN);
+    assert.deepEqual(await res.json(),{error:"truncated"});assert.equal(kv.store.size,0);assert.equal(requests,1);
+    fakeGoogle(200);await worker.fetch(req(GOOD_BODY),{GEMINI_KEY:"test",RL:kv});
+    assert.deepEqual([...kv.store.values()],["1","1"],"a later complete answer counts exactly once");
+  }
 });

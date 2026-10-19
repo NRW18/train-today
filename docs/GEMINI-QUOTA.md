@@ -1,4 +1,4 @@
-# Gemini quota changes (v66)
+# Gemini quota changes (v67)
 
 This change reduces repeat requests and bounds generation. It does **not** prove
 unchanged model accuracy, answer completeness or live latency. Those checks still
@@ -15,10 +15,10 @@ are rejected before any upstream call or quota write.
 
 | Task | First model | Output cap | Image processing |
 |---|---|---:|---|
-| scan | Existing Gemini 3 Flash preview | 800 | Medium |
-| food | Existing Gemini 3 Flash preview | 500 | Medium |
-| explain | Existing Gemini 3.1 Flash-Lite | 300 | No image setting |
-| week | Existing Gemini 3.1 Flash-Lite | 500 | No image setting |
+| scan | Existing Gemini 3 Flash preview | 2000 | Medium |
+| food | Existing Gemini 3 Flash preview | 1000 | Medium |
+| explain | Existing Gemini 3.1 Flash-Lite | 600 | No image setting |
+| week | Existing Gemini 3.1 Flash-Lite | 800 | No image setting |
 
 Scan/food keep the full original order: 3 Flash preview, 3.1 Flash-Lite,
 flash-latest. Explain/week move only Flash-Lite to the front. 404 fallback stays;
@@ -48,8 +48,11 @@ Google documentation checked on 2026-10-19:
 ## Accounting and caches
 
 Worker quotas are still 40 successful calls/IP/day and 450 successful calls/app/day.
-The preflight KV check reads only. Only a completed Google HTTP 200 triggers two
-KV writes; 404/config skips, 429, 5xx and network failures do not consume app quota.
+The preflight KV check reads only. Only a completed, non-truncated Google HTTP 200 triggers two
+KV writes; MAX_TOKENS/CONTINUATION, 404/config skips, 429, 5xx and network failures do not consume app quota.
+Truncation returns HTTP 422 with {error:"truncated"}, without echoing model text.
+The browser retains its translated truncation message and does not automatically
+retry that same output cap.
 The existing one retry after proxy 502/503 therefore counts only its success.
 Google may independently count failed upstream attempts against its own limits.
 
@@ -83,10 +86,10 @@ These are defensible estimates for each type, **not measured overall savings**:
 |---|---:|---|---|
 | scan | 0% (still one successful request) | 100% fewer calls on an in-memory hit | Gemini 3 image component ~50% lower (1120 to 560); prompt/output/thought tokens additional |
 | food | 0% | No new food cache | Same ~50% image-component estimate |
-| explain | 0% | Existing saved guide already avoids calls; no additional cache saving claimed | Cap 300; minimal thinking and Lite first, total saving unmeasured |
-| week | 0% | 100% fewer calls for unchanged same-day input; forced refresh saves 0% calls | Cap 500; minimal thinking and Lite first, total saving unmeasured |
+| explain | 0% | Existing saved guide already avoids calls; no additional cache saving claimed | Cap 600; minimal thinking and Lite first, total saving unmeasured |
+| week | 0% | 100% fewer calls for unchanged same-day input; forced refresh saves 0% calls | Cap 800; minimal thinking and Lite first, total saving unmeasured |
 
-Scan cap is 800, food cap 500. Caps constrain a maximum; they are not tokens saved
+Scan cap is 2000, food cap 1000. Caps constrain a maximum; they are not tokens saved
 when the old answer was already shorter. Likewise switching models does not by
 itself reduce the number of requests. For a workload with cache-hit fraction h,
 repeat-call reduction is 100*h percent. Compare actual `usageMetadata` token
@@ -94,6 +97,38 @@ counts and latency before claiming a combined percentage. Do not divide these
 caps by a model's theoretical maximum and present that as measured savings.
 
 ## Image/quality gate: NOT RUN
+
+### Opt-in paired evaluation
+
+Set `GEMINI_KEY` securely in your environment, then run:
+
+```powershell
+node tests/ai-eval.mjs "C:\private\machine-fixtures" --task scan --lang th
+node tests/ai-eval.mjs "C:\private\food-fixtures" --task food --lang th
+```
+
+`--help` does not need credentials. The script defaults to five sorted image
+files, two live Google calls per image (plus model fallbacks). Use `--limit N`
+to change that explicitly; `--model ID` pins one of the existing models for both
+variants. Keep photos outside the repo. It sends supplied image bytes directly;
+use already-resized 1024px/JPEG .82 fixtures to match the app. It compares
+generation config, not image compression. Both variants use the same real app
+prompt, language and image bytes; old config is JSON/.2 with no cap or thinking/
+media override, new config is the current shared policy. Pair order alternates
+to reduce systematic warm-up bias; repeat runs for variation.
+
+The table shows file, variant, actual model version, finish reason/status,
+recognized machine names/IDs (or food names), prompt/output/thinking/total token
+counts from `usageMetadata`, and total request time including fallbacks in ms.
+Missing metadata is null, never estimated. Invalid/truncated/error responses
+are reported; the script does not infer accuracy or silently repair them.
+The CLI exits nonzero for incomplete/error responses. It writes no photos,
+credentials or response files, and never prints a key or raw API error body.
+Review the table against human labels; this is not an automated accuracy score.
+
+`ai-eval.mjs` does not match `tests/*.test.mjs` and does not run on import. Normal
+tests exercise it only with fake fetch, temporary synthetic bytes and dummy
+credentials. Those tests are not live Gemini evaluation results.
 
 No labelled set of five real machine/food photos or authenticated Gemini test
 route was supplied in this session. There is no legitimate before/after accuracy
@@ -125,4 +160,4 @@ Before marking the PR ready:
 existing secrets/bindings; `wrangler.toml` is unchanged. Wrangler bundles the
 shared `../ai-config.js` import. Deploy the Worker before releasing the frontend
 so task policy applies immediately. No deployment is performed by this PR.
-The app shell caches ai-config.js and all seven CSS/script URLs use v66.
+The app shell caches ai-config.js and all seven CSS/script URLs use v67.

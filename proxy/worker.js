@@ -279,6 +279,14 @@ export default {
       }
       // Never pass Google's error details through: they can mention the key or project.
       if (!res.ok) return json({ error: "upstream", status: res.status }, res.status === 429 ? 429 : 502, origin);
+      // Incomplete generations are not successful app calls. 422 avoids a blind
+      // 502/503 retry with the same cap; the app already has translated guidance.
+      let answer;
+      try { answer = JSON.parse(text); } catch (_) {}
+      if (Array.isArray(answer && answer.candidates) && answer.candidates.some(candidate =>
+        candidate && ["MAX_TOKENS", "CONTINUATION"].includes(candidate.finishReason))) {
+        return json({ error: "truncated" }, 422, origin);
+      }
       if (res.status === 200) await countSuccess(env, lim);
       return new Response(text, { status: 200, headers: { "Content-Type": "application/json", ...cors(origin) } });
     }

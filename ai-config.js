@@ -2,7 +2,7 @@
  * references and quality-evaluation limits: docs/GEMINI-QUOTA.md. No credentials. */
 (function (root) {
   "use strict";
-  var limits = { scan: 800, food: 500, explain: 300, week: 500 };
+  var limits = { scan: 2000, food: 1000, explain: 600, week: 800 };
   var models = ["gemini-3-flash-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
   root.KryvosAI = Object.freeze({
     validTask: function (task) { return Object.prototype.hasOwnProperty.call(limits, task); },

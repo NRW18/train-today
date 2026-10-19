@@ -4,7 +4,7 @@ import {webcrypto} from "node:crypto";
 import {load, html} from "./app.mjs";
 
 test("personal-key requests use the shared task budget and task-specific model order", async () => {
-  for (const [task, max] of [["scan",800],["food",500],["explain",300],["week",500]]) {
+  for (const [task, max] of [["scan",2000],["food",1000],["explain",600],["week",800]]) {
     const calls=[];
     const a=load(["callGemini"], {navigator:{onLine:true},getKey:()=>"test",withLang:parts=>parts,
       fetch:async(url,options)=>{calls.push({url,body:JSON.parse(options.body)});return new Response('{"answer":1}');},
@@ -27,7 +27,7 @@ test("personal fallback skips an unsupported-config model, keeping task on the n
     readAIResponse:res=>res.json(),parseGemini:json=>json.answer});
   assert.equal(await a.callGemini([{text:"p"}],0,null,"explain"),1);
   assert.match(urls[0],/flash-lite:/);assert.match(urls[1],/3-flash-preview:/);
-  assert.ok(configs.every(config=>config.maxOutputTokens===300));
+  assert.ok(configs.every(config=>config.maxOutputTokens===600));
 });
 
 test("proxy retry sends only the task and parts, never client token config", async () => {
@@ -37,6 +37,14 @@ test("proxy retry sends only the task and parts, never client token config", asy
     readAIResponse:res=>res.json(),parseGemini:json=>json.answer});
   assert.equal(await a.callProxy([{text:"p"}],false,null,"food"),1);
   assert.deepEqual(bodies,[{parts:[{text:"p"}],task:"food"},{parts:[{text:"p"}],task:"food"}]);
+});
+
+test("proxy truncation keeps its translated category and does not retry the same budget", async () => {
+  let calls=0;
+  const a=load(["callProxy","aiHttpError","aiError"], {PROXY_URL:"https://worker.test/",
+    fetch:async()=>{calls++;return new Response('{"error":"truncated"}',{status:422});},readAIResponse:res=>res.json()});
+  await assert.rejects(a.callProxy([{text:"p"}],false,null,"scan"),error=>error.aiCode==="truncated");
+  assert.equal(calls,1);
 });
 
 function scanner() {
