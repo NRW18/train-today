@@ -41,12 +41,13 @@ test("shared equipment uses one file without changing the original exercise IDs"
   assert.match(photos.shoulder_press.changes, /upright overhead/);
 });
 
-test("personal thumbnails keep priority; curated photos use canonical names; unknown custom IDs keep illustration", () => {
+test("curated photos win over personal thumbnails; thumbnails show only without a curated photo; unknown custom IDs keep illustration", () => {
   const a = load(["machineArt"], {
     thumbnailHtml: () => "personal photograph", BASE_EX: [{id:"leg_press"}], EXBY: {leg_press:{name:"Leg press"}},
     MACHINE_PHOTOS: photos, esc: value => String(value)
   });
-  assert.equal(a.machineArt("leg_press"), "personal photograph");
+  assert.match(a.machineArt("leg_press"), /class="machine-example"/, "a scan of a whole home gym must not replace the example photo");
+  assert.equal(a.machineArt("custom"), "personal photograph", "AI-added exercises still show the user's photo");
   a.thumbnailHtml = () => "";
   assert.match(a.machineArt("leg_press"), /class="machine-example"/);
   assert.match(a.machineArt("leg_press"), /alt="Leg press"/);

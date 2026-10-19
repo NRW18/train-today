@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=63">
+<link rel="stylesheet" href="theme.css?v=64">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -670,7 +670,7 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=63">
+<link rel="stylesheet" href="simple-flow.css?v=64">
 </head>
 <body class="home">
 <div class="app">
@@ -1121,10 +1121,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=63"></script>
-<script src="machines-config.js?v=63"></script>
-<script src="machine-recognition.js?v=63"></script>
-<script src="machine-photos.js?v=63"></script>
+<script src="en.js?v=64"></script>
+<script src="machines-config.js?v=64"></script>
+<script src="machine-recognition.js?v=64"></script>
+<script src="machine-photos.js?v=64"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -2337,10 +2337,12 @@
   }
   function recognizeMachine(imageBlob) { return getMachineAdapter().recognizeMachine(imageBlob); }
   function machineArt(id) {
-    var thumb = thumbnailHtml(id);
+    // The app's example photo shows the machine itself; a personal scan thumbnail may be a whole home gym or the
+    // wrong object, so it is shown only for exercises that have no example photo.
+    var photo = typeof MACHINE_PHOTOS !== "undefined" && MACHINE_PHOTOS[id];
+    var thumb = photo ? "" : thumbnailHtml(id);
     if (thumb) return thumb;
     var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : "generic";
-    var photo = typeof MACHINE_PHOTOS !== "undefined" && MACHINE_PHOTOS[id];
     var fallback = '<svg class="machine-art"' + (photo ? ' hidden' : '') + ' viewBox="0 0 120 90" role="img" aria-label="' + esc(t("ภาพประกอบเครื่องและท่า")) + '"><use href="assets/machines.svg#' + symbol + '"></use></svg>';
     return (photo ? '<img class="machine-example" src="' + esc(photo.src) + '" alt="' + esc(EXBY[id].name) + '" width="640" height="480" loading="lazy" decoding="async">' : '') + fallback;
   }
