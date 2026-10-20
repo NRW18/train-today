@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KRYVOS</title>
 <meta name="description" content="KRYVOS โค้ชซ้อมรายวัน: บอกว่าวันนี้ควรฝึกอะไร จากการฟื้นตัวของกล้ามเนื้อ อาการเมื่อยหรือเจ็บ บันทึกวิ่ง หารองเท้าวิ่ง และนับแคลอรี่ โดย Norrawat Nakphut และ Krittanun Boonman">
-<meta name="theme-color" content="#EDF0F4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0C0F14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#017DFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#06204A" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=65">
+<link rel="stylesheet" href="theme.css?v=69">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,22 +672,25 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=65">
+<link rel="stylesheet" href="simple-flow.css?v=69">
+<link rel="stylesheet" href="brand.css?v=69">
 </head>
 <body class="home">
 <div class="app">
   <header class="top">
-    <h1 class="brand"><svg class="wordmark" viewBox="100 250 1720 215" role="img" aria-label="KRYVOS"><path fill="currentColor" fill-rule="evenodd" d="M 207.7 259.3 L 107.1 415.6 L 160.3 415.6 L 262.6 259.3 Z M 381.2 259.3 L 229.8 340.7 L 310.8 415.6 L 424.2 459.9 L 298.4 333.7 L 437 259.3 Z M 599.1 362.4 C 609.2 361.9 631 359.2 651.8 343.8 C 657.8 339.4 678.3 323.9 684.6 297.8 C 686.1 291.6 687.1 286.8 685.5 281.4 C 681 267.2 660.6 258.3 633.6 257.9 L 487.1 259.3 L 469.8 267.7 L 460.5 286.3 L 633.2 287.4 L 633.2 325.7 L 497.3 325.7 L 601.3 417.8 L 661.5 417.8 L 599.1 362.4 M 723.1 259.3 L 794.8 341.2 L 765.2 417.8 L 814.3 417.8 L 853.3 320.8 L 960.4 259.3 L 916.6 259.3 L 838.7 303.5 L 793.5 257.9 Z M 983.5 257.9 L 1054.3 417.8 L 1083.1 417.8 L 1258 260.1 L 1197.8 257.9 L 1087.1 374.4 L 1039.7 257.9 Z M 1289 257.9 L 1208.9 417.8 L 1453.7 417.8 L 1527.7 257.9 Z M 1316.5 289.8 L 1271.3 384.6 L 1418.3 384.6 L 1464.8 289.8 Z M 1812.9 257.9 L 1567.5 257.9 L 1527.7 353.6 L 1707.9 355.8 L 1692.4 384.6 L 1542.7 384.6 L 1489.6 417.8 L 1693.3 417.8 L 1738 396.5 L 1772.6 320.8 L 1592.3 317.3 L 1606.5 289.8 L 1760.2 289.8 Z"/></svg><span class="edition">Essential</span></h1>
+    <h1 class="brand"><span class="brand-runner" aria-hidden="true"></span><span class="wordmark" role="img" aria-label="KRYVOS"></span><span class="edition">Essential</span></h1>
     <div class="top-r"><div class="date" id="today-date"></div><button type="button" class="me" id="me-btn" aria-label="โปรไฟล์และการตั้งค่า"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8.2" r="4.2"/><path d="M3.8 20.5c.9-4.1 4.2-6.6 8.2-6.6s7.3 2.5 8.2 6.6c.1.5-.3.9-.8.9H4.6c-.5 0-.9-.4-.8-.9z"/></svg></button></div>
   </header>
 
   <!-- TODAY -->
   <main id="v-today">
     <section class="home-hero" aria-label="ภาพรวมวันนี้">
+      <p class="home-greeting" id="home-greeting"><span>สวัสดี!</span> <span>วันนี้ออกกำลังกายอะไรกันดี?</span></p>
       <ol class="week home-week" id="week-strip" aria-label="เจ็ดวันรอบวันนี้"></ol>
+      <div class="home-month" id="home-month" role="status"></div>
       <div class="seg home-mode" id="home-mode" role="group" aria-label="ภาพรวมวันนี้">
         <button type="button" data-v="training" aria-pressed="true">การฝึก</button>
-        <button type="button" data-v="nutrition" aria-pressed="false">โภชนาการ</button>
+        <button type="button" data-v="nutrition" aria-pressed="false">แคล</button>
       </div>
       <div class="home-number" id="home-value" aria-live="polite"></div>
       <p class="home-label" id="home-label"></p>
@@ -1123,10 +1126,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=65"></script>
-<script src="machines-config.js?v=65"></script>
-<script src="machine-recognition.js?v=65"></script>
-<script src="machine-photos.js?v=65"></script>
+<script src="en.js?v=69"></script>
+<script src="machines-config.js?v=69"></script>
+<script src="machine-recognition.js?v=69"></script>
+<script src="machine-photos.js?v=69"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1828,8 +1831,9 @@
       else inner = d.getDate();
       var label = d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "short" }) + ": " +
         (what.length ? what.join(", ") : a.today ? t("วันนี้ยังไม่ได้ซ้อม") : a.future ? t("ยังไม่ถึง") : t("ไม่มีกิจกรรม"));
-      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="dot ' + kind + '" aria-hidden="true">' + inner +
-        '</span><span class="wl" aria-hidden="true">' + (a.today ? t("วันนี้") : d.toLocaleDateString(LOCALE, { weekday: "short" })) + "</span></button></li>";
+      var mark = kind && kind !== "restday" ? '<span class="dot ' + kind + '" aria-hidden="true">' + inner + "</span>" : '<span class="dot ' + kind + '" aria-hidden="true"></span>';
+      var center = Math.abs((a.ts - new Date(now).setHours(0, 0, 0, 0)) / 864e5) < 1.5;
+      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(d.toLocaleDateString(LOCALE, { weekday: center ? "long" : "short" }).replace(/^วัน/, "")) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
     }).join("");
   }
 
@@ -1860,13 +1864,20 @@
       return { muscle: muscle, pct: pct, status: status };
     });
   }
+  function monthActiveDays(now) {
+    var d = new Date(now), y = d.getFullYear(), m = d.getMonth(), seen = {};
+    S.log.concat(S.runs).forEach(function (x) { var e = new Date(x.ts); if (e.getFullYear() === y && e.getMonth() === m) seen[e.getDate()] = 1; });
+    return Object.keys(seen).length;
+  }
   function renderTodayOverview() {
     if (!current) return;
     if (typeof renderStartAction === "function") renderStartAction();
     var totals = todayTotals(Date.now()), nutrition = homeMode === "nutrition";
-    $("home-value").textContent = nutrition ? totals.left.toLocaleString(LOCALE) : current.rest || current.restAdvice ? t("พัก") : DAYS[current.day].name;
-    $("home-label").textContent = nutrition ? t("kcal ที่เหลือ") : t("โปรแกรมวันนี้");
-    var metrics = nutrition ? [[totals.eaten, t("kcal ที่กิน")], [totals.protein, t("โปรตีน (g)")], [totals.proteinGoal, t("เป้าโปรตีน (g)")]] : [[totals.exercises, t("ท่า")], [totals.minutes ? "≈" + totals.minutes : "0", t("นาที")], [totals.sets, t("เซ็ต")]];
+    $("home-month").innerHTML = "<span>" + esc(t("ในเดือนนี้ออกกำลังกายไปแล้ว")) + "</span><b>" + monthActiveDays(Date.now()) + "</b><span>" + esc(t("วัน")) + "</span>";
+    var homeValue = nutrition ? totals.left.toLocaleString(LOCALE) : current.rest || current.restAdvice ? t("พัก") : DAYS[current.day].name, half = Math.ceil(homeValue.length / 2);
+    $("home-value").innerHTML = /^[A-Z]{3,}$/.test(homeValue) ? esc(homeValue.slice(0, half)) + '<span class="accent">' + esc(homeValue.slice(half)) + "</span>" : esc(homeValue);
+    $("home-label").textContent = nutrition ? t("kcal ที่เหลือ") : t("โปรแกรมของวันนี้");
+    var metrics = nutrition ? [[totals.eaten + " kcal", t("กินไปแล้ว")], [totals.protein + " g", t("โปรตีน")], [totals.proteinGoal + " g", t("เป้าโปรตีน")]] : [[totals.exercises + " " + t("ท่า"), t("จำนวนท่า")], [(totals.minutes ? "≈" + totals.minutes : "0") + " " + t("นาที"), t("เวลาฝึก")], [totals.sets + " " + t("เซ็ต"), t("จำนวนเซ็ต")]];
     $("home-metrics").innerHTML = metrics.map(function (metric) { return '<div class="home-metric"><strong>' + esc(metric[0]) + "</strong><span>" + esc(metric[1]) + "</span></div>"; }).join("");
     var labels = { ready: t("พร้อม"), recovering: t("กำลังฟื้น"), sore: t("เมื่อย"), pain: t("เจ็บ") };
     $("today-recovery").innerHTML = recoveryRows(Date.now()).map(function (row) {
