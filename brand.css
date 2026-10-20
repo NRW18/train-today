@@ -124,7 +124,7 @@ nav.tabs button[aria-current="page"] svg { background: var(--brand-yellow); colo
 nav.tabs .quick-plus { background: var(--quick-bg); color: var(--quick-ink); }
 
 /* titles that sit straight on the gradient */
-main > h2, main > section > h2:first-child, .view-title { color: var(--page-ink); }
+main > h2, .view-title { color: var(--page-ink); }
 .card h2, .card h3, .card .q { color: var(--ink); }
 .recovery-status.sore { color: var(--yellow); }
 
@@ -207,3 +207,19 @@ nav.tabs button[aria-current="page"] svg { background: none; color: var(--grad-t
 .home-week .wd:nth-child(5) { transform: translateY(8px) rotate(8deg); opacity: 1; }
 .home-week .wd:nth-child(6) { transform: translateY(34px) rotate(18deg); opacity: .45; }
 .home-week::after { left: -6%; right: -6%; top: 74px; height: 200px; border-top-width: 20px; border-radius: 50% 50% 0 0 / 70px 70px 0 0; -webkit-mask: linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%); mask: linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%); }
+
+/* ---------- other tabs: same language as Today ---------- */
+/* card titles get a short yellow brand bar */
+.card > h2, .card > header h2, .card > summary h2 { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; }
+.card > h2::before { content: ""; width: 6px; height: 1.1em; border-radius: 99px; background: var(--brand-yellow); flex: none; }
+/* stat tiles: light-blue like the Today tiles, bold value */
+.stat { background: var(--sunk); border-radius: 22px; }
+.stat .v { font-family: var(--head); font-weight: 800; }
+/* real machine photos sit on a light backing so black frames stay visible in dark mode */
+.machine-card { border-radius: 24px; }
+.machine-card img, .machine-card .machine-art, img.machine-example, #equip .machine-art { background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #EEF4FB 70%, #DCE7F3 100%); border-radius: 18px; padding: 6px; }
+.machine-card[aria-pressed="true"], .machine-card.on { box-shadow: inset 0 0 0 3px var(--brand-yellow); }
+/* camera-first buttons keep the yellow main action; quieter secondary chips */
+.mini, .chip { font-family: var(--head); }
+/* disclosure rows read as tappable */
+.card > details > summary, details.card > summary { font-family: var(--head); font-weight: 700; }
