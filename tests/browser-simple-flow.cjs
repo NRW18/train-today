@@ -10,6 +10,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const root = path.resolve(__dirname, '..');
+const photoScope={};require('node:vm').runInNewContext(fs.readFileSync(path.join(root,'machine-photos.js'),'utf8'),photoScope);
+const photoCount=Object.keys(photoScope.MACHINE_PHOTOS).length;
 const mime = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.svg':'image/svg+xml', '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -116,7 +118,7 @@ async function noOverflow(page, label) {
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await page.reload();
     await page.locator('[data-tab="gym"]').click();
-    assert.equal(await page.locator('#machine-grid .machine-example').count(), 15);
+    assert.equal(await page.locator('#machine-grid .machine-example').count(), photoCount);
     for (const group of await page.locator('#machine-grid details').all()) if(!await group.evaluate(el=>el.open))await group.locator('summary').click();
     for (const photo of await page.locator('#machine-grid .machine-example').all()) {
       await photo.scrollIntoViewIfNeeded();
@@ -124,9 +126,9 @@ async function noOverflow(page, label) {
       assert.ok(await photo.evaluate(image => image.naturalWidth > 0));
     }
     await page.locator('#machine-photo-credits').click();
-    assert.equal(await page.locator('.sheet .photo-credits li').count(), 15);
+    assert.equal(await page.locator('.sheet .photo-credits li').count(), photoCount);
     await page.keyboard.press('Escape');
-    console.log('PASS all 15 equipment cutout cards decoded and source/license credits remain accessible');
+    console.log('PASS all '+photoCount+' equipment cutout cards decoded and source/license credits remain accessible');
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-status').filter({ hasText:"Auto-recognition isn't ready yet" }).waitFor();
     assert.equal(await page.locator('#machine-grid button').count(), catalogCount);

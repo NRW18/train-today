@@ -292,3 +292,13 @@ just functional browser checks while iterating; final validation used the full s
 - Replaced the glute_kickback SVG with a verified CC BY 2.0 original by Dakil Auctioneers (Flickr 19075041473), showing an empty Cybex classic glute station. Built-in image editing removed the background, reflections and separate equipment; white-background QA confirmed one station. The transparent WebP is 46,246 bytes and is loaded on demand.
 - Node: 273/273 passed. Catalog browser: 16/16 viewport/theme/language combinations passed. Focused 375px light/dark checks decoded the new file, verified the SVG is hidden and no sideways overflow, and captured docs/screenshots/real-photos/glute-kickback-375-*.png.
 - Current coverage: 56/58. high_row and hip_thrust_machine remain unresolved SVG entries. No complete-coverage claim. Navigation icons, workout rules, saved-data format and Worker code are unchanged. No deployment or migration.
+
+
+## Pre-publication verification — 2026-10-21
+
+- Product checkout 2fad240 (v76), clean before verification. No product code changed during this audit. Fixed stale 15-photo assumptions in browser-simple-flow and browser-release: current metadata has 56 photograph entries. Upgrade checks now verify a decoded Smith-machine photo rather than its hidden SVG, preserve existing activation choices, and require newly introduced strength exercises to remain disabled; cardio stays outside strength planning.
+- Node: 273/273 passed. Full simple-flow browser suite: all 16 combinations (320/360/375/430, TH/EN, light/dark), all 56 photo cards and credit rows, six tabs, manual memory/reload, rest timer, controlled recognition/consent/failures, offline and no unexpected upload checks passed.
+- PWA upgrades passed from v57, v59, v60, v61 and current origin/main faa6319 (v69) to v76. Served assets match checkout hashes; photographed cards decode online/offline; existing training, food, weight, run, shoe and draft records are preserved. Tested with synthetic browser profiles, not personal data.
+- All 38 distinct current photograph files decode, include transparency and are <=60,000 bytes (1,844,366 bytes combined). Two unresolved catalog entries still intentionally use SVG: high_row and hip_thrust_machine. This remains a content gap, not a runtime failure.
+- GitHub checked: PR #26 open/draft, main faa6319; remote PR head was c91cd36 before publishing this audit. Local product had two additional commits. PR #27 is separate and depends on A; not included in this verification.
+- No blocking runtime regression found in these checks. Live Gemini inference, physical phones and a production rollout were not performed. No worker redeploy or database migration is required for PR A.
