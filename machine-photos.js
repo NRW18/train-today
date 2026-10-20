@@ -119,7 +119,7 @@ var MACHINE_PHOTOS = Object.freeze({
     "author": "Teemeah",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "AI-assisted equipment reconstruction and person/background removal from the credited reference; resized to transparent WebP. Equipment example, not an exact product photograph.",
+    "changes": "AI-assisted equipment reconstruction and person/background removal from the credited reference; resized to transparent WebP. Equipment example, not an exact product photograph. Additionally resized to at most 480px and WebP re-encoded for the 60 KB budget; alpha retained.",
     "presentation": "ai-edited-cutout"
   },
   "leg_extension": {

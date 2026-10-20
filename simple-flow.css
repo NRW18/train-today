@@ -26,6 +26,10 @@ summary { cursor: pointer; min-height: 44px; padding: 10px 2px; font-weight: 600
 #machine-gallery, #machine-prepare { min-height: 44px; width: auto; max-width: 100%; padding: 8px 12px; font-size: .88rem; margin-top: 8px; }
 #machine-settings { margin-top: 8px; }
 .machine-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+#machine-search { min-height: 48px; }
+.catalog-group { border-top: 1px solid var(--line); }
+.catalog-group > summary { min-height: 44px; padding: 12px 2px; }
+.catalog-group > summary .hint { margin-left: 8px; }
 .machine-card { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px; background: var(--sunk); border: 1px solid var(--line); border-radius: 14px; padding: 10px 8px; cursor: pointer; text-align: center; }
 .machine-card span { overflow-wrap: anywhere; font-size: .9rem; line-height: 1.5; }
 .machine-art { display: block; width: 100%; height: 90px; color: var(--blue); }
@@ -46,3 +50,7 @@ nav.tabs .quick-plus { display: flex; flex-direction: column; justify-content: c
 .quick-plus-icon { font-size: 1.25rem; line-height: 1; }
 #quick-plus-label { font-size: .7rem; font-weight: 600; line-height: 1.05; white-space: normal; max-width: 100%; text-align: center; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.machine-filters { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.machine-filters button { min-height:44px; padding:8px 12px; border:1px solid var(--line); }
+.machine-filters button[aria-pressed="true"] { background:var(--blue-bg); color:var(--blue); border-color:var(--blue); }

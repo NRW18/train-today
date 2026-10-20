@@ -9,15 +9,18 @@ vm.runInNewContext(readFileSync(new URL("../machine-photos.js", import.meta.url)
 const photos = scope.MACHINE_PHOTOS;
 const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
 
-test("every canonical exercise has a transparent equipment cutout, attribution and offline shell entry", () => {
+test("all original 15 canonical exercises retain their transparent cutouts, attribution and offline shell entries", () => {
   const base = html.slice(html.indexOf("var BASE_EX = ["), html.indexOf("var EN_NAME = {"));
-  const ids = [...base.matchAll(/id: "([^"]+)"/g)].map(match => match[1]);
+  const data={t:value=>value};vm.runInNewContext(base,data);
+  const ids = Array.from(data.BASE_EX.filter(ex=>!ex.optional),ex=>ex.id);
+  assert.equal(ids.length,15);
   assert.deepEqual(Object.keys(photos).sort(), ids.sort());
   assert.ok(sw.includes('"machine-photos.js"'));
   for (const photo of Object.values(photos)) {
     assert.match(photo.src, /^assets\/machines\/cutouts\/[a-z-]+\.webp$/);
     assert.ok(existsSync(new URL("../" + photo.src, import.meta.url)));
     const bytes = readFileSync(new URL("../" + photo.src, import.meta.url));
+    assert.ok(bytes.length <= 60000, photo.src + " must be at most 60 KB");
     assert.equal(bytes.toString("ascii", 0, 4), "RIFF");
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
     assert.equal(bytes.toString("ascii", 12, 16), "VP8X");
