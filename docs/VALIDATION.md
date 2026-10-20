@@ -302,3 +302,12 @@ just functional browser checks while iterating; final validation used the full s
 - All 38 distinct current photograph files decode, include transparency and are <=60,000 bytes (1,844,366 bytes combined). Two unresolved catalog entries still intentionally use SVG: high_row and hip_thrust_machine. This remains a content gap, not a runtime failure.
 - GitHub checked: PR #26 open/draft, main faa6319; remote PR head was c91cd36 before publishing this audit. Local product had two additional commits. PR #27 is separate and depends on A; not included in this verification.
 - No blocking runtime regression found in these checks. Live Gemini inference, physical phones and a production rollout were not performed. No worker redeploy or database migration is required for PR A.
+
+
+## Launcher icons across platforms — v77, 2026-10-21
+
+- Confirmed that root web icons already contained the new blue/yellow runner, but manifest icon URLs were unchanged and all five native Android mipmap resources still contained the old blue/silver artwork. Chrome 144 treats unchanged icons metadata/URLs as unchanged assets (https://developer.chrome.com/blog/improvements-to-web-app-updates).
+- Copied existing approved web artwork to four revised URLs for manifest, browser favicon and Apple touch icon; updated main and Stats page references. Kept manifest URL, start_url and scope stable. Manifest requests now refresh online with a release-scoped offline fallback; v77 refreshes app shell. Old icon files are retained for compatibility.
+- Resampled the existing icon-512.png into native Android 48/72/96/144/192px launcher resources. Verified exact pixel equality to the intended resamples and PNG decoding/dimensions. Existing Android workflow will build APK/AAB when these Android paths reach main. No signing configuration or app package ID change.
+- Node 276/276 passed, including manifest network-refresh, offline/HTTP-error fallback, revised icon URL/dimension/precache coverage and stable installation identity checks. Browser upgrade v76 -> v77 passed with current manifest/icons/brand files matching checkout hashes, photographs decoding, offline reopening and existing user data retained. No physical phone or iPhone launcher update was exercised.
+- Installed PWA icon/name identity updates may require the user to review/accept an app update; changing server assets cannot force a phone launcher to redraw instantly. Native APK icon changes require a newly built package. No user data clearing/uninstall action is part of this fix. No Worker or database migration.

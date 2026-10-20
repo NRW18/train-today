@@ -1,7 +1,7 @@
 // Offline support: keep the app shell cached so it opens in the gym without internet.
 // Bump VERSION whenever index.html changes so phones pick up the new version.
-var VERSION = "train-today-v76";
-var SHELL = ["machine-photos.js", "assets/machines/cutouts/cable-station.webp", "assets/machines/cutouts/calf-raise.webp", "assets/machines/cutouts/chest-press.webp", "assets/machines/cutouts/dumbbells.webp", "assets/machines/cutouts/exercise-mat.webp", "assets/machines/cutouts/lat-pulldown.webp", "assets/machines/cutouts/leg-extension.webp", "assets/machines/cutouts/leg-press.webp", "assets/machines/cutouts/pec-deck.webp", "assets/machines/cutouts/seated-leg-curl.webp", "assets/machines/cutouts/seated-row.webp", "assets/machines/cutouts/shoulder-press.webp", "./", "index.html", "en.js", "theme.css", "simple-flow.css", "brand.css", "assets/brand/wordmark.png", "machines-config.js", "machine-recognition.js", "assets/machines.svg", "manifest.json", "cover.jpg", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png", "assets/onboarding/athlete-male.webp", "assets/onboarding/athlete-female.webp", "assets/onboarding/runner.webp", "assets/onboarding/runner-mark.png"];
+var VERSION = "train-today-v77";
+var SHELL = ["machine-photos.js", "assets/machines/cutouts/cable-station.webp", "assets/machines/cutouts/calf-raise.webp", "assets/machines/cutouts/chest-press.webp", "assets/machines/cutouts/dumbbells.webp", "assets/machines/cutouts/exercise-mat.webp", "assets/machines/cutouts/lat-pulldown.webp", "assets/machines/cutouts/leg-extension.webp", "assets/machines/cutouts/leg-press.webp", "assets/machines/cutouts/pec-deck.webp", "assets/machines/cutouts/seated-leg-curl.webp", "assets/machines/cutouts/seated-row.webp", "assets/machines/cutouts/shoulder-press.webp", "./", "index.html", "en.js", "theme.css", "simple-flow.css", "brand.css", "assets/brand/wordmark.png", "machines-config.js", "machine-recognition.js", "assets/machines.svg", "manifest.json", "cover.jpg", "icon-192-v2.png", "icon-512-v2.png", "icon-maskable-512-v2.png", "apple-touch-icon-v2.png", "assets/onboarding/athlete-male.webp", "assets/onboarding/athlete-female.webp", "assets/onboarding/runner.webp", "assets/onboarding/runner-mark.png"];
 
 // A read-only release probe, so update checks verify the worker controlling this page.
 self.addEventListener("message", function (e) {
@@ -27,6 +27,18 @@ self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
   var url = new URL(req.url);
+
+  // Installed apps must see the current manifest and revised icon URLs online.
+  // Keep its stable URL/identity; retain the current release copy for offline use.
+  if (url.origin === location.origin && /\/manifest\.json$/.test(url.pathname)) {
+    e.respondWith(fetch(req).then(function (res) {
+      if (!res.ok) return caches.open(VERSION).then(function (cache) { return cache.match(req).then(function (hit) { return hit || res; }); });
+      var copy = res.clone();
+      e.waitUntil(caches.open(VERSION).then(function (cache) { return cache.put(req, copy); }));
+      return res;
+    }).catch(function () { return caches.open(VERSION).then(function (cache) { return cache.match(req); }); }));
+    return;
+  }
 
   // Optional models: refresh online, use a successfully cached copy offline.
   // Missing model files are never required during service worker installation.
