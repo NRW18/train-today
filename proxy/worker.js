@@ -28,7 +28,7 @@ function cors(origin) {
   return {
     "Access-Control-Allow-Origin": ok ? origin : ALLOWED_ORIGINS[0],
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Stats-Key",
+    "Access-Control-Allow-Headers": "Content-Type, X-Stats-Key, X-Stats-Id",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
@@ -94,7 +94,7 @@ const EVENTS = [
   "open", "install", "today_mode_toggle", "today_section_toggle", "today_day_open", "quick_add_open",
   "tab_today", "tab_gym", "tab_run", "tab_food", "tab_history", "tab_settings",
   "checkin", "set_done", "workout_done", "ex_skip", "ex_add",
-  "howto_open", "video_open", "scan_machine", "gym_group_toggle",
+  "howto_open", "video_open", "scan_machine", "gym_group_toggle", "machine_photo_request",
   "food_photo", "food_manual", "food_quick",
   "run_log", "run_gps", "shoe_finder", "shoe_set",
   "weight_log", "goal_set", "ai_summary", "ai_explain",
@@ -108,7 +108,11 @@ const PLATFORMS = ["android", "ios", "desktop", "other"];
 const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS ev (id INTEGER PRIMARY KEY, day TEXT NOT NULL, ts INTEGER NOT NULL, anon TEXT NOT NULL, ev TEXT NOT NULL, lang TEXT, plat TEXT, inst INTEGER, ver TEXT)",
   "CREATE INDEX IF NOT EXISTS ev_day ON ev(day)",
-  "CREATE INDEX IF NOT EXISTS ev_anon_day ON ev(anon, day)"
+  "CREATE INDEX IF NOT EXISTS ev_anon_day ON ev(anon, day)",
+  "CREATE TABLE IF NOT EXISTS machine_requests (name TEXT NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL DEFAULT 0 CHECK(count >= 0), PRIMARY KEY(name, day))",
+  "CREATE INDEX IF NOT EXISTS machine_requests_day ON machine_requests(day)",
+  "CREATE TABLE IF NOT EXISTS machine_request_limits (anon TEXT NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL DEFAULT 0 CHECK(count >= 0), PRIMARY KEY(anon, day))",
+  "CREATE INDEX IF NOT EXISTS machine_request_limits_day ON machine_request_limits(day)"
 ];
 // The table is created on first use, once per worker instance (no separate setup step).
 const schemaReady = new WeakMap();
@@ -156,7 +160,8 @@ async function handleEvents(request, env, origin) {
   try {
     await ensureSchema(env.DB);
     const seen = await env.DB.prepare("SELECT COUNT(*) AS n FROM ev WHERE anon = ? AND day = ?").bind(rows[0].anon, bkkDay(now)).first();
-    const room = PER_DEVICE_DAILY - ((seen && seen.n) || 0);
+    const requests = await env.DB.prepare("SELECT count AS n FROM machine_request_limits WHERE anon = ? AND day = ?").bind(rows[0].anon, bkkDay(now)).first();
+    const room = PER_DEVICE_DAILY - ((seen && seen.n) || 0) - ((requests && requests.n) || 0);
     if (room > 0) {
       const ins = env.DB.prepare("INSERT INTO ev (day, ts, anon, ev, lang, plat, inst, ver) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
       await env.DB.batch(rows.slice(0, room).map((r) => ins.bind(r.day, r.ts, r.anon, r.ev, r.lang, r.plat, r.inst, r.ver)));
@@ -165,6 +170,46 @@ async function handleEvents(request, env, origin) {
     console.log("stats write failed:", e && e.message);
   }
   return new Response(null, { status: 204, headers: cors(origin) });
+}
+
+// The body contains only an English machine name. The existing stats anon ID is
+// carried separately for the same 400/day device budget; no IP is retained.
+function cleanMachineRequest(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).length !== 1 || !Object.prototype.hasOwnProperty.call(body, "name")) return null;
+  const name = body.name;
+  return typeof name === "string" && name.length <= 60 && name === name.trim().toLowerCase() && /^[a-z0-9][a-z0-9 -]*$/.test(name) && /[a-z]/.test(name) ? name : null;
+}
+async function handleMachineRequest(request, env, origin) {
+  if (!env.DB) return json({ error: "not_configured" }, 503, origin);
+  const anon = request.headers.get("X-Stats-Id") || "";
+  if (!/^[A-Za-z0-9-]{8,40}$/.test(anon)) return json({ error: "bad_request" }, 400, origin);
+  let name;
+  try {
+    // Bound the actual stream, including chunked bodies with no Content-Length.
+    const reader = request.body && request.body.getReader();
+    if (!reader) return json({ error: "bad_request" }, 400, origin);
+    let size = 0, raw = ""; const decoder = new TextDecoder();
+    while (true) { const chunk = await reader.read(); if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > 160) { await reader.cancel(); return json({ error: "bad_request" }, 400, origin); }
+      raw += decoder.decode(chunk.value, { stream: true });
+    }
+    name = cleanMachineRequest(JSON.parse(raw + decoder.decode()));
+  } catch { return json({ error: "bad_request" }, 400, origin); }
+  if (!name) return json({ error: "bad_request" }, 400, origin);
+  try {
+    await ensureSchema(env.DB);
+    const day = bkkDay(Date.now()), from = bkkDay(Date.now() - 29 * 864e5);
+    // D1 batch is transactional. The aggregate increments only when the budget
+    // statement changed a row, including at the boundary under concurrent calls.
+    const results = await env.DB.batch([
+      env.DB.prepare("DELETE FROM machine_request_limits WHERE day < ?").bind(from),
+      env.DB.prepare("INSERT INTO machine_request_limits (anon, day, count) SELECT ?, ?, 1 WHERE (SELECT COUNT(*) FROM ev WHERE anon = ? AND day = ?) < ? ON CONFLICT(anon, day) DO UPDATE SET count = count + 1 WHERE count + (SELECT COUNT(*) FROM ev WHERE anon = ? AND day = ?) < ?").bind(anon, day, anon, day, PER_DEVICE_DAILY, anon, day, PER_DEVICE_DAILY),
+      env.DB.prepare("INSERT INTO machine_requests (name, day, count) SELECT ?, ?, 1 WHERE changes() > 0 ON CONFLICT(name, day) DO UPDATE SET count = count + 1").bind(name, day)
+    ]);
+    if (!results[2] || !results[2].meta || results[2].meta.changes !== 1) return json({ error: "limit" }, 429, origin);
+    return new Response(null, { status: 204, headers: cors(origin) });
+  } catch { return json({ error: "db" }, 503, origin); }
 }
 
 function sameKey(a, b) {
@@ -193,11 +238,13 @@ async function handleStats(request, env, origin) {
       q("SELECT COUNT(DISTINCT anon) AS devices FROM ev WHERE day >= ? AND inst = 1", from),
       q("SELECT n AS days, COUNT(*) AS devices FROM (SELECT anon, COUNT(DISTINCT day) AS n FROM ev WHERE day >= ? GROUP BY anon) GROUP BY n ORDER BY n", from),
       q("SELECT d AS day, COUNT(*) AS devices FROM (SELECT anon, MIN(day) AS d FROM ev GROUP BY anon) WHERE d >= ? GROUP BY d ORDER BY d", from),
-      q("SELECT COUNT(DISTINCT anon) AS devices, COUNT(*) AS events, MIN(day) AS first FROM ev")
+      q("SELECT COUNT(DISTINCT anon) AS devices, COUNT(*) AS events, MIN(day) AS first FROM ev"),
+      q("SELECT name, SUM(count) AS count FROM machine_requests WHERE day >= ? AND day <= ? GROUP BY name ORDER BY count DESC, name ASC LIMIT 30", bkkDay(now - 29 * 864e5), bkkDay(now))
     ]);
     const rows = (i) => (r[i] && r[i].results) || [];
     return json({
       days, from, today: bkkDay(now),
+      machineRequests: rows(9), machineRequestsDays: 30,
       daily: rows(0), features: rows(1), platforms: rows(2), langs: rows(3),
       devices: (rows(4)[0] || {}).devices || 0,
       installed: (rows(5)[0] || {}).devices || 0,
@@ -223,6 +270,7 @@ export default {
     if (request.method !== "POST") return json({ error: "method" }, 405, origin);
     if (!ALLOWED_ORIGINS.includes(origin)) return json({ error: "origin" }, 403, origin);
     if (path === "/e") return handleEvents(request, env, origin);
+    if (path === "/machine-request") return handleMachineRequest(request, env, origin);
     if (!env.GEMINI_KEY) return json({ error: "not_configured" }, 500, origin);
 
     let body;

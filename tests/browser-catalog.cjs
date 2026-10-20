@@ -23,13 +23,13 @@ const server=http.createServer((req,res)=>{try{
       const page=await context.newPage(),errors=[],posts=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.method()==='POST')posts.push(r.url());});
       await page.goto('http://127.0.0.1:'+server.address().port+'/train-today/');
       await page.locator('#start-workout').waitFor();await page.locator('[data-tab="gym"]').click();
-      assert.equal(await page.locator('#machine-grid button').count(),catalog.length);
+      assert.equal(await page.locator('#machine-grid [data-machine-pick]').count(),catalog.length);
       assert.ok(await page.locator('#machine-search').evaluate(el=>el.getBoundingClientRect().height>=44));
       const search=page.locator('#machine-search');await search.focus();
       assert.equal(await search.evaluate(el=>getComputedStyle(el).outlineStyle!=='none'||getComputedStyle(el.closest('label')).boxShadow!=='none'),true,'search has a visible focus indicator');
       const capture=[320,375].includes(width)&&((theme==='light'&&language==='th')||(theme==='dark'&&language==='en'));
       if(capture){await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(out,`gym-${width}-${language}-${theme}.png`)});}
-      for(const query of ['สมิธ','SMITH']){await search.fill(query);assert.equal(await page.locator('#machine-grid button').count(),2);assert.equal(await page.locator('#machine-grid button:visible').count(),2);}
+      for(const query of ['สมิธ','SMITH']){await search.fill(query);assert.equal(await page.locator('#machine-grid [data-machine-pick]').count(),2);assert.equal(await page.locator('#machine-grid [data-machine-pick]:visible').count(),2);}
       if(capture){await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(out,`search-${width}-${language}-${theme}.png`)});}
       await search.fill('this machine does not exist');assert.equal(await page.locator('#machine-grid [role="status"]').count(),1);
       assert.equal(await page.locator('#machine-camera').isDisabled(),false);
