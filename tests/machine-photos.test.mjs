@@ -37,7 +37,7 @@ test("equipment references cover canonical IDs with licensed, compact local WebP
 });
 
 test("cardio has real photographs and shared equipment keeps source attribution", () => {
-  for(const id of ["treadmill","stationary_bike","elliptical","stair_climber","rower","incline_chest_press","smith_bench_press","cable_fly","lying_leg_curl","biceps_curl_machine","chest_supported_row","triceps_extension_machine","lateral_raise_machine","hip_adduction","leg_raise_station","preacher_curl","chest_press","shoulder_press","lat_pulldown","leg_curl","triceps_dip"])
+  for(const id of ["treadmill","stationary_bike","elliptical","stair_climber","rower","incline_chest_press","smith_bench_press","cable_fly","lying_leg_curl","biceps_curl_machine","chest_supported_row","triceps_extension_machine","lateral_raise_machine","hip_adduction","leg_raise_station","preacher_curl","chest_press","shoulder_press","lat_pulldown","leg_curl","triceps_dip","glute_kickback"])
     assert.equal(photos[id].presentation,"photograph",id+" uses a photograph");
   assert.equal(photos.pec_deck.src,photos.rear_delt.src);
   assert.equal(photos.db_curl.src,photos.lateral_raise.src);

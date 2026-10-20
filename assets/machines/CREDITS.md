@@ -1,3 +1,9 @@
+# Glute kickback photograph — v76
+
+`glute_kickback`: [transparent cutout](cutouts/glute-kickback-photo.webp), from [Glute by Dakil Auctioneers](https://www.flickr.com/photos/29694550@N06/19075041473/) ([CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)). AI-assisted background extraction removes the room, mirrors, people/reflections and separate machines, preserving one photographed Cybex glute station. Resized to WebP. Equipment reference, not an exercise demonstration.
+
+---
+
 # Additional photographic cutouts — v75
 
 The following current entries replace nine SVGs and the four legacy AI reconstructions. Each is derived from an actual empty-equipment photograph. AI-assisted background removal preserves the original crop; these are equipment references, not technique demonstrations. Existing source watermarks are retained. Earlier provenance sections remain historical records for superseded files.

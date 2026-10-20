@@ -285,3 +285,10 @@ just functional browser checks while iterating; final validation used the full s
 - Node suite: 273/273 passed. Browser catalog: 16 combinations of 320/360/375/430 px, TH/EN, light/dark passed, including decoding all referenced photographs, guides, bilingual search, saved selections and no horizontal overflow.
 - Remaining SVGs: high_row, hip_thrust_machine, glute_kickback. Searches of Commons, Flickr open-license results and free-image indexes did not establish exact, person-free, openly licensed photographic sources for these three. No manufacturer/shop image or unrelated station was substituted. This release does not claim complete replacement of all 58 entries.
 - Bottom-navigation icons, workout algorithms, saved-data format and proxy/Worker code are unchanged. No merge, deployment or migration was performed.
+
+
+## Glute kickback photo — v76, 2026-10-21
+
+- Replaced the glute_kickback SVG with a verified CC BY 2.0 original by Dakil Auctioneers (Flickr 19075041473), showing an empty Cybex classic glute station. Built-in image editing removed the background, reflections and separate equipment; white-background QA confirmed one station. The transparent WebP is 46,246 bytes and is loaded on demand.
+- Node: 273/273 passed. Catalog browser: 16/16 viewport/theme/language combinations passed. Focused 375px light/dark checks decoded the new file, verified the SVG is hidden and no sideways overflow, and captured docs/screenshots/real-photos/glute-kickback-375-*.png.
+- Current coverage: 56/58. high_row and hip_thrust_machine remain unresolved SVG entries. No complete-coverage claim. Navigation icons, workout rules, saved-data format and Worker code are unchanged. No deployment or migration.

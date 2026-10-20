@@ -660,5 +660,17 @@ var MACHINE_PHOTOS = Object.freeze({
     "presentation": "photograph",
     "backgroundRemoved": true,
     "singleEquipment": true
+  },
+  "glute_kickback": {
+    "src": "assets/machines/cutouts/glute-kickback-photo.webp",
+    "source": "https://www.flickr.com/photos/29694550@N06/19075041473/",
+    "title": "Glute",
+    "author": "Dakil Auctioneers",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "changes": "AI-assisted background extraction of one photographed Cybex classic glute kickback machine; no AI reconstruction of equipment requested. Surrounding machines, room and reflections removed. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   }
 });

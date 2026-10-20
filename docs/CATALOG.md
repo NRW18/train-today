@@ -4,7 +4,7 @@ Built from latest main faa6319, reusing ab1da45 without merging other PRs. Origi
 
 Search works in TH/EN in either language. Filter chips: All / Cardio / Upper body / Lower body / Free weights. Exact validated AI names resolve to canonical IDs before custom exercise creation.
 
-Photo status is recorded below. New photos must be openly licensed, person-free, WebP <= 60,000 bytes, with source/title/author/license/changes. Current coverage is 55 photographs; the three unresolved entries use original currentColor SVGs. No generated picture is claimed to be a real photo. New image files are fetched lazily, never added to the shell precache.
+Photo status is recorded below. New photos must be openly licensed, person-free, WebP <= 60,000 bytes, with source/title/author/license/changes. Current coverage is 56 photographs; the two unresolved entries use original currentColor SVGs. No generated picture is claimed to be a real photo. New image files are fetched lazily, never added to the shell precache.
 
 | ID | TH | EN | Day | Status |
 |---|---|---|---|---|
@@ -53,7 +53,7 @@ Photo status is recorded below. New photos must be openly licensed, person-free,
 | hip_thrust_machine | ฮิปทรัสต์ (เครื่อง) | Hip thrust machine | legs | photo missing — SVG |
 | hip_abduction | กางสะโพก (เครื่อง) | Hip abduction machine | legs | one-equipment photographic cutout — see credits |
 | hip_adduction | หุบสะโพก (เครื่อง) | Hip adduction machine | legs | one-equipment photographic cutout — see credits |
-| glute_kickback | เตะขาด้านหลัง (เครื่อง) | Glute kickback machine | legs | photo missing — SVG |
+| glute_kickback | เตะขาด้านหลัง (เครื่อง) | Glute kickback machine | legs | one-equipment photographic cutout — see credits |
 | seated_calf_raise | ยกน่อง (เครื่องนั่ง) | Seated calf raise machine | legs | one-equipment photographic cutout — see credits |
 | back_extension | แบ็กเอ็กซ์เทนชัน (ม้านั่งเอียง) | 45-degree back extension bench | pull | one-equipment photographic cutout — see credits |
 | cable_crunch | ครันช์หน้าท้อง (เคเบิล) | Kneeling cable crunch | pull | one-equipment photographic cutout — see credits |
@@ -79,6 +79,10 @@ Following the request to replace line art with real equipment: 38 entries now us
 
 The current cutouts include assisted pull-up/dip, hack squat and EZ-bar curl. Current sources and changes are at the top of assets/machines/CREDITS.md. Historical source tables below that section do not describe the displayed files. 12 SVG entries and four explicitly labelled legacy AI examples remain unresolved; this is not complete real-photo coverage of all 58 entries. No substitute machine or unlicensed manufacturer image is used to disguise a missing photograph. Bottom-navigation icons and workout rules are unchanged.
 
-## Current photo coverage — v75, 2026-10-21
+## Historical photo coverage — v75, 2026-10-21
 
 55 of 58 canonical entries now use actual equipment photographs with transparent backgrounds and one selected equipment item per image. Four legacy AI reconstructions have been replaced. Three entries still have SVG artwork because an exact person-free openly licensed source has not been verified: high_row, hip_thrust_machine, glute_kickback. This is an incomplete photo replacement, not 58/58 coverage. Bottom-navigation icons are unchanged.
+
+## Current photo coverage — v76, 2026-10-21
+
+56/58 canonical entries use actual-photo cutouts. Glute kickback now uses a verified CC BY 2.0 photo of a Cybex classic glute machine. High row and Hip thrust machine still use SVG artwork; exact empty-equipment open-license sources remain unverified. This is not complete real-photo coverage. Bottom navigation is unchanged.
