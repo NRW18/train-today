@@ -248,3 +248,10 @@ just functional browser checks while iterating; final validation used the full s
 - Existing 15 AI-edited example entries/source/author/license retained. All cutouts <=60,000 bytes; leg-press re-encoded with transparency retained. 43 additions explicitly photo missing: SVG fallback. Wikimedia kettlebell download returned 429; no image was bundled without verified provenance. New images are not added to SW shell.
 - Node suite: 273 passing (before final compatibility assertion); final count recorded in PR. Catalog browser: 16/16 size/theme/language combinations, every new guide/SVG bounding box, filters, two-language search, no results, persistence, no upload, focus and overflow. Existing browser-simple-flow: 16/16, six tabs, photos/credits, offline/manual memory, controlled local/remote flows and rest timer passed. Updated only the old above-fold Start assertion to check reachability in the main brand layout.
 - Screenshots: docs/screenshots/catalog (320/375 TH light and EN dark); manually inspected. No physical phones or live Gemini inference tested. No proxy/Worker/Android change; no deployment.
+
+## Set progress spacing follow-up (v72)
+
+- CSS only: 24px top padding, 8px gaps, uniformly sized grid cells that wrap, 12px before the set-count text, and unchanged equal horizontal card padding. Existing exercise grouping remains in the DOM for progress updates.
+- Browser geometry checks passed all 16 combinations: 320/360/375/430px × TH/EN × light/dark, using an isolated 12-set workout. Verified top/gap/text spacing, wrapping, equal insets, 20px cell height, no horizontal overflow, and unchanged tick/progress/rest behavior.
+- Node suite: 273/273 passed. No application functions, translations, user data or Worker code changed. HTML asset tags and service-worker version bumped together to v72 for cache refresh.
+- Review crops: docs/screenshots/set-spacing. Local PR A preview remains on port 8026. No merge or deployment.
