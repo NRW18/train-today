@@ -23,34 +23,27 @@ test("equipment references cover canonical IDs with licensed, compact local WebP
     assert.ok(bytes.length <= 60000, photo.src + " must be at most 60 KB");
     assert.equal(bytes.toString("ascii", 0, 4), "RIFF");
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
-    assert.match(photo.presentation,/^(photograph|ai-edited-cutout)$/);
-    assert.match(photo.source, /^https:\/\/(?:commons\.wikimedia\.org\/wiki\/File:|www\.flickr\.com\/photos\/ortus_equipment\/\d+\/)/);
+    assert.equal(photo.presentation,"photograph",id+" uses an actual photographic source");
+    assert.match(photo.source, /^https:\/\/(?:commons\.wikimedia\.org\/wiki\/File:|www\.flickr\.com\/photos\/[a-zA-Z0-9@_-]+\/\d+\/)/);
     assert.ok(photo.author && photo.title && photo.license && photo.changes);
     assert.match(photo.licenseUrl, /^https:\/\/(creativecommons\.org|commons\.wikimedia\.org)\//);
-    if(photo.presentation === "ai-edited-cutout") {
-      assert.equal(bytes.toString("ascii", 12, 16), "VP8X");
-      assert.ok(bytes[20] & 0x10, photo.src + " retains its legacy transparency");
-      assert.match(photo.changes,/AI-/);
-      assert.ok(sw.includes(JSON.stringify(photo.src)),photo.src+" remains in the offline shell");
-    } else {
-      assert.match(photo.changes,/no AI reconstruction/);
-      assert.equal(photo.backgroundRemoved,true, id+" has its surroundings removed");
-      assert.equal(photo.singleEquipment,true, id+" is one selected equipment item");
-      assert.equal(bytes.toString("ascii", 12, 16),"VP8X");
-      assert.ok(bytes[20] & 0x10,photo.src+" retains alpha transparency");
-      assert.equal(sw.includes(JSON.stringify(photo.src)),false,photo.src+" loads on demand, not at install");
-    }
+    assert.match(photo.changes,/AI-assisted background extraction/);
+    assert.equal(photo.backgroundRemoved,true,id+" has its surroundings removed");
+    assert.equal(photo.singleEquipment,true,id+" is one selected equipment item");
+    assert.equal(bytes.toString("ascii",12,16),"VP8X");
+    assert.ok(bytes[20] & 0x10,photo.src+" retains alpha transparency");
+    assert.equal(sw.includes(JSON.stringify(photo.src)),false,photo.src+" loads on demand, not at install");
   }
 });
 
 test("cardio has real photographs and shared equipment keeps source attribution", () => {
-  for(const id of ["treadmill","stationary_bike","elliptical","stair_climber","rower","incline_chest_press","smith_bench_press","cable_fly"])
+  for(const id of ["treadmill","stationary_bike","elliptical","stair_climber","rower","incline_chest_press","smith_bench_press","cable_fly","lying_leg_curl","biceps_curl_machine","chest_supported_row","triceps_extension_machine","lateral_raise_machine","hip_adduction","leg_raise_station","preacher_curl","chest_press","shoulder_press","lat_pulldown","leg_curl","triceps_dip"])
     assert.equal(photos[id].presentation,"photograph",id+" uses a photograph");
   assert.equal(photos.pec_deck.src,photos.rear_delt.src);
   assert.equal(photos.db_curl.src,photos.lateral_raise.src);
   assert.equal(photos.pushup.src,photos.plank.src);
   assert.equal(photos.smith_squat.src,photos.smith_bench_press.src);
-  assert.match(photos.shoulder_press.changes,/upright overhead/);
+  assert.equal(Object.values(photos).some(photo=>photo.presentation!=="photograph"),false,"no legacy AI reconstruction is displayed as machine artwork");
 });
 
 test("machineArt never reads personal photos, with or without app artwork", () => {

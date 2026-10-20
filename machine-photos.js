@@ -1,25 +1,29 @@
-// Equipment references: photographic cutouts and explicitly labelled legacy AI examples.
-// Source credits and derivative licenses: assets/machines/CREDITS.md.
+// Real equipment photographs with AI-assisted background extraction.
+// Source credits, actual changes and derivative licenses: assets/machines/CREDITS.md.
 var MACHINE_PHOTOS = Object.freeze({
   "chest_press": {
-    "src": "assets/machines/cutouts/chest-press.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Chest_Press.webm",
-    "title": "Muscle Strengthening at the Gym - Chest Press.webm",
-    "author": "Centers for Disease Control and Prevention",
-    "license": "Public domain",
-    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
-    "changes": "AI-assisted equipment reconstruction and person/background removal from the credited reference; resized to transparent WebP. Equipment example, not an exact product photograph.",
-    "presentation": "ai-edited-cutout"
+    "source": "https://www.flickr.com/photos/127311295@N06/27120021587/",
+    "title": "MT3105 Seated Chest Press 15 from Haswell commercial gym equipment",
+    "author": "haswell fitness",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "assets/machines/cutouts/chest-press-real-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "shoulder_press": {
-    "src": "assets/machines/cutouts/shoulder-press.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Shoulder_Press.jpg",
-    "title": "Shoulder Press.jpg",
-    "author": "Aliva Sahoo",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "AI-generated upright overhead shoulder press using the credited image as a materials reference; the source depicts an incline press. Transparent WebP; not an exact product photograph.",
-    "presentation": "ai-edited-cutout"
+    "source": "https://www.flickr.com/photos/127311295@N06/27120022627/",
+    "title": "MT3103 Seated Shoulder Press 11 from Haswell commercial gym equipment",
+    "author": "haswell fitness",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "assets/machines/cutouts/shoulder-press-real-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "pec_deck": {
     "source": "https://commons.wikimedia.org/wiki/File:Pec_deck_Fly.jpg",
@@ -82,14 +86,16 @@ var MACHINE_PHOTOS = Object.freeze({
     "singleEquipment": true
   },
   "lat_pulldown": {
-    "src": "assets/machines/cutouts/lat-pulldown.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Lat_Pull_down_Machine.jpg",
-    "title": "Lat Pull down Machine.jpg",
-    "author": "SAgbley",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "AI-assisted equipment reconstruction and person/background removal from the credited reference; resized to transparent WebP. Equipment example, not an exact product photograph.",
-    "presentation": "ai-edited-cutout"
+    "source": "https://www.flickr.com/photos/29694550@N06/19695965155/",
+    "title": "Lats-Low Pull",
+    "author": "Dakil Auctioneers",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "src": "assets/machines/cutouts/lat-pulldown-real-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "seated_row": {
     "source": "https://commons.wikimedia.org/wiki/File:Multifunctional_cable_and_row_machines_in_a_gym.jpg",
@@ -152,14 +158,16 @@ var MACHINE_PHOTOS = Object.freeze({
     "singleEquipment": true
   },
   "leg_curl": {
-    "src": "assets/machines/cutouts/seated-leg-curl.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Muscle_Strengthening_at_the_Gym_-_Leg_Curl.webm",
-    "title": "Muscle Strengthening at the Gym - Leg Curl.webm",
-    "author": "Centers for Disease Control and Prevention",
-    "license": "Public domain",
-    "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-HHS-CDC",
-    "changes": "AI-assisted equipment reconstruction and person/background removal from the credited reference; resized to transparent WebP. Equipment example, not an exact product photograph.",
-    "presentation": "ai-edited-cutout"
+    "source": "https://www.flickr.com/photos/29694550@N06/19507913538/",
+    "title": "Weight Seated Leg Curl",
+    "author": "Dakil Auctioneers",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "src": "assets/machines/cutouts/seated-leg-curl-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "calf_raise": {
     "source": "https://commons.wikimedia.org/wiki/File:Seated_calf_machine.jpg",
@@ -541,6 +549,114 @@ var MACHINE_PHOTOS = Object.freeze({
     "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
     "src": "assets/machines/cutouts/ez-bar-single-single-photo.webp",
     "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "lying_leg_curl": {
+    "source": "https://www.flickr.com/photos/127311295@N06/41944752092/",
+    "title": "MT3205 Prone Leg Curl 43 from Haswell commercial gym equipment",
+    "author": "haswell fitness",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "assets/machines/cutouts/lying-leg-curl-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "biceps_curl_machine": {
+    "source": "https://commons.wikimedia.org/wiki/File:Bicep_curl_machine.jpg",
+    "title": "Bicep curl machine.jpg",
+    "author": "Aliva Sahoo",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "src": "assets/machines/cutouts/biceps-curl-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "chest_supported_row": {
+    "source": "https://commons.wikimedia.org/wiki/File:Back_Machine.jpg",
+    "title": "Back Machine.jpg",
+    "author": "Aliva Sahoo",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "src": "assets/machines/cutouts/chest-supported-row-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "triceps_extension_machine": {
+    "source": "https://www.flickr.com/photos/29694550@N06/19688820732/",
+    "title": "Tricep Extensiions",
+    "author": "Dakil Auctioneers",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "src": "assets/machines/cutouts/triceps-extension-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "lateral_raise_machine": {
+    "source": "https://www.flickr.com/photos/127311295@N06/41270477174/",
+    "title": "MT3106 Seated Lat Raise 16 from Haswell commercial gym equipment",
+    "author": "haswell fitness",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "assets/machines/cutouts/lateral-raise-machine-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "hip_adduction": {
+    "source": "https://www.flickr.com/photos/127311295@N06/28117744338/",
+    "title": "MT3204 Seated Hip Adduction inner thigh 35 from Haswell commercial gym equipment",
+    "author": "haswell fitness",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "assets/machines/cutouts/hip-adduction-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "leg_raise_station": {
+    "source": "https://www.flickr.com/photos/21569074@N00/3060550012/",
+    "title": "Chin/Dip Station converted for using PowerRings",
+    "author": "Danny Thompson",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "src": "assets/machines/cutouts/knee-raise-station-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration. Original chin/dip station has forearm supports and attached rings; lower frame remains outside the original crop.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "preacher_curl": {
+    "source": "https://www.flickr.com/photos/22974618@N00/50720512488/",
+    "title": "Home gym",
+    "author": "Sergiy Galyonkin",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "src": "assets/machines/cutouts/preacher-bench-real-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed equipment item; no AI reconstruction of equipment requested. Original hardware crop and existing source watermark retained where present. Resized to transparent WebP. Equipment reference, not an exercise demonstration. Bench with preacher attachment; the image does not demonstrate free EZ-bar technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "triceps_dip": {
+    "src": "assets/machines/cutouts/triceps-dip-photo.webp",
+    "source": "https://www.flickr.com/photos/127311295@N06/40834931105/",
+    "title": "MT3101-Seated-triceps-press-01",
+    "author": "haswell fitness",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "changes": "AI-assisted background extraction of one photographed seated triceps press/dip machine; no AI reconstruction of equipment requested. Surrounding gym, separate machines and bottle removed. Existing source watermark retained. Resized to transparent WebP; equipment reference, not an exercise demonstration.",
     "presentation": "photograph",
     "backgroundRemoved": true,
     "singleEquipment": true

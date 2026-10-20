@@ -275,3 +275,13 @@ just functional browser checks while iterating; final validation used the full s
 - Node: 273/273 passed. Browser catalog: all 16 combinations of 320/360/375/430 px, light/dark, TH/EN passed. Search, guides, saved selections, no uploads, no sideways overflow and image decoding remain covered.
 - Bottom-navigation markup, styles and icons are unchanged; index.html changes only cache query versions. sw.js is v74; the 24 cutouts are lazy-loaded, not added to the shell precache. No worker, migration, workout algorithm or saved-data change.
 - Remaining gap: 12 SVG entries and four legacy AI examples. This check does not claim that the entire 58-entry catalog now has real photographs.
+
+
+## Additional photographic cutouts — v75, 2026-10-21
+
+- Replaced nine remaining SVG entries and all four legacy AI examples with 13 actual-photo cutouts. Current coverage is 55/58 canonical entries, using 37 distinct transparent assets. Every displayed photo entry has source, author, license and editing details. Flickr CC BY/CC BY-SA originals and Wikimedia Commons originals are used; visible source watermarks and original hardware crop are retained.
+- White-background visual QA: one selected equipment item per cutout, empty equipment, no surrounding machines. These are equipment references and do not demonstrate every exercise sharing a station. Built-in image editing was used for background extraction; no new equipment generation was requested.
+- All current photo assets contain alpha and are <=60,000 bytes. Photographs load on demand, outside the service-worker shell precache. index/en cache queries and sw.js are v75.
+- Node suite: 273/273 passed. Browser catalog: 16 combinations of 320/360/375/430 px, TH/EN, light/dark passed, including decoding all referenced photographs, guides, bilingual search, saved selections and no horizontal overflow.
+- Remaining SVGs: high_row, hip_thrust_machine, glute_kickback. Searches of Commons, Flickr open-license results and free-image indexes did not establish exact, person-free, openly licensed photographic sources for these three. No manufacturer/shop image or unrelated station was substituted. This release does not claim complete replacement of all 58 entries.
+- Bottom-navigation icons, workout algorithms, saved-data format and proxy/Worker code are unchanged. No merge, deployment or migration was performed.

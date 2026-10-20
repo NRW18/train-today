@@ -1,3 +1,25 @@
+# Additional photographic cutouts — v75
+
+The following current entries replace nine SVGs and the four legacy AI reconstructions. Each is derived from an actual empty-equipment photograph. AI-assisted background removal preserves the original crop; these are equipment references, not technique demonstrations. Existing source watermarks are retained. Earlier provenance sections remain historical records for superseded files.
+
+| ID | Local asset | Original photo | Author | License |
+|---|---|---|---|---|
+| `triceps_dip` | [triceps-dip](cutouts/triceps-dip-photo.webp) | [MT3101-Seated-triceps-press-01](https://www.flickr.com/photos/127311295@N06/40834931105/) | haswell fitness | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `lying_leg_curl` | [lying-leg-curl](cutouts/lying-leg-curl-photo.webp) | [MT3205 Prone Leg Curl 43 from Haswell commercial gym equipment](https://www.flickr.com/photos/127311295@N06/41944752092/) | haswell fitness | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `biceps_curl_machine` | [biceps-curl](cutouts/biceps-curl-photo.webp) | [Bicep curl machine.jpg](https://commons.wikimedia.org/wiki/File:Bicep_curl_machine.jpg) | Aliva Sahoo | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| `chest_supported_row` | [chest-supported-row](cutouts/chest-supported-row-photo.webp) | [Back Machine.jpg](https://commons.wikimedia.org/wiki/File:Back_Machine.jpg) | Aliva Sahoo | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| `triceps_extension_machine` | [triceps-extension](cutouts/triceps-extension-photo.webp) | [Tricep Extensiions](https://www.flickr.com/photos/29694550@N06/19688820732/) | Dakil Auctioneers | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| `lateral_raise_machine` | [lateral-raise-machine](cutouts/lateral-raise-machine-photo.webp) | [MT3106 Seated Lat Raise 16 from Haswell commercial gym equipment](https://www.flickr.com/photos/127311295@N06/41270477174/) | haswell fitness | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `hip_adduction` | [hip-adduction](cutouts/hip-adduction-photo.webp) | [MT3204 Seated Hip Adduction inner thigh 35 from Haswell commercial gym equipment](https://www.flickr.com/photos/127311295@N06/28117744338/) | haswell fitness | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `leg_raise_station` | [knee-raise-station](cutouts/knee-raise-station-photo.webp) | [Chin/Dip Station converted for using PowerRings](https://www.flickr.com/photos/21569074@N00/3060550012/) | Danny Thompson | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| `preacher_curl` | [preacher-bench-real](cutouts/preacher-bench-real-photo.webp) | [Home gym](https://www.flickr.com/photos/22974618@N00/50720512488/) | Sergiy Galyonkin | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `chest_press` | [chest-press-real](cutouts/chest-press-real-photo.webp) | [MT3105 Seated Chest Press 15 from Haswell commercial gym equipment](https://www.flickr.com/photos/127311295@N06/27120021587/) | haswell fitness | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `shoulder_press` | [shoulder-press-real](cutouts/shoulder-press-real-photo.webp) | [MT3103 Seated Shoulder Press 11 from Haswell commercial gym equipment](https://www.flickr.com/photos/127311295@N06/27120022627/) | haswell fitness | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| `lat_pulldown` | [lat-pulldown-real](cutouts/lat-pulldown-real-photo.webp) | [Lats-Low Pull](https://www.flickr.com/photos/29694550@N06/19695965155/) | Dakil Auctioneers | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| `leg_curl` | [seated-leg-curl](cutouts/seated-leg-curl-photo.webp) | [Weight Seated Leg Curl](https://www.flickr.com/photos/29694550@N06/19507913538/) | Dakil Auctioneers | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+
+---
+
 # Single-equipment photographic cutouts
 
 Each asset below contains one selected piece of empty equipment extracted from an openly licensed photograph. Background removal used the built-in image editor; no equipment reconstruction was requested. Cropped parts in the reference remain cropped. Files retain alpha transparency and are at most 60,000 bytes. The source licenses also apply to these derivatives. Earlier sources below are retained as historical attribution, not a list of currently displayed assets.
