@@ -9,7 +9,7 @@ const version=source.match(/var VERSION = "([^"]+)"/)[1];
 const base="https://example.test/train-today/";
 function worker() {
   const events={},oldEntries=new Map([["en.js","old English"],["index.html","old HTML"]]);
-  const currentEntries=new Map([["en.js","current English"],["index.html","current HTML"]]);
+  const currentEntries=new Map([["en.js","current English"],["index.html","current HTML"],["manifest.json","cached manifest"]]);
   let installed;
   const lookup=(entries,req,options={})=>{
     const url=new URL(typeof req==="string"?req:req.url,base);
@@ -60,4 +60,36 @@ test("version probe reports only the worker's public version on the provided por
   w.events.message({data:{type:"KRYVOS_VERSION"},ports:[{postMessage:value=>{reply=value;}}]});
   assert.equal(reply,version);
   assert.doesNotThrow(()=>w.events.message({data:null,ports:[]}));
+});
+
+
+test("manifest refreshes from the network while keeping a release-scoped offline fallback",async()=>{
+  const w=worker();
+  assert.equal(await w.request("manifest.json"),"cached manifest");
+  w.context.fetch=async()=>new Response("updated manifest",{status:200});
+  assert.equal(await (await w.request("manifest.json")).text(),"updated manifest");
+  w.context.fetch=async()=>new Response("not found",{status:404});
+  assert.equal(await w.request("manifest.json"),"cached manifest");
+});
+
+test("manifest HTTP errors remain valid responses when there is no cached manifest",async()=>{
+  const w=worker();w.context.caches.open=async()=>({match:async()=>undefined});
+  w.context.fetch=async()=>new Response("unavailable",{status:503});
+  assert.equal((await w.request("manifest.json")).status,503);
+});
+
+test("installable app and shortcut icons use revised URLs without changing app identity",()=>{
+  const manifest=JSON.parse(readFileSync(new URL("../manifest.json",import.meta.url),"utf8"));
+  assert.equal(manifest.start_url,"./");assert.equal(manifest.scope,"./");
+  assert.match(html,/<link rel="manifest" href="manifest.json">/);
+  for(const icon of manifest.icons){
+    assert.match(icon.src,/-v2\.png$/);assert.ok(source.includes(JSON.stringify(icon.src)));
+    const bytes=readFileSync(new URL("../"+icon.src,import.meta.url));
+    assert.equal(bytes.readUInt32BE(16)+"x"+bytes.readUInt32BE(20),icon.sizes);
+  }
+  const stats=readFileSync(new URL("../stats.html",import.meta.url),"utf8");
+  for(const page of [html,stats]){
+    assert.match(page,/<link rel="icon"[^>]*href="icon-192-v2.png"/);
+    assert.match(page,/<link rel="apple-touch-icon" href="apple-touch-icon-v2.png"/);
+  }
 });
