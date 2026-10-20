@@ -102,9 +102,9 @@ test("new primary muscles use existing soreness and painful joint exclusions",()
   a.S.body={"j:hip":"pain"};assert.equal(a.plan().items.some(item=>item.e.id==="hip_adduction"),false);
 });
 
-test("assisted stations log repetitions without treating assistance as resistance",()=>{
+test("assisted and bodyweight stations log repetitions without invented resistance",()=>{
   const all=clean(data().BASE_EX),a=planner(all,{log:[],prefs:{},off:[],today:{skip:[],add:[]}});
-  for(const id of ["assisted_dip","assisted_pullup"]){
+  for(const id of ["assisted_dip","assisted_pullup","leg_raise_station"]){
     const ex=all.find(row=>row.id===id);assert.equal(ex.t,"reps");
     assert.equal(a.suggest(ex,false).kg,"");
     assert.equal(a.unit(ex),"");
