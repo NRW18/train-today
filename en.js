@@ -2,6 +2,9 @@
 // To change a word: edit the value here. To add text: write it in Thai in index.html as t("…"), then add it here.
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
+  "ออกกำลังกายในเดือนนี้": "Active this month",
+  "สวัสดี! วันนี้ออกกำลังกายอะไรกันดี?": "Hi! What are we training today?",
+  "วัน": "days",
   "แก้ไข": "Edit",
   "ตั้งค่าการจำเครื่อง": "Recognition settings",
   "เตรียมใช้แบบไม่มีเน็ต": "Make available offline",
