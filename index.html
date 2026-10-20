@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=69">
+<link rel="stylesheet" href="theme.css?v=76">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=69">
-<link rel="stylesheet" href="brand.css?v=69">
+<link rel="stylesheet" href="simple-flow.css?v=76">
+<link rel="stylesheet" href="brand.css?v=76">
 </head>
 <body class="home">
 <div class="app">
@@ -953,8 +953,10 @@
       <p class="hint" id="machine-status" role="status"></p>
       <div id="machine-results" aria-live="polite" tabindex="-1"></div>
       <details id="machine-manual" open><summary>เลือกเครื่องเอง</summary>
-        <p class="hint">ภาพอุปกรณ์แต่งด้วย AI แต่ละยิมอาจใช้คนละรุ่น ดูวิธีเล่นก่อนเริ่ม</p>
-        <div id="machine-grid" class="machine-grid"></div>
+        <p class="hint">ภาพวาดและภาพตัวอย่างอาจต่างจากเครื่องในยิม ดูวิธีเล่นก่อนเริ่ม</p>
+        <label class="field txt"><input type="search" id="machine-search" placeholder="ค้นหาเครื่อง ไทย / English" aria-label="ค้นหาเครื่อง ไทย / English" autocomplete="off"></label>
+        <div id="machine-filters" class="machine-filters" role="group" aria-label="ตัวกรองเครื่อง"></div>
+        <div id="machine-grid"></div>
       </details>
       <button type="button" class="linkbtn" id="machine-photo-credits">ที่มารูปภาพ</button>
     </section>
@@ -1126,10 +1128,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=69"></script>
-<script src="machines-config.js?v=69"></script>
-<script src="machine-recognition.js?v=69"></script>
-<script src="machine-photos.js?v=69"></script>
+<script src="en.js?v=76"></script>
+<script src="machines-config.js?v=76"></script>
+<script src="machine-recognition.js?v=76"></script>
+<script src="machine-photos.js?v=76"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1164,8 +1166,8 @@
   "use strict";
 
   /* ---------- knowledge ---------- */
-  var MUSCLES = { chest: t("อก"), shoulders: t("ไหล่"), triceps: t("หลังแขน"), back: t("หลัง"), biceps: t("หน้าแขน"), core: t("หน้าท้อง"), quads: t("ต้นขาหน้า"), hamstrings: t("ต้นขาหลัง"), glutes: t("ก้น"), calves: t("น่อง") };
-  var JOINTS = { shoulder: t("ข้อไหล่"), elbow: t("ข้อศอก"), wrist: t("ข้อมือ"), lowback: t("หลังล่าง"), knee: t("เข่า"), ankle: t("ข้อเท้า") };
+  var MUSCLES = { chest: t("อก"), shoulders: t("ไหล่"), triceps: t("หลังแขน"), back: t("หลัง"), biceps: t("หน้าแขน"), core: t("หน้าท้อง"), quads: t("ต้นขาหน้า"), hamstrings: t("ต้นขาหลัง"), glutes: t("ก้น"), calves: t("น่อง"), adductors: t("ต้นขาด้านใน") };
+  var JOINTS = { shoulder: t("ข้อไหล่"), elbow: t("ข้อศอก"), wrist: t("ข้อมือ"), lowback: t("หลังล่าง"), knee: t("เข่า"), ankle: t("ข้อเท้า"), hip: t("ข้อสะโพก") };
   var DAYS = {
     push: { name: "PUSH", th: t("อก ไหล่ หลังแขน"), main: ["chest", "shoulders", "triceps"], slot: "am" },
     pull: { name: "PULL", th: t("หลัง หน้าแขน"), main: ["back", "biceps"], slot: "am" },
@@ -1188,18 +1190,111 @@
     { id: "leg_press", name: t("เลกเพรส"), day: "legs", m: ["quads", "glutes", "hamstrings"], j: ["knee", "lowback"], t: "kg" },
     { id: "leg_extension", name: t("เลกเอ็กซ์เทนชัน"), day: "legs", m: ["quads"], j: ["knee"], t: "kg" },
     { id: "leg_curl", name: t("ซีทเต็ดเลกเคิร์ล"), day: "legs", m: ["hamstrings"], j: ["knee"], t: "kg" },
-    { id: "calf_raise", name: t("คาล์ฟเรส (เครื่อง)"), day: "legs", m: ["calves"], j: ["ankle"], t: "kg" }
+    { id: "calf_raise", name: t("คาล์ฟเรส (เครื่อง)"), day: "legs", m: ["calves"], j: ["ankle"], t: "kg" },
+    { id: "incline_chest_press", name: t("อินไคลน์เชสต์เพรส (เครื่องอกบน)"), day: "push", m: ["chest","shoulders","triceps"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, category: "chest" },
+    { id: "lateral_raise_machine", name: t("ยกไหล่ด้านข้าง (เครื่อง)"), day: "push", m: ["shoulders"], j: ["shoulder"], t: "kg", optional: true, category: "chest" },
+    { id: "assisted_dip", name: t("ดิพ (เครื่องช่วยพยุง)"), day: "push", m: ["triceps","chest","shoulders"], j: ["shoulder","elbow","wrist"], t: "reps", optional: true, category: "arms" },
+    { id: "assisted_pullup", name: t("ดึงข้อ (เครื่องช่วยพยุง)"), day: "pull", m: ["back","biceps"], j: ["shoulder","elbow","wrist"], t: "reps", optional: true, category: "back" },
+    { id: "high_row", name: t("ไฮโรว์ (เครื่องดึงหลังแนวสูง)"), day: "pull", m: ["back","biceps"], j: ["shoulder","elbow"], t: "kg", optional: true, category: "back" },
+    { id: "chest_supported_row", name: t("โรว์แบบมีแผ่นรองอก"), day: "pull", m: ["back","biceps"], j: ["shoulder","elbow"], t: "kg", optional: true, category: "back" },
+    { id: "cable_row", name: t("ซีทเต็ดโรว์ (เคเบิล)"), day: "pull", m: ["back","biceps"], j: ["shoulder","elbow","lowback"], t: "kg", optional: true, category: "back" },
+    { id: "cable_fly", name: t("เคเบิลฟลาย"), day: "push", m: ["chest","shoulders"], j: ["shoulder","elbow"], t: "kg", optional: true, category: "chest" },
+    { id: "cable_face_pull", name: t("เฟซพูล (เคเบิลเชือก)"), day: "pull", m: ["shoulders","back"], j: ["shoulder","elbow"], t: "kg", optional: true, category: "back" },
+    { id: "cable_lateral_raise", name: t("ยกไหล่ด้านข้าง (เคเบิล)"), day: "push", m: ["shoulders"], j: ["shoulder"], t: "kg", optional: true, category: "chest" },
+    { id: "cable_curl", name: t("ไบเซ็ปส์เคิร์ล (เคเบิล)"), day: "pull", m: ["biceps"], j: ["elbow","wrist"], t: "kg", optional: true, category: "arms" },
+    { id: "overhead_triceps_extension", name: t("เหยียดหลังแขนเหนือหัว (เคเบิล)"), day: "push", m: ["triceps"], j: ["shoulder","elbow"], t: "kg", optional: true, category: "arms" },
+    { id: "preacher_curl", name: t("พรีชเชอร์เคิร์ล (ม้านั่งกับบาร์อีซี)"), day: "pull", m: ["biceps"], j: ["elbow","wrist"], t: "kg", optional: true, category: "arms" },
+    { id: "biceps_curl_machine", name: t("ไบเซ็ปส์เคิร์ล (เครื่อง)"), day: "pull", m: ["biceps"], j: ["elbow","wrist"], t: "kg", optional: true, category: "arms" },
+    { id: "triceps_extension_machine", name: t("เหยียดหลังแขน (เครื่อง)"), day: "push", m: ["triceps"], j: ["elbow","shoulder"], t: "kg", optional: true, category: "arms" },
+    { id: "hack_squat", name: t("แฮ็กสควอต (เครื่อง)"), day: "legs", m: ["quads","glutes"], j: ["hip","knee","ankle","lowback"], t: "kg", optional: true, category: "legs" },
+    { id: "smith_squat", name: t("สควอต (สมิธแมชชีน)"), day: "legs", m: ["quads","glutes","hamstrings"], j: ["hip","knee","ankle","lowback"], t: "kg", optional: true, category: "legs" },
+    { id: "smith_bench_press", name: t("เบนช์เพรส (สมิธแมชชีน)"), day: "push", m: ["chest","shoulders","triceps"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, category: "chest" },
+    { id: "barbell_squat", name: t("บาร์เบลแบ็กสควอต (แร็ค)"), day: "legs", m: ["quads","glutes","hamstrings","core"], j: ["hip","knee","ankle","lowback"], t: "kg", optional: true, category: "legs" },
+    { id: "barbell_bench_press", name: t("บาร์เบลเบนช์เพรส (ม้านั่งกับแร็ค)"), day: "push", m: ["chest","shoulders","triceps"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, category: "chest" },
+    { id: "incline_db_press", name: t("ดันดัมเบลบนม้านั่งเอียง"), day: "push", m: ["chest","shoulders","triceps"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, category: "chest" },
+    { id: "db_bench_press", name: t("ดันดัมเบลบนม้านั่งราบ"), day: "push", m: ["chest","shoulders","triceps"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, category: "chest" },
+    { id: "db_shoulder_press", name: t("ดันดัมเบลเหนือหัว (นั่ง)"), day: "push", m: ["shoulders","triceps"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, category: "chest" },
+    { id: "one_arm_db_row", name: t("ดัมเบลโรว์ข้างเดียว (ม้านั่ง)"), day: "pull", m: ["back","biceps"], j: ["shoulder","elbow","lowback"], t: "kg", optional: true, category: "back" },
+    { id: "romanian_deadlift", name: t("โรมาเนียนเดดลิฟต์ (บาร์เบล)"), day: "legs", m: ["hamstrings","glutes","back"], j: ["hip","knee","lowback"], t: "kg", optional: true, category: "legs" },
+    { id: "ez_bar_curl", name: t("เคิร์ลบาร์อีซี (ยืน)"), day: "pull", m: ["biceps"], j: ["elbow","wrist"], t: "kg", optional: true, category: "arms" },
+    { id: "lying_leg_curl", name: t("ไลอิงเลกเคิร์ล (นอนคว่ำ)"), day: "legs", m: ["hamstrings"], j: ["knee","hip"], t: "kg", optional: true, category: "legs" },
+    { id: "hip_thrust_machine", name: t("ฮิปทรัสต์ (เครื่อง)"), day: "legs", m: ["glutes","hamstrings"], j: ["hip","lowback"], t: "kg", optional: true, category: "legs" },
+    { id: "hip_abduction", name: t("กางสะโพก (เครื่อง)"), day: "legs", m: ["glutes"], j: ["hip"], t: "kg", optional: true, category: "legs" },
+    { id: "hip_adduction", name: t("หุบสะโพก (เครื่อง)"), day: "legs", m: ["adductors"], j: ["hip"], t: "kg", optional: true, category: "legs" },
+    { id: "glute_kickback", name: t("เตะขาด้านหลัง (เครื่อง)"), day: "legs", m: ["glutes","hamstrings"], j: ["hip","lowback"], t: "kg", optional: true, category: "legs" },
+    { id: "seated_calf_raise", name: t("ยกน่อง (เครื่องนั่ง)"), day: "legs", m: ["calves"], j: ["ankle","knee"], t: "kg", optional: true, category: "legs" },
+    { id: "back_extension", name: t("แบ็กเอ็กซ์เทนชัน (ม้านั่งเอียง)"), day: "pull", m: ["back","glutes","hamstrings"], j: ["hip","lowback"], t: "kg", optional: true, category: "back" },
+    { id: "cable_crunch", name: t("ครันช์หน้าท้อง (เคเบิล)"), day: "pull", m: ["core"], j: ["lowback","hip"], t: "kg", optional: true, category: "back" },
+    { id: "leg_raise_station", name: t("ยกเข่า (สถานีพยุงแขน)"), day: "pull", m: ["core"], j: ["shoulder","hip","lowback"], t: "reps", optional: true, category: "back" },
+    { id: "barbell_row", name: t("บาร์เบลโรว์"), day: "pull", m: ["back","biceps"], j: ["shoulder","elbow","hip","lowback"], t: "kg", optional: true, category: "back" },
+    { id: "treadmill", name: t("ลู่วิ่ง"), day: "legs", m: ["quads","glutes","calves"], j: ["hip","knee","ankle"], t: "sec", optional: true, catalogVersion: 2, category: "cardio", catalogOnly: true },
+    { id: "stationary_bike", name: t("จักรยานอยู่กับที่"), day: "legs", m: ["quads","glutes"], j: ["hip","knee"], t: "sec", optional: true, catalogVersion: 2, category: "cardio", catalogOnly: true },
+    { id: "elliptical", name: t("เครื่องเดินวงรี"), day: "legs", m: ["quads","glutes","calves"], j: ["hip","knee","ankle"], t: "sec", optional: true, catalogVersion: 2, category: "cardio", catalogOnly: true },
+    { id: "stair_climber", name: t("เครื่องขึ้นบันได"), day: "legs", m: ["quads","glutes","calves"], j: ["hip","knee","ankle"], t: "sec", optional: true, catalogVersion: 2, category: "cardio", catalogOnly: true },
+    { id: "rower", name: t("เครื่องกรรเชียงบก"), day: "pull", m: ["back","quads","glutes"], j: ["hip","knee","shoulder","lowback"], t: "sec", optional: true, catalogVersion: 2, category: "cardio", catalogOnly: true },
+    { id: "kettlebell_goblet_squat", name: t("กอบเล็ตสควอต (เคตเทิลเบล)"), day: "legs", m: ["quads","glutes","core"], j: ["hip","knee","ankle","lowback"], t: "kg", optional: true, catalogVersion: 2, category: "free" },
+    { id: "triceps_dip", name: t("ดิพ (เครื่องหลังแขน)"), day: "push", m: ["triceps","chest","shoulders"], j: ["shoulder","elbow","wrist"], t: "kg", optional: true, catalogVersion: 2, category: "arms" }
   ];
-  // English names, used only to search YouTube (there are far more English form videos)
+  // English names for video links and bilingual equipment search.
   var EN_NAME = {
+    treadmill: "Treadmill",
+    stationary_bike: "Stationary bike",
+    elliptical: "Elliptical trainer",
+    stair_climber: "Stair climber",
+    rower: "Rowing ergometer",
+    kettlebell_goblet_squat: "Kettlebell goblet squat",
+    triceps_dip: "Triceps dip machine",
     chest_press: "machine chest press", shoulder_press: "machine shoulder press", pec_deck: "pec deck machine fly",
     lateral_raise: "dumbbell lateral raise", triceps_pushdown: "cable triceps pushdown", pushup: "push up",
     lat_pulldown: "lat pulldown", seated_row: "seated cable row machine", rear_delt: "reverse pec deck rear delt fly",
     db_curl: "dumbbell bicep curl", plank: "plank", leg_press: "leg press machine", leg_extension: "leg extension machine",
-    leg_curl: "seated leg curl machine", calf_raise: "machine calf raise"
+    leg_curl: "seated leg curl machine", calf_raise: "machine calf raise",
+    incline_chest_press: "Incline chest press machine",
+    lateral_raise_machine: "Lateral raise machine",
+    assisted_dip: "Assisted dip machine",
+    assisted_pullup: "Assisted pull-up machine",
+    high_row: "High row machine",
+    chest_supported_row: "Chest-supported row machine",
+    cable_row: "Seated cable row",
+    cable_fly: "Cable chest fly",
+    cable_face_pull: "Cable rope face pull",
+    cable_lateral_raise: "Cable lateral raise",
+    cable_curl: "Cable biceps curl",
+    overhead_triceps_extension: "Cable overhead triceps extension",
+    preacher_curl: "Preacher bench EZ-bar curl",
+    biceps_curl_machine: "Biceps curl machine",
+    triceps_extension_machine: "Triceps extension machine",
+    hack_squat: "Hack squat machine",
+    smith_squat: "Smith machine squat",
+    smith_bench_press: "Smith machine bench press",
+    barbell_squat: "Barbell back squat in rack",
+    barbell_bench_press: "Barbell bench press with rack",
+    incline_db_press: "Incline dumbbell press",
+    db_bench_press: "Flat dumbbell bench press",
+    db_shoulder_press: "Seated dumbbell shoulder press",
+    one_arm_db_row: "One-arm dumbbell bench row",
+    romanian_deadlift: "Barbell Romanian deadlift",
+    ez_bar_curl: "Standing EZ-bar curl",
+    lying_leg_curl: "Lying leg curl machine",
+    hip_thrust_machine: "Hip thrust machine",
+    hip_abduction: "Hip abduction machine",
+    hip_adduction: "Hip adduction machine",
+    glute_kickback: "Glute kickback machine",
+    seated_calf_raise: "Seated calf raise machine",
+    back_extension: "45-degree back extension bench",
+    cable_crunch: "Kneeling cable crunch",
+    leg_raise_station: "Vertical knee raise station",
+    barbell_row: "Bent-over barbell row"
   };
   // How to do each exercise, and the mistakes people make most often.
   var GUIDE = {
+    treadmill: { how: [t("ติดคลิปนิรภัย ยืนบนขอบแล้วเริ่มสายพานช้า ๆ"),t("เริ่มช้า ๆ และเพิ่มความหนักเมื่อยังพูดเป็นประโยคได้"),t("ลดความเร็วก่อนหยุดและลงจากเครื่องเมื่อหยุดสนิท")], miss: [t("ฝืนเล่นเมื่อเจ็บหรือเวียนหัว"),t("เริ่มเร็วหรือหนักเกินกว่าจะควบคุมได้")] },
+    stationary_bike: { how: [t("ปรับเบาะให้เข่างอเล็กน้อยเมื่อเหยียดขาสุดและเริ่มแรงต้านต่ำ"),t("เริ่มช้า ๆ และเพิ่มความหนักเมื่อยังพูดเป็นประโยคได้"),t("ลดความเร็วก่อนหยุดและลงจากเครื่องเมื่อหยุดสนิท")], miss: [t("ฝืนเล่นเมื่อเจ็บหรือเวียนหัว"),t("เริ่มเร็วหรือหนักเกินกว่าจะควบคุมได้")] },
+    elliptical: { how: [t("จับมือจับ ขึ้นแป้นที่หยุดนิ่ง แล้วก้าวช้า ๆ โดยเข่าตามปลายเท้า"),t("เริ่มช้า ๆ และเพิ่มความหนักเมื่อยังพูดเป็นประโยคได้"),t("ลดความเร็วก่อนหยุดและลงจากเครื่องเมื่อหยุดสนิท")], miss: [t("ฝืนเล่นเมื่อเจ็บหรือเวียนหัว"),t("เริ่มเร็วหรือหนักเกินกว่าจะควบคุมได้")] },
+    stair_climber: { how: [t("จับราว ขึ้นขั้นที่หยุดนิ่ง แล้วเริ่มก้าวช้า ๆ วางเท้าเต็มขั้น"),t("เริ่มช้า ๆ และเพิ่มความหนักเมื่อยังพูดเป็นประโยคได้"),t("ลดความเร็วก่อนหยุดและลงจากเครื่องเมื่อหยุดสนิท")], miss: [t("ฝืนเล่นเมื่อเจ็บหรือเวียนหัว"),t("เริ่มเร็วหรือหนักเกินกว่าจะควบคุมได้")] },
+    rower: { how: [t("รัดเท้าพอดี ตั้งหลังเป็นกลาง เริ่มแรงต้านต่ำ"),t("ดันด้วยขา เอนสะโพกเล็กน้อย แล้วดึงด้ามเข้าชายโครง"),t("คืนแขน พับสะโพก แล้วงอเข่ากลับอย่างช้า ๆ")], miss: [t("ฝืนเล่นเมื่อเจ็บหรือเวียนหัว"),t("เริ่มเร็วหรือหนักเกินกว่าจะควบคุมได้")] },
+    kettlebell_goblet_squat: { how: [t("ถือเคตเทิลเบลเบาชิดอก ยืนมั่นคงและเกร็งหน้าท้อง"),t("ย่อตัวโดยเข่าตามปลายเท้า ลงเท่าที่หลังเป็นกลาง"),t("ดันพื้นขึ้นช้า ๆ โดยเท้าวางเต็มพื้น")], miss: [t("เข่าพับเข้าด้านในและส้นลอย"),t("ถือไกลตัวจนหลังงอ")] },
+    triceps_dip: { how: [t("ปรับเบาะ วางเท้ามั่นคง และจับด้ามโดยไหล่ไม่ยก"),t("กดด้ามลงโดยศอกอยู่ใกล้ลำตัวและหลังแนบเบาะ"),t("คืนด้ามช้า ๆ หยุดก่อนหัวไหล่รู้สึกตึงหรือเจ็บ")], miss: [t("กดจนหัวไหล่ยื่นไปข้างหน้า"),t("เหวี่ยงตัวหรือใช้แรงกระแทก")] },
     chest_press: { how: [t("ปรับเบาะให้ด้ามจับอยู่ระดับกลางอก"), t("ดันออกจนแขนเกือบตึง ไม่ล็อกศอก"), t("ผ่อนกลับช้า ๆ 2–3 วินาที ให้รู้สึกอกยืด")], miss: [t("ยักไหล่ขึ้นหาหู"), t("ปล่อยน้ำหนักกระแทกกลับ")] },
     shoulder_press: { how: [t("ปรับเบาะให้ด้ามจับอยู่ระดับไหล่"), t("ดันขึ้นเหนือศีรษะ หลังแนบเบาะตลอด"), t("ลดลงช้า ๆ จนมือถึงระดับคาง")], miss: [t("แอ่นหลังเพื่อดันน้ำหนัก"), t("ล็อกศอกแรงตอนดันสุด")] },
     pec_deck: { how: [t("ปรับเบาะให้แขนอยู่ระดับอก ศอกงอเล็กน้อย"), t("บีบแขนเข้าหากันด้วยแรงอก ค้าง 1 วินาที"), t("เปิดออกช้า ๆ แค่พอรู้สึกอกยืด")], miss: [t("เปิดแขนกว้างเกินจนไหล่ตึง"), t("ใช้แรงเหวี่ยง")] },
@@ -1214,7 +1309,43 @@
     leg_press: { how: [t("วางเท้ากว้างระดับไหล่ กลางแผ่นเหยียบ"), t("ลดลงจนเข่างอราว 90° หลังล่างไม่ยกจากเบาะ"), t("ดันขึ้น ไม่ล็อกเข่า")], miss: [t("ลดลึกจนก้นยกจากเบาะ"), t("เข่าหุบเข้าด้านใน")] },
     leg_extension: { how: [t("ปรับให้เข่าตรงกับแกนหมุนของเครื่อง แผ่นรองอยู่เหนือข้อเท้า"), t("เหยียดขาขึ้น ค้าง 1 วินาที"), t("ลดลงช้า ๆ")], miss: [t("กระแทกขาขึ้นเร็ว"), t("ยกก้นจากเบาะ")] },
     leg_curl: { how: [t("ปรับให้เข่าตรงกับแกนหมุน แผ่นรองอยู่เหนือส้นเท้า"), t("งอขาให้ส้นเท้าเข้าหาก้น"), t("ปล่อยกลับช้า ๆ")], miss: [t("ใช้แรงเหวี่ยง"), t("ปล่อยกลับเร็ว")] },
-    calf_raise: { how: [t("ปลายเท้าวางบนขอบ ส้นเท้าลอย"), t("เขย่งขึ้นสุด ค้าง 1 วินาที"), t("ลดส้นเท้าลงต่ำกว่าขอบให้น่องยืด")], miss: [t("เด้งขึ้นลงเร็ว"), t("งอเข่าช่วย")] }
+    calf_raise: { how: [t("ปลายเท้าวางบนขอบ ส้นเท้าลอย"), t("เขย่งขึ้นสุด ค้าง 1 วินาที"), t("ลดส้นเท้าลงต่ำกว่าขอบให้น่องยืด")], miss: [t("เด้งขึ้นลงเร็ว"), t("งอเข่าช่วย")] },
+    incline_chest_press: { how: [t("ปรับเบาะให้ด้ามอยู่ระดับอกบน เท้าวางพื้น"), t("ดันตามแนวเครื่องโดยไม่ยักไหล่หรือล็อกศอก"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังจนลอยจากเบาะ"), t("ตั้งเบาะต่ำจนด้ามสูงเกินไหล่")] },
+    lateral_raise_machine: { how: [t("ปรับเบาะให้ข้อไหล่ใกล้แกนหมุน แขนแตะแผ่นรอง"), t("ยกแขนออกด้านข้างถึงระดับที่สบาย ไม่เกินไหล่"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ยักไหล่ขึ้นหาหู"), t("เหวี่ยงตัวเพื่อยกน้ำหนัก")] },
+    assisted_dip: { how: [t("เลือกแรงช่วยมากพอและขึ้นเครื่องตามจุดเหยียบ"), t("จับด้าม ลดตัวในช่วงที่ไม่เจ็บ แล้วดันขึ้นโดยไม่ล็อกศอก"), t("คุมแผ่นพยุงให้นิ่งและลงตามขั้นของเครื่อง")], miss: [t("ลดตัวลึกจนหัวไหล่ถูกดึง"), t("เลือกแรงช่วยน้อยจนคุมตัวไม่ได้")] },
+    assisted_pullup: { how: [t("ตั้งแรงช่วยและขึ้นเครื่องตามขั้น จับด้ามให้มั่น"), t("ดึงตัวขึ้นให้คางใกล้ด้าม โดยไม่เหวี่ยงหรือยื่นคอ"), t("ลดตัวช้า ๆ แล้วลงตามขั้นเมื่อแผ่นพยุงนิ่ง")], miss: [t("เหวี่ยงตัวเพื่อยกน้ำหนัก"), t("ดึงด้ามลงด้านหลังคอ")] },
+    high_row: { how: [t("ปรับเบาะให้จับด้ามได้โดยอกยังแนบแผ่นรอง"), t("ดึงศอกลงข้างลำตัว ไม่ยกอกหนีแผ่นรอง"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังเพื่อดึงด้ามให้ไกล"), t("ยักไหล่ระหว่างดึง")] },
+    chest_supported_row: { how: [t("ปรับแผ่นรองให้อกพิงได้และเอื้อมถึงด้าม"), t("ดึงศอกไปด้านหลังโดยอกไม่ยกจากแผ่นรอง"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ยกอกหนีแผ่นรอง"), t("งอข้อมือเพื่อช่วยดึง")] },
+    cable_row: { how: [t("วางเท้าบนแท่น งอเข่าเล็กน้อยและนั่งหลังเป็นกลาง"), t("ดึงด้ามเข้าท้องโดยไม่เอนตัวไปมา"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("โยกหลังเพื่อดึงน้ำหนัก"), t("ปล่อยหลังงอขณะเอื้อมด้าม")] },
+    cable_fly: { how: [t("ตั้งรอกระดับอก ใช้น้ำหนักเบาและยืนแยกเท้ามั่นคง"), t("งอศอกเล็กน้อย หุบแขนมาด้านหน้าโดยไม่กระแทกด้าม"), t("กางกลับเฉพาะช่วงที่สบาย ไม่ดึงแขนไปหลังลำตัวมาก")], miss: [t("กางแขนลึกจนไหล่ถูกดึง"), t("เปลี่ยนมุมศอกเป็นท่าดัน")] },
+    cable_face_pull: { how: [t("ตั้งรอกใกล้ระดับหน้า จับเชือกและยืนห่างให้สายตึง"), t("ดึงปลายเชือกแยกไปข้างใบหน้า ไม่กระแทกหน้า"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังเพื่อช่วยดึง"), t("ใช้หนักจนคุมเชือกใกล้หน้าไม่ได้")] },
+    cable_lateral_raise: { how: [t("ตั้งรอกต่ำ จับด้ามด้วยมือข้างไกลและยืนมั่นคง"), t("ยกแขนออกข้างโดยงอศอกนิดเดียว ไม่สูงเกินไหล่"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("เอนตัวช่วยยกมากเกินไป"), t("ยักไหล่ขึ้นหาหู")] },
+    cable_curl: { how: [t("ตั้งรอกต่ำ จับด้ามและเก็บศอกข้างลำตัว"), t("พับศอกยกด้ามขึ้นโดยต้นแขนไม่เหวี่ยง"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("เหวี่ยงตัวเพื่อยกน้ำหนัก"), t("พับข้อมือเข้าหาตัว")] },
+    overhead_triceps_extension: { how: [t("ใช้เชือกและน้ำหนักเบา ยืนแยกเท้า เก็บซี่โครง"), t("ตั้งต้นแขนเหนือหัวแล้วเหยียดศอกในช่วงที่ไม่เจ็บ"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังเพื่อช่วยดัน"), t("กางศอกและเหวี่ยงต้นแขน")] },
+    preacher_curl: { how: [t("ปรับเบาะให้ต้นแขนแนบแผ่นรอง ใช้บาร์เบา"), t("พับศอกยกบาร์โดยต้นแขนยังแตะแผ่นรอง"), t("ลดช้า ๆ โดยไม่เหยียดศอกสุด แล้ววางบาร์บนที่พักให้มั่น")], miss: [t("ปล่อยบาร์ดึงศอกเหยียดสุด"), t("ยกต้นแขนพ้นแผ่นรอง")] },
+    biceps_curl_machine: { how: [t("ปรับเบาะให้ศอกใกล้แกนเครื่องและแขนอยู่บนแผ่นรอง"), t("พับศอกดึงด้ามขึ้นโดยไม่ยกไหล่"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ตั้งเบาะจนศอกไม่ตรงแนวแกน"), t("ปล่อยศอกเหยียดกระแทก")] },
+    triceps_extension_machine: { how: [t("ปรับเบาะและแผ่นรองให้ศอกใกล้แกนหมุน"), t("เหยียดศอกดันด้ามโดยต้นแขนอยู่กับแผ่นรอง"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ล็อกศอกแรงเมื่อเหยียดสุด"), t("ยกไหล่และกดตัวช่วย")] },
+    hack_squat: { how: [t("ตั้งตัวหยุด ทดลองปลดล็อก และพิงหลังเต็มแผ่นรอง"), t("ย่อตามช่วงที่คุมได้ เข่าไปแนวเดียวกับปลายเท้า"), t("ดันขึ้นโดยไม่ล็อกเข่า แล้วล็อกเครื่องก่อนก้าวออก")], miss: [t("ยกส้นเท้าจากแท่น"), t("ปล่อยหลังหรือเชิงกรานหลุดจากแผ่นรอง")] },
+    smith_squat: { how: [t("ตั้งตัวหยุดและฝึกหมุนล็อกบาร์ด้วยน้ำหนักเบาก่อน"), t("วางบาร์บนบ่าหลัง ย่อลงโดยหลังเป็นกลางและเท้าไม่ลอย"), t("ยืนขึ้นแล้วตรวจว่าขอเกี่ยวล็อกครบก่อนออกจากบาร์")], miss: [t("วางบาร์กดตรงกระดูกคอ"), t("ไม่ตั้งตัวหยุดหรือไม่ตรวจขอเกี่ยว")] },
+    smith_bench_press: { how: [t("จัดม้านั่งและตัวหยุด ฝึกล็อกบาร์ก่อนเริ่มด้วยบาร์เบา"), t("วางเท้าพื้น ลดบาร์สู่อกกลางโดยไม่เด้งกระแทก"), t("ดันขึ้นแล้วเกี่ยวล็อกทั้งสองด้านให้มั่นก่อนปล่อยมือ")], miss: [t("ตั้งม้านั่งจนบาร์ลงใกล้คอ"), t("ปล่อยมือก่อนตรวจว่าบาร์ล็อกแล้ว")] },
+    barbell_squat: { how: [t("ตั้งราวเซฟตี้ใกล้ระดับล่างของท่า เริ่มด้วยบาร์เบา"), t("วางบาร์บนบ่าหลัง เกร็งลำตัวและย่อโดยเข่าตามปลายเท้า"), t("ยืนขึ้นอย่างคุมได้ เดินเข้าชนจุดพักก่อนลดบาร์ลง")], miss: [t("ลองน้ำหนักหนักโดยไม่มีเซฟตี้หรือผู้ช่วยที่ฝึกมา"), t("หลังงอหรือส้นเท้าลอย")] },
+    barbell_bench_press: { how: [t("ตั้งเซฟตี้และใช้ผู้ช่วยที่รู้วิธี เท้าราบและจับบาร์เต็มมือ"), t("ลดบาร์สู่อกกลางช้า ๆ โดยข้อมืออยู่เหนือศอก"), t("ดันขึ้นอย่างคุมได้ แล้ววางบาร์เข้าที่พักทั้งสองข้าง")], miss: [t("เด้งบาร์จากหน้าอก"), t("ฝึกหนักคนเดียวโดยไม่มีเซฟตี้")] },
+    incline_db_press: { how: [t("ตั้งม้านั่งเอียงพอประมาณ เลือกดัมเบลที่ยกเข้าที่ได้"), t("พิงหลัง ดันดัมเบลขึ้นเหนืออกโดยไม่ชนกัน"), t("ลดถึงช่วงที่สบาย แล้วนั่งขึ้นอย่างคุมได้ก่อนวางดัมเบล")], miss: [t("เอียงม้านั่งชันจนกลายเป็นดันไหล่"), t("ทิ้งดัมเบลลงพื้นโดยไม่ดูรอบตัว")] },
+    db_bench_press: { how: [t("นอนบนม้านั่งราบ เท้าวางพื้นและข้อมือตรง"), t("ดันดัมเบลเหนืออกโดยไม่ล็อกศอกหรือชนกัน"), t("ลดในช่วงที่ไม่เจ็บ แล้วนั่งขึ้นอย่างคุมได้ก่อนวางดัมเบล")], miss: [t("กางศอกสุดออกข้างลำตัว"), t("แอ่นหลังจนเสียการพยุง")] },
+    db_shoulder_press: { how: [t("นั่งพิงม้านั่งที่ตั้งมั่นคง ยกดัมเบลใกล้ระดับไหล่"), t("ดันขึ้นเหนือหัวในแนวที่สบายโดยไม่แอ่นหลัง"), t("ลดกลับใกล้ไหล่ช้า ๆ แล้ววางน้ำหนักอย่างคุมได้")], miss: [t("แอ่นหลังหรือกางซี่โครงช่วยดัน"), t("ลดดัมเบลลึกจนไหล่เจ็บ")] },
+    one_arm_db_row: { how: [t("ใช้มือข้างหนึ่งพยุงม้านั่ง กางเท้าและรักษาหลังเป็นกลาง"), t("ดึงศอกไปข้างสะโพกโดยลำตัวไม่หมุน"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("บิดลำตัวเพื่อยกดัมเบล"), t("ยกไหล่ขึ้นหาหู")] },
+    romanian_deadlift: { how: [t("เริ่มยืนถือบาร์เบา เข่างอเล็กน้อยและเกร็งลำตัว"), t("พับสะโพกไปหลัง บาร์ชิดขา หยุดก่อนหลังเริ่มงอ"), t("ดันสะโพกกลับมายืนตรงโดยไม่แอ่นหลัง")], miss: [t("พยายามแตะพื้นจนหลังงอ"), t("ปล่อยบาร์ห่างลำตัว")] },
+    ez_bar_curl: { how: [t("จับช่วงเอียงของบาร์อีซีให้ข้อมือสบาย ศอกข้างตัว"), t("พับศอกยกบาร์โดยไม่โยกลำตัว"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("เหวี่ยงตัวเพื่อยกน้ำหนัก"), t("ดันศอกไปข้างหน้ามากจนไหล่ช่วย")] },
+    lying_leg_curl: { how: [t("ปรับแกนเครื่องใกล้ข้อเข่า ลูกกลิ้งอยู่เหนือส้นเท้า"), t("พับเข่ายกลูกกลิ้งโดยสะโพกยังแนบเบาะ"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ยกสะโพกหรือแอ่นหลังช่วย"), t("ตั้งลูกกลิ้งบนข้อเท้าโดยตรง")] },
+    hip_thrust_machine: { how: [t("ล็อกสายหรือแผ่นรองตามคู่มือ ให้รองบนสะโพกไม่ใช่ท้อง"), t("วางเท้ามั่นคง ดันสะโพกขึ้นจนลำตัวตรงโดยไม่แอ่นหลัง"), t("ลดสะโพกช้า ๆ และคืนเครื่องสู่จุดพักก่อนปลดสาย")], miss: [t("แอ่นหลังแทนการเหยียดสะโพก"), t("ปลดสายขณะน้ำหนักยังยกอยู่")] },
+    hip_abduction: { how: [t("ตั้งระยะเริ่มแคบพอสบาย แผ่นรองแตะด้านนอกต้นขา"), t("กางขาออกช้า ๆ โดยเชิงกรานไม่โยก"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("โยกตัวหรือกระแทกขาออก"), t("ตั้งช่วงกว้างจนฝืนสะโพก")] },
+    hip_adduction: { how: [t("ปรับช่วงกางที่สบาย แผ่นรองอยู่ด้านในต้นขา"), t("หุบขาช้า ๆ โดยหลังยังพิงเบาะ"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("เริ่มจากช่วงกว้างจนตึงฝืน"), t("ปล่อยน้ำหนักดึงขากางเร็ว")] },
+    glute_kickback: { how: [t("ปรับแผ่นรองและวางเท้าตามจุดของเครื่อง เกร็งลำตัว"), t("ดันขาไปหลังในช่วงสั้นที่คุมได้ โดยสะโพกไม่บิด"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังเพื่อดันขาให้สูง"), t("เปิดสะโพกหมุนออกข้าง")] },
+    seated_calf_raise: { how: [t("วางหน้าเท้าบนแท่นและแผ่นรองบนต้นขาไม่กดข้อเข่า"), t("ยกส้นขึ้นแล้วลดช้า ๆ ในช่วงที่ข้อเท้าสบาย"), t("คุมลงแล้วคืนตัวล็อกก่อนนำขาออก")], miss: [t("เด้งส้นเพื่อยกน้ำหนัก"), t("วางแผ่นรองกดตรงข้อเข่า")] },
+    back_extension: { how: [t("ตั้งแผ่นรองต่ำกว่ารอยพับสะโพกและยึดเท้าให้มั่น"), t("พับที่สะโพกโดยรักษาหลังเป็นกลาง ไม่ก้มลึกฝืน"), t("ยกกลับจนลำตัวตรงแนวขา ไม่แอ่นเลยแนว")], miss: [t("แอ่นหลังเลยแนวลำตัว"), t("ใช้แรงเหวี่ยงขึ้นลง")] },
+    cable_crunch: { how: [t("ตั้งรอกสูง ใช้เชือกน้ำหนักเบา คุกเข่าบนแผ่นรอง"), t("เกร็งท้องและงอลำตัวเล็กน้อยโดยไม่ดึงคอด้วยมือ"), t("คลายกลับช้า ๆ โดยสะโพกไม่โยกไปมา")], miss: [t("ดึงเชือกด้วยแขนแทนหน้าท้อง"), t("พับสะโพกลึกจนลำตัวโยก")] },
+    leg_raise_station: { how: [t("จับด้ามและวางท่อนแขนบนแผ่นรอง ไหล่ไม่ยกค้าง"), t("ยกเข่างอเข้าหาลำตัว ม้วนเชิงกรานเล็กน้อยโดยไม่เหวี่ยง"), t("ลดขาช้า ๆ แล้วใช้ขั้นของเครื่องลงอย่างมั่นคง")], miss: [t("เหวี่ยงขาเพื่อให้ยกสูง"), t("ปล่อยไหล่ยุบและหลังแอ่น")] },
+    barbell_row: { how: [t("ใช้บาร์เบา พับสะโพก เข่างอเล็กน้อยและหลังเป็นกลาง"), t("ดึงบาร์เข้าท้องโดยลำตัวคงมุมเดิม"), t("ลดบาร์ช้า ๆ แล้วตั้งตัวก่อนวางบาร์อย่างปลอดภัย")], miss: [t("กระตุกลำตัวขึ้นทุกครั้งที่ดึง"), t("ปล่อยหลังงอขณะถือบาร์")] }
   };
 
   // EX: exercises the app can pick or offer. ALL_EX and EXBY also hold AI exercises the user removed (hidden),
@@ -1222,7 +1353,7 @@
   var EX = [], ALL_EX = [], EXBY = {};
   function rebuildEx() {
     ALL_EX = BASE_EX.concat(S.custom);
-    EX = ALL_EX.filter(function (e) { return !e.hidden; });
+    EX = ALL_EX.filter(function (e) { return !e.hidden && !e.catalogOnly; });
     EXBY = {}; ALL_EX.forEach(function (e) { EXBY[e.id] = e; });
   }
   // Removing an AI exercise hides it instead of deleting it: past sets still need its name and muscles.
@@ -1324,7 +1455,7 @@
   var KEY = "train-today-v1", AIKEY = "train-today-gemini-key";
   var S = blankState();
   function blankState() {
-    return { log: [], off: [], slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanThumbs: {}, scanned: false,
+    return { log: [], off: BASE_EX.filter(function (ex) { return ex.optional; }).map(function (ex) { return ex.id; }), slot: "any", energy: "ok", body: {}, draft: {}, custom: [], seen: [], scanThumbs: {}, scanned: false,
       food: [], weights: [], runs: [], prefs: { rest: 90, kcal: 2800, protein: null, goalKg: null, goal: "gain" }, summary: null,
       profile: { sex: null, age: null, h: null, act: 1.55 }, shoe: null, shoeQ: cleanShoeQ(null),
       today: { skip: [], add: [] }, picker: false, onboarded: false, draftTs: 0 };
@@ -1510,6 +1641,7 @@
       var d = JSON.parse(localStorage.getItem(KEY) || "null");
       if (d && Array.isArray(d.log)) {
         S.log = cleanLog(d.log); S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return typeof x === "string"; }) : [];
+        if (d.catalogVersion !== 2) S.off = S.off.concat(BASE_EX.filter(function (ex) { return ex.optional && (d.catalogVersion !== 1 || ex.catalogVersion === 2) && S.off.indexOf(ex.id) < 0; }).map(function (ex) { return ex.id; }));
         if (d.slot) S.slot = d.slot; if (d.energy) S.energy = d.energy;
         if (d.body && d.bodyDay === dayKey(Date.now())) S.body = d.body; // soreness resets each day
         S.custom = cleanCustom(d.custom);
@@ -1530,7 +1662,7 @@
     rebuildEx(); checkLoadedThumbnails();
   }
   function snapshot() {
-    return { log: S.log, off: S.off, custom: S.custom, seen: S.seen, scanThumbs: S.scanThumbs || {}, food: S.food, weights: S.weights, runs: S.runs, prefs: S.prefs, profile: S.profile, shoe: S.shoe, shoeQ: S.shoeQ };
+    return { catalogVersion: 2, log: S.log, off: S.off, custom: S.custom, seen: S.seen, scanThumbs: S.scanThumbs || {}, food: S.food, weights: S.weights, runs: S.runs, prefs: S.prefs, profile: S.profile, shoe: S.shoe, shoeQ: S.shoeQ };
   }
   function save(previousThumbs) {
     try {
@@ -2345,7 +2477,7 @@
   function machineConfig() { return window.MACHINE_CONFIG || { mode: "local", modelPath: "models/machines/", threshold: 0.85, timeoutMs: 15000 }; }
   function getMachineAdapter() {
     if (!window.KryvosMachines) throw new Error("model");
-    if (!machineAdapter) machineAdapter = window.KryvosMachines.create(machineConfig(), function () { return EX; });
+    if (!machineAdapter) machineAdapter = window.KryvosMachines.create(machineConfig(), function () { return ALL_EX.filter(function (ex) { return !ex.hidden; }); });
     return machineAdapter;
   }
   function recognizeMachine(imageBlob) { return getMachineAdapter().recognizeMachine(imageBlob); }
@@ -2363,10 +2495,10 @@
   function showMachinePhotoCredits() {
     openSheet("", null, $("machine-photo-credits"));
     var photos = typeof MACHINE_PHOTOS !== "undefined" ? MACHINE_PHOTOS : {};
-    sheet.innerHTML = sheetHead(t("ที่มารูปภาพ"), false) + '<p class="hint">' + t("ภาพผ่านการแต่งด้วย AI เพื่อลบคนและพื้นหลัง รายละเอียดอาจต่างจากเครื่องจริง ดูเครดิตต้นฉบับด้านล่าง") + '</p><ul class="photo-credits">' + EX.filter(function (ex) { return photos[ex.id]; }).map(function (ex) {
+    sheet.innerHTML = sheetHead(t("ที่มารูปภาพ"), false) + '<p class="hint">' + t("ภาพถ่ายเครื่องที่ลบพื้นหลังใช้เป็นตัวอย่างอุปกรณ์ ไม่ใช่ภาพสาธิตทุกท่า ดูแหล่งที่มาและการปรับแต่งได้ในเครดิต") + '</p><ul class="photo-credits">' + BASE_EX.filter(function (ex) { return photos[ex.id]; }).map(function (ex) {
       var photo = photos[ex.id];
       var author = photo.authorUrl ? '<a href="' + esc(photo.authorUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.author) + '</a>' : esc(photo.author);
-      return '<li><strong>' + esc(ex.name) + '</strong><br><a href="' + esc(photo.source) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.title) + '</a><br>' + author + ' · <a href="' + esc(photo.licenseUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.license) + '</a></li>';
+      return '<li><strong>' + esc(ex.name) + '</strong><br><a href="' + esc(photo.source) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.title) + '</a><br>' + author + ' · <a href="' + esc(photo.licenseUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(photo.license) + '</a><br>' + esc(photo.changes) + '</li>';
     }).join("") + '</ul>';
     sheet.onclick = function (ev) { if (ev.target.closest("[data-close]")) closeSheet(); };
     sheet.focus();
@@ -2375,8 +2507,51 @@
     var ex = EXBY[row.id]; if (!ex || ex.hidden) return "";
     return '<button type="button" class="machine-card" data-machine-' + action + '="' + esc(ex.id) + '">' + machineArt(ex.id) + '<span>' + esc(ex.name) + '</span></button>';
   }
+  var machineAliases = null;
+  function machineMatches(ex, query) {
+    query = String(query || "").normalize("NFKC").trim().toLowerCase();
+    if (!query) return true;
+    if (!machineAliases) {
+      machineAliases = {};
+      if (typeof EN !== "undefined") Object.keys(EN).forEach(function (key) {
+        if (typeof EN[key] === "string") machineAliases[EN[key]] = (machineAliases[EN[key]] || "") + " " + key;
+      });
+    }
+    return [ex.name, EN_NAME[ex.id] || "", ex.en || "", machineAliases[ex.name] || ""].join(" ").normalize("NFKC").toLowerCase().indexOf(query) >= 0;
+  }
+  function machineFilterCategory(ex) {
+    if (ex.category === "cardio") return "cardio";
+    if (/^(?:db_|incline_db|one_arm_db|barbell_|romanian_|ez_bar_|preacher_|kettlebell_|lateral_raise$|pushup$|plank$)/.test(ex.id)) return "free";
+    return ex.day === "legs" ? "lower" : "upper";
+  }
+  var machineFilter = "all";
+  function machineCategory(ex) {
+    if (ex.category) return ex.category;
+    if (ex.day === "legs") return "legs";
+    if (ex.m[0] === "biceps" || ex.m[0] === "triceps") return "arms";
+    return ex.day === "push" ? "chest" : "back";
+  }
+  function machineGroups() {
+    try {
+      var groups = JSON.parse(localStorage.getItem("kryvos-machine-library-groups") || "{}");
+      return groups && typeof groups === "object" && !Array.isArray(groups) ? groups : {};
+    } catch (error) { return {}; }
+  }
+  function renderMachineGrid() {
+    var query = $("machine-search").value, groups = machineGroups();
+    var labels = { chest: t("อก / ไหล่"), back: t("หลัง"), legs: t("ขา"), arms: t("แขน"), cardio: t("คาร์ดิโอ"), free: t("ฟรีเวท") };
+    var filters = { all: t("ทั้งหมด"), cardio: t("คาร์ดิโอ"), upper: t("ช่วงบน"), lower: t("ช่วงล่าง"), free: t("ฟรีเวท") };
+    $("machine-filters").innerHTML = Object.keys(filters).map(function (key) { return '<button type="button" class="mini" data-machine-filter="' + key + '" aria-pressed="' + (machineFilter === key) + '">' + esc(filters[key]) + '</button>'; }).join("");
+    var h = Object.keys(labels).map(function (category) {
+      var items = ALL_EX.filter(function (ex) { return !ex.hidden && machineCategory(ex) === category && (machineFilter === "all" || machineFilterCategory(ex) === machineFilter) && machineMatches(ex, query); });
+      if (!items.length) return "";
+      var open = query.trim() || machineFilter !== "all" || (typeof groups[category] === "boolean" ? groups[category] : false);
+      return '<details class="catalog-group" data-machine-group="' + category + '"' + (open ? ' open' : '') + '><summary>' + esc(labels[category]) + ' <span class="hint">' + items.length + '</span></summary><div class="machine-grid">' + items.map(function (ex) { return machineCard(ex, "pick"); }).join("") + '</div></details>';
+    }).join("");
+    $("machine-grid").innerHTML = h || '<p role="status">' + t("ไม่เจอเครื่อง ลองชื่ออื่นหรือใช้กล้อง") + '</p>';
+  }
   function renderMachineLibrary() {
-    $("machine-grid").innerHTML = EX.map(function (ex) { return machineCard(ex, "pick"); }).join("");
+    renderMachineGrid();
     var remote = machineConfig().mode === "remote";
     $("machine-settings-label").textContent = t("ตั้งค่าการจำเครื่อง");
     $("machine-prepare").textContent = t("เตรียมใช้แบบไม่มีเน็ต");
@@ -2408,7 +2583,7 @@
     var ex = EXBY[id]; if (!ex || ex.hidden) return false;
     var before = JSON.stringify(S);
     if (S.seen.indexOf(id) < 0) S.seen.push(id);
-    S.off = S.off.filter(function (item) { return item !== id; });
+    if (!ex.catalogOnly) S.off = S.off.filter(function (item) { return item !== id; });
     S.prefs.homeAutoOff = (S.prefs.homeAutoOff || []).filter(function (item) { return item !== id; });
     S.scanned = true;
     if (save() === false) { S = JSON.parse(before); return false; }
@@ -2424,6 +2599,7 @@
   }
   function openMachineInfo(id, saved, back) {
     var ex = EXBY[id]; if (!ex || ex.hidden) return;
+    saved = saved || S.seen.indexOf(id) >= 0;
     machineSequence++; // a late model result cannot replace a manual choice
     var origin = back || (sheet ? sheetBack : document.activeElement);
     openSheet("", null, machineFocusReturn(origin, id));
@@ -2432,7 +2608,7 @@
     sheet.innerHTML = sheetHead(esc(ex.name), false) + machineArt(id) +
       '<p role="status">' + (saved ? t("จำเครื่องนี้ในยิมแล้ว เปิดแอปใหม่ก็ยังอยู่") : t("ดูวิธีเล่นก่อน แล้วค่อยเพิ่มในยิมได้")) + '</p>' +
       (isPainful(ex) ? '<p class="alert red">' + t("ท่านี้โดนส่วนที่เจ็บ วันนี้ให้ข้าม ถ้าเจ็บมากหรือไม่หายให้พบแพทย์") + '</p>' : '') +
-      guideHtml(ex) + '<button type="button" class="btn" data-machine-rest="' + esc(id) + '">' + t("เริ่มจับเวลาพัก") + ' · ' + restText(S.prefs.rest) + '</button>' +
+      (ex.catalogOnly ? '<p class="hint">' + t("เครื่องคาร์ดิโอ: ดูวิธีใช้และจำไว้ในยิม ไม่เพิ่มในโปรแกรมเวทอัตโนมัติ") + '</p>' : "") + guideHtml(ex) + '<button type="button" class="btn" data-machine-rest="' + esc(id) + '">' + t("เริ่มจับเวลาพัก") + ' · ' + restText(S.prefs.rest) + '</button>' +
       (!saved ? '<button type="button" class="btn line" data-machine-save="' + esc(id) + '">' + t("เพิ่มในยิมของฉัน") + '</button>' : '') +
       (related.length ? '<p class="hint">' + t("ท่าที่ใช้อุปกรณ์ลักษณะเดียวกัน ตรวจว่าเครื่องรองรับก่อนเพิ่ม") + '</p><div class="machine-grid">' + related.map(function (key) { return machineCard({ id: key }, "pick"); }).join("") + '</div>' : '');
     sheet.onclick = function (ev) {
@@ -2476,7 +2652,7 @@
   var shotN = 0;
 
   function buildPrompt() {
-    var known = EX.map(function (e) { return e.id + ": " + e.name; }).join("\n");
+    var known = (typeof ALL_EX !== "undefined" ? ALL_EX : EX).filter(function (e) { return !e.hidden; }).map(function (e) { return e.id + ": " + (EN_NAME[e.id] || e.name); }).join("\n");
     return [
       "You identify gym equipment in a photo for a Thai workout-planning app.",
       "Known exercises (id: name):", known, "",
@@ -2485,7 +2661,8 @@
       "Rules:",
       "- Look only at equipment that is clearly visible. Ignore people and do not describe them.",
       "- For each piece of equipment, list the ids of known exercises it can be used for.",
-      "- If it supports a common exercise NOT in the known list, add it to new_exercises with a short " + AI_LANG + " name in name_th (machine type in brackets), day push/pull/legs, muscles (main first, keys above), joints it loads (keys above).",
+      "- Match equipment to ALL applicable catalog ids first. Never create new_exercises when a catalog exercise matches the equipment and movement.",
+      "- Only if it supports a common exercise with NO matching catalog id, add it to new_exercises with a short " + AI_LANG + " name in name_th (machine type in brackets), day push/pull/legs, muscles (main first, keys above), joints it loads (keys above).",
       "- Write label_th in " + AI_LANG + ". If there is no gym equipment, return empty arrays.",
       "Return JSON only, exactly this shape:",
       '{"equipment":[{"label_th":"string","label_en":"English machine name","known":["id"],"confidence":0.0}],"new_exercises":[{"name_th":"string","name_en":"English exercise name","day":"push","muscles":["chest"],"joints":["shoulder"]}]}'
@@ -2547,11 +2724,11 @@
   }
   function scanExerciseHtml(ex, item, saved, selected) {
     var en = EN_NAME[ex.id] || ex.en || "", guide = GUIDE[ex.id] || ex.guide;
-    var sug = suggest(ex, S.energy === "tired"), sets = S.energy === "tired" || firstWeekLevel() === 0 ? 2 : 3;
+    var sug = ex.catalogOnly ? { reps: "", tip: t("เครื่องคาร์ดิโอ: ดูวิธีใช้และจำไว้ในยิม ไม่เพิ่มในโปรแกรมเวทอัตโนมัติ") } : suggest(ex, S.energy === "tired"), sets = S.energy === "tired" || firstWeekLevel() === 0 ? 2 : 3;
     var pick = item.fresh ? 'data-new="' + item.k + '"' : 'data-known="' + esc(item.id) + '"';
     var checked = typeof selected === "boolean" ? selected : !!item.fresh || item.conf >= 0.5;
     return '<article class="sh-ex"><label class="sh-pick"><input type="checkbox" ' + pick + (checked ? " checked" : "") + (saved ? " disabled" : "") + '><span>' + esc(ex.name) + (en ? '<small lang="en">' + esc(en) + '</small>' : '<small>' + t("ยังไม่มีชื่อภาษาอังกฤษที่ยืนยันแล้ว") + '</small>') + (!checked ? '<small>' + t("AI ไม่แน่ใจ ตรวจดูก่อน") + '</small>' : '') + '</span></label>' +
-      scanMuscles(ex) + '<p class="hint">' + esc(names(ex.m, MUSCLES)) + '</p><div class="scan-dose">' + tf(t("{n} เซ็ต"), { n: sets }) + ' · ' + esc(sug.reps + (ex.t === "sec" ? t(" วิ") : t(" ครั้ง"))) + '<small class="hint" style="display:block">' + esc(sug.tip) + '</small></div>' +
+      scanMuscles(ex) + '<p class="hint">' + esc(names(ex.m, MUSCLES)) + '</p><div class="scan-dose">' + (ex.catalogOnly ? '' : tf(t("{n} เซ็ต"), { n: sets }) + ' · ' + esc(sug.reps + (ex.t === "sec" ? t(" วิ") : t(" ครั้ง")))) + '<small class="hint" style="display:block">' + esc(sug.tip) + '</small></div>' +
       (guide && guide.how && guide.how.length >= 3 ? '<ol class="scan-steps">' + guide.how.slice(0, 4).map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>' : '<p class="hint">' + t("ยังไม่มีขั้นตอนที่ครบถ้วนสำหรับท่านี้ ดูวิดีโอหรือสอบถามผู้ฝึกสอนก่อนใช้เครื่อง") + '</p>') +
       '<p class="hint">' + tf(t("พักระหว่างเซ็ต {t}"), { t: restText(S.prefs.rest) }) + '</p>' + exVideos(ex) + '</article>';
   }
@@ -2648,6 +2825,13 @@
   }
 
   // Never trust the model's output blindly: keep only known ids and valid keys.
+  function catalogMatch(name) {
+    if (typeof name !== "string" || typeof BASE_EX === "undefined") return null;
+    function key(value) { return String(value).normalize("NFKC").trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " "); }
+    var aliases = { treadmill: "treadmill", "stationary bike": "stationary_bike", "exercise bike": "stationary_bike", elliptical: "elliptical", "elliptical trainer": "elliptical", "stair climber": "stair_climber", stairmaster: "stair_climber", rower: "rower", "rowing machine": "rower", "rowing ergometer": "rower", "cable crossover": "cable_fly", "smith machine": "smith_squat", kettlebell: "kettlebell_goblet_squat" };
+    var normalized = key(name), alias = aliases[normalized];
+    return BASE_EX.find(function (ex) { return ex.id === alias || [ex.id, ex.name, typeof EN_NAME !== "undefined" && EN_NAME[ex.id]].some(function (value) { return value && key(value) === normalized; }); }) || null;
+  }
   function validate(r) {
     var out = { equipment: [], fresh: [] };
     var taken = {}, back = {};
@@ -2656,11 +2840,18 @@
     (r && Array.isArray(r.equipment) ? r.equipment : []).slice(0, 8).forEach(function (q) {
       if (!q) return;
       var ids = (Array.isArray(q.known) ? q.known : []).filter(function (id) { return typeof id === "string" && Object.prototype.hasOwnProperty.call(EXBY, id) && !EXBY[id].hidden; });
+      var mapped = typeof catalogMatch === "function" && (catalogMatch(q.label_en) || catalogMatch(q.label_th));
+      if (!ids.length && mapped) ids.push(mapped.id);
       var label = typeof q.label_th === "string" ? q.label_th.slice(0, 50) : t("เครื่องออกกำลังกาย");
       var conf = typeof q.confidence === "number" ? Math.max(0, Math.min(1, q.confidence)) : 0.5;
       out.equipment.push({ label: label, en: cleanEn(q.label_en), ids: ids, conf: conf });
     });
     (r && Array.isArray(r.new_exercises) ? r.new_exercises : []).slice(0, 5).forEach(function (n) {
+      var mapped = n && typeof catalogMatch === "function" && (catalogMatch(n.name_en) || catalogMatch(n.name_th));
+      if (mapped) {
+        if (!out.equipment.some(function (row) { return row.ids.indexOf(mapped.id) >= 0; })) out.equipment.push({ label: mapped.name, en: EN_NAME[mapped.id], ids: [mapped.id], conf: 0.5 });
+        return;
+      }
       if (!n || typeof n.name_th !== "string" || !Object.prototype.hasOwnProperty.call(DAYS, n.day)) return;
       var m = (Array.isArray(n.muscles) ? n.muscles : []).filter(function (k) { return typeof k === "string" && Object.prototype.hasOwnProperty.call(MUSCLES, k); });
       var j = (Array.isArray(n.joints) ? n.joints : []).filter(function (k) { return typeof k === "string" && Object.prototype.hasOwnProperty.call(JOINTS, k); });
@@ -2994,7 +3185,7 @@
       if (!EXBY[exId] || EXBY[exId].hidden) return;
       selected.push(exId);
       if (S.seen.indexOf(exId) < 0) S.seen.push(exId);
-      S.off = S.off.filter(function (x) { return x !== exId; });
+      if (!EXBY[exId].catalogOnly) S.off = S.off.filter(function (x) { return x !== exId; });
       on++;
     });
     Array.prototype.forEach.call(box.querySelectorAll("input[data-new]:checked"), function (cb) {
@@ -3787,7 +3978,7 @@
     var plan6 = ["push", "legs", "pull", "push", "legs", "pull"];
     plan6.forEach(function (d, i) {
       var round = i >= 3 ? 1 : 0;
-      var entries = BASE_EX.filter(function (e) { return e.day === d; }).map(function (e) {
+      var entries = BASE_EX.filter(function (e) { return !e.optional && e.day === d; }).map(function (e) {
         var sets = [0, 1, 2].map(function (k) {
           if (e.t === "kg") return { kg: base[e.id] + round * STEP, reps: round ? 10 - k : 12 };
           if (e.t === "sec") return { reps: 30 + round * 5 };
@@ -3865,6 +4056,19 @@
     try { $("machine-gallery-input").click(); } catch (error) { $("machine-manual").open = true; $("machine-status").textContent = t("อ่านรูปไม่ได้ ลองรูปอื่นหรือเลือกเครื่องเอง"); }
   });
   $("machine-photo-credits").addEventListener("click", showMachinePhotoCredits);
+  $("machine-filters").addEventListener("click", function (ev) {
+    var button = ev.target.closest("[data-machine-filter]"); if (!button) return;
+    machineFilter = button.dataset.machineFilter; renderMachineGrid();
+    $("machine-filters").querySelector('[data-machine-filter="' + machineFilter + '"]').focus();
+  });
+  $("machine-search").addEventListener("input", renderMachineGrid);
+  $("machine-grid").addEventListener("click", function (ev) {
+    var summary = ev.target.closest("summary"); if (!summary) return;
+    var details = summary.parentElement, category = details.dataset.machineGroup;
+    if (!category || $("machine-search").value.trim() || machineFilter !== "all") return;
+    var groups = machineGroups(); groups[category] = !details.open;
+    try { localStorage.setItem("kryvos-machine-library-groups", JSON.stringify(groups)); } catch (error) {}
+  });
   $("machine-prepare").addEventListener("click", async function () {
     var button = this; button.disabled = true;
     $("machine-status").textContent = t("กำลังเตรียมให้… เลือกเครื่องเองก่อนได้เลย");
@@ -4236,6 +4440,7 @@
       S.scanned = S.scanned || S.seen.length > 0;
       S.scanThumbs = thumbnails;
       S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
+      if (d.catalogVersion !== 2) S.off = S.off.concat(BASE_EX.filter(function (ex) { return ex.optional && (d.catalogVersion !== 1 || ex.catalogVersion === 2) && S.off.indexOf(ex.id) < 0; }).map(function (ex) { return ex.id; }));
       S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
       if (d.prefs) S.prefs = cleanPrefs(d.prefs);
       // body details and shoes are in backups since v3; older files leave the current ones alone

@@ -239,3 +239,66 @@ just functional browser checks while iterating; final validation used the full s
 - Original browser-simple-flow suite: 16 combinations plus offline/manual, recognition-controlled flows and rest/focus regression passed. Local PWA upgrade checks from v57/v59/v60/v61 to v65 verify matching assets and retained data.
 - Before/after screenshots: [app-only-machine-art](screenshots/app-only-machine-art/). Before index is 4ab366a; both sides use synthetic gray JPEG scan photos. For this fixture only, the leg_press app-photo entry is omitted at runtime to demonstrate SVG fallback; production MACHINE_PHOTOS is unchanged. Gym overview and expanded toggle close-ups captured at 320/375, Thai, light/dark. Reproduce with tests/browser-machine-art.cjs, adding --before for baseline.
 - No physical iPhone/Android testing; no trained model added or recognition accuracy claim. No backend change or worker deployment required. Submitted as one PR; not merged.
+
+## Machine catalog (v70, 2026-10-20)
+
+- Based on main faa6319 (Claude brand PR #24 retained), reuses unmerged ab1da45; no existing catalog PR was found. PR #25 (AI icons) and #23 (Gemini quotas) are independent and not merged here.
+- 58 bilingual entries: original 15 identical; 43 additions with how-to/mistakes/muscles/joints and bounded original SVGs. Five cardio stations remain outside EX (training) but in ALL_EX/EXBY (catalog/scans/history). Exact-name scan aliases reuse catalog IDs.
+- plan(), suggest(), exStatus(), lastTrained(), hoursSince() source matches main snapshots. Existing saved plan/load comparisons pass across 54 scenarios plus training/running history. Old saves/backups default additions off; version-1 draft backups keep activations and default only seven new entries off.
+- Existing 15 AI-edited example entries/source/author/license retained. All cutouts <=60,000 bytes; leg-press re-encoded with transparency retained. 43 additions explicitly photo missing: SVG fallback. Wikimedia kettlebell download returned 429; no image was bundled without verified provenance. New images are not added to SW shell.
+- Node suite: 273 passing (before final compatibility assertion); final count recorded in PR. Catalog browser: 16/16 size/theme/language combinations, every new guide/SVG bounding box, filters, two-language search, no results, persistence, no upload, focus and overflow. Existing browser-simple-flow: 16/16, six tabs, photos/credits, offline/manual memory, controlled local/remote flows and rest timer passed. Updated only the old above-fold Start assertion to check reachability in the main brand layout.
+- Screenshots: docs/screenshots/catalog (320/375 TH light and EN dark); manually inspected. No physical phones or live Gemini inference tested. No proxy/Worker/Android change; no deployment.
+
+## Set progress spacing follow-up (v72)
+
+- CSS only: 24px top padding, 8px gaps, uniformly sized grid cells that wrap, 12px before the set-count text, and unchanged equal horizontal card padding. Existing exercise grouping remains in the DOM for progress updates.
+- Browser geometry checks passed all 16 combinations: 320/360/375/430px × TH/EN × light/dark, using an isolated 12-set workout. Verified top/gap/text spacing, wrapping, equal insets, 20px cell height, no horizontal overflow, and unchanged tick/progress/rest behavior.
+- Node suite: 273/273 passed. No application functions, translations, user data or Worker code changed. HTML asset tags and service-worker version bumped together to v72 for cache refresh.
+- Review crops: docs/screenshots/set-spacing. Local PR A preview remains on port 8026. No merge or deployment.
+
+
+## Real equipment photographs — 2026-10-20
+
+- 38 canonical entries use 21 verified Wikimedia Commons photographs, including all five cardio stations. Sources, authors, licenses and actual changes are recorded in machine-photos.js and assets/machines/CREDITS.md.
+- All new WebP files are below 60,000 bytes, loaded lazily and absent from the shell precache. Existing shell artwork is retained. v73 invalidates stale HTML and metadata.
+- 16 entries still use SVG because an exact person-free freely licensed photograph was not verified; four original AI-edited entries remain labelled as such. No unrelated machine is substituted to fill these gaps.
+- Shared cable/bench/rack pictures are references to the equipment, not demonstrations of each exercise.
+- Node: 273/273 passed. Browser catalog: 16 combinations (320, 360, 375, 430px; TH/EN; light/dark) passed, including image decoding, SVG fallback, search, saved selection, no uploads and no horizontal overflow.
+- Focused browser checks: all five cardio photos decode, cardio credits include source changes, and cable references render in light/dark. Captures: docs/screenshots/real-photos/.
+- No worker, workout algorithm or personal data change. Worker redeploy is not required. No production deployment or migration was run.
+
+
+## One equipment item per image — v74, 2026-10-20
+
+- Visually reviewed 24 photographic cutouts on a white backing: exactly one selected piece of equipment, no people, surrounding machines removed. The cardio rower is a single RowPerfect machine, treadmill a single curved treadmill, free-weight bench a single foreground bench, and dumbbell one assembled dumbbell.
+- 42 canonical entries reference these files. Every file has alpha transparency and is <= 60,000 bytes. Sources, actual changes, licenses and single-equipment metadata are recorded. Wikimedia Commons and three Public Domain Mark releases by Ortus Fitness on Flickr are used. No images were copied from manufacturer/shop sites.
+- Node: 273/273 passed. Browser catalog: all 16 combinations of 320/360/375/430 px, light/dark, TH/EN passed. Search, guides, saved selections, no uploads, no sideways overflow and image decoding remain covered.
+- Bottom-navigation markup, styles and icons are unchanged; index.html changes only cache query versions. sw.js is v74; the 24 cutouts are lazy-loaded, not added to the shell precache. No worker, migration, workout algorithm or saved-data change.
+- Remaining gap: 12 SVG entries and four legacy AI examples. This check does not claim that the entire 58-entry catalog now has real photographs.
+
+
+## Additional photographic cutouts — v75, 2026-10-21
+
+- Replaced nine remaining SVG entries and all four legacy AI examples with 13 actual-photo cutouts. Current coverage is 55/58 canonical entries, using 37 distinct transparent assets. Every displayed photo entry has source, author, license and editing details. Flickr CC BY/CC BY-SA originals and Wikimedia Commons originals are used; visible source watermarks and original hardware crop are retained.
+- White-background visual QA: one selected equipment item per cutout, empty equipment, no surrounding machines. These are equipment references and do not demonstrate every exercise sharing a station. Built-in image editing was used for background extraction; no new equipment generation was requested.
+- All current photo assets contain alpha and are <=60,000 bytes. Photographs load on demand, outside the service-worker shell precache. index/en cache queries and sw.js are v75.
+- Node suite: 273/273 passed. Browser catalog: 16 combinations of 320/360/375/430 px, TH/EN, light/dark passed, including decoding all referenced photographs, guides, bilingual search, saved selections and no horizontal overflow.
+- Remaining SVGs: high_row, hip_thrust_machine, glute_kickback. Searches of Commons, Flickr open-license results and free-image indexes did not establish exact, person-free, openly licensed photographic sources for these three. No manufacturer/shop image or unrelated station was substituted. This release does not claim complete replacement of all 58 entries.
+- Bottom-navigation icons, workout algorithms, saved-data format and proxy/Worker code are unchanged. No merge, deployment or migration was performed.
+
+
+## Glute kickback photo — v76, 2026-10-21
+
+- Replaced the glute_kickback SVG with a verified CC BY 2.0 original by Dakil Auctioneers (Flickr 19075041473), showing an empty Cybex classic glute station. Built-in image editing removed the background, reflections and separate equipment; white-background QA confirmed one station. The transparent WebP is 46,246 bytes and is loaded on demand.
+- Node: 273/273 passed. Catalog browser: 16/16 viewport/theme/language combinations passed. Focused 375px light/dark checks decoded the new file, verified the SVG is hidden and no sideways overflow, and captured docs/screenshots/real-photos/glute-kickback-375-*.png.
+- Current coverage: 56/58. high_row and hip_thrust_machine remain unresolved SVG entries. No complete-coverage claim. Navigation icons, workout rules, saved-data format and Worker code are unchanged. No deployment or migration.
+
+
+## Pre-publication verification — 2026-10-21
+
+- Product checkout 2fad240 (v76), clean before verification. No product code changed during this audit. Fixed stale 15-photo assumptions in browser-simple-flow and browser-release: current metadata has 56 photograph entries. Upgrade checks now verify a decoded Smith-machine photo rather than its hidden SVG, preserve existing activation choices, and require newly introduced strength exercises to remain disabled; cardio stays outside strength planning.
+- Node: 273/273 passed. Full simple-flow browser suite: all 16 combinations (320/360/375/430, TH/EN, light/dark), all 56 photo cards and credit rows, six tabs, manual memory/reload, rest timer, controlled recognition/consent/failures, offline and no unexpected upload checks passed.
+- PWA upgrades passed from v57, v59, v60, v61 and current origin/main faa6319 (v69) to v76. Served assets match checkout hashes; photographed cards decode online/offline; existing training, food, weight, run, shoe and draft records are preserved. Tested with synthetic browser profiles, not personal data.
+- All 38 distinct current photograph files decode, include transparency and are <=60,000 bytes (1,844,366 bytes combined). Two unresolved catalog entries still intentionally use SVG: high_row and hip_thrust_machine. This remains a content gap, not a runtime failure.
+- GitHub checked: PR #26 open/draft, main faa6319; remote PR head was c91cd36 before publishing this audit. Local product had two additional commits. PR #27 is separate and depends on A; not included in this verification.
+- No blocking runtime regression found in these checks. Live Gemini inference, physical phones and a production rollout were not performed. No worker redeploy or database migration is required for PR A.

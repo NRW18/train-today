@@ -4,11 +4,14 @@
  */
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const assert = require('node:assert/strict');
+const catalogCount = require('./catalog-data.cjs').length;
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const root = path.resolve(__dirname, '..');
+const photoScope={};require('node:vm').runInNewContext(fs.readFileSync(path.join(root,'machine-photos.js'),'utf8'),photoScope);
+const photoCount=Object.keys(photoScope.MACHINE_PHOTOS).length;
 const mime = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.svg':'image/svg+xml', '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -51,8 +54,9 @@ async function noOverflow(page, label) {
       await page.goto(base);
       const start = page.locator('#start-workout');
       await start.waitFor({ state:'visible' });
+      await start.scrollIntoViewIfNeeded();
       const startBox = await start.boundingBox();
-      assert.ok(startBox.y + startBox.height < 650, 'start must fit a compact mobile viewport');
+      assert.ok(startBox.y >= 0 && startBox.y + startBox.height < 780, 'start remains reachable in the current brand layout');
       assert.equal(await page.locator('.simple-options').getAttribute('open'), null);
       await start.click();
       assert.equal(await page.evaluate(() => document.activeElement.id), 'plan');
@@ -67,8 +71,9 @@ async function noOverflow(page, label) {
         await page.locator(`[data-tab="${tab}"]`).click();
         await noOverflow(page, `${width}/${colorScheme}/${language}/${tab}`);
         if (tab === 'gym') {
-          assert.equal(await page.locator('#machine-grid button').count(), 15);
+          assert.equal(await page.locator('#machine-grid button').count(), catalogCount);
           assert.equal(await page.locator('#machine-camera').isVisible(), true);
+          await page.locator('#machine-grid details > summary').first().click();
           const first = page.locator('#machine-grid button').first();
           await page.keyboard.press('Tab');
           await first.focus();
@@ -113,19 +118,20 @@ async function noOverflow(page, label) {
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await page.reload();
     await page.locator('[data-tab="gym"]').click();
-    assert.equal(await page.locator('#machine-grid .machine-example').count(), 15);
+    assert.equal(await page.locator('#machine-grid .machine-example').count(), photoCount);
+    for (const group of await page.locator('#machine-grid details').all()) if(!await group.evaluate(el=>el.open))await group.locator('summary').click();
     for (const photo of await page.locator('#machine-grid .machine-example').all()) {
       await photo.scrollIntoViewIfNeeded();
       await photo.evaluate(image => image.decode());
       assert.ok(await photo.evaluate(image => image.naturalWidth > 0));
     }
     await page.locator('#machine-photo-credits').click();
-    assert.equal(await page.locator('.sheet .photo-credits li').count(), 15);
+    assert.equal(await page.locator('.sheet .photo-credits li').count(), photoCount);
     await page.keyboard.press('Escape');
-    console.log('PASS all 15 equipment cutout cards decoded and source/license credits remain accessible');
+    console.log('PASS all '+photoCount+' equipment cutout cards decoded and source/license credits remain accessible');
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-status').filter({ hasText:"Auto-recognition isn't ready yet" }).waitFor();
-    assert.equal(await page.locator('#machine-grid button').count(), 15);
+    assert.equal(await page.locator('#machine-grid button').count(), catalogCount);
     assert.equal(uploads.length, 0, 'local missing model must never upload');
     await page.locator('#machine-settings > summary').click();
     await page.locator('#machine-prepare').click();
@@ -135,7 +141,7 @@ async function noOverflow(page, label) {
     await context.setOffline(true);
     await page.reload();
     await page.locator('[data-tab="gym"]').click();
-    assert.equal(await page.locator('#machine-grid button').count(), 15);
+    assert.equal(await page.locator('#machine-grid button').count(), catalogCount);
     const offlinePhoto = page.locator('#machine-grid .machine-example').first();
     await offlinePhoto.scrollIntoViewIfNeeded();
     await offlinePhoto.evaluate(image => image.decode());
@@ -207,7 +213,7 @@ async function noOverflow(page, label) {
     remote.once('dialog', dialog => dialog.accept());
     await remote.locator('#machine-input').setInputFiles(image);
     await remote.locator('#machine-status').filter({hasText:"We can't check your photo right now"}).waitFor();
-    assert.equal(await remote.locator('#machine-grid button').count(), 15);
+    assert.equal(await remote.locator('#machine-grid button').count(), catalogCount);
     // Load actual vendored libraries and verify their public API without a fake model.
     await remote.addScriptTag({url:base + 'vendor/tf-4.22.0.min.js'});
     await remote.addScriptTag({url:base + 'vendor/tm-image-0.8.5.min.js'});

@@ -12,11 +12,11 @@ const { execFileSync } = require('node:child_process');
 const { createHash } = require('node:crypto');
 const root = path.resolve(__dirname, '..');
 // GitHub Pages serves Git's LF text; Windows checkouts can use CRLF.
-const hash = (file, bytes) => createHash('sha256').update(/\.(html|css|js)$/.test(file) ? Buffer.from(bytes).toString('utf8').replace(/\r\n/g,'\n') : bytes).digest('hex');
+const hash = (file, bytes) => createHash('sha256').update(/\.(html|css|js|svg)$/.test(file) ? Buffer.from(bytes).toString('utf8').replace(/\r\n/g,'\n') : bytes).digest('hex');
 const scope = {};
 vm.runInNewContext(fs.readFileSync(path.join(root, 'machine-photos.js'), 'utf8'), scope);
 const photoFiles = [...new Set(Object.values(scope.MACHINE_PHOTOS).map(photo => photo.src))];
-const appFiles = ['index.html','en.js','theme.css','simple-flow.css','machine-photos.js','machine-recognition.js','machines-config.js','sw.js',...photoFiles];
+const appFiles = ['assets/machines.svg','index.html','en.js','theme.css','simple-flow.css','machine-photos.js','machine-recognition.js','machines-config.js','sw.js',...photoFiles];
 const version = fs.readFileSync(path.join(root, 'sw.js'), 'utf8').match(/var VERSION = "([^"]+)"/)[1];
 const mime = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.json':'application/json'};
 let revision = null;
@@ -73,7 +73,7 @@ async function exactAssets(page, base) {
     for (const file of files) {
       const response = await fetch(new URL(file,base));
       if (!response.ok) throw Error(file + ': HTTP ' + response.status);
-      const bytes = /\.(html|css|js)$/.test(file) ? new TextEncoder().encode((await response.text()).replace(/\r\n/g,'\n')) : await response.arrayBuffer();
+      const bytes = /\.(html|css|js|svg)$/.test(file) ? new TextEncoder().encode((await response.text()).replace(/\r\n/g,'\n')) : await response.arrayBuffer();
       const digest = await crypto.subtle.digest('SHA-256', bytes);
       result.push([file, [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2,'0')).join('')]);
     }
@@ -88,8 +88,9 @@ async function exactAssets(page, base) {
 }
 async function checkCards(page) {
   await page.locator('[data-tab="gym"]').click();
+  for(const group of await page.locator('#machine-grid details').all())if(!await group.evaluate(el=>el.open))await group.locator('summary').click();
   const photos = page.locator('#machine-grid .machine-example');
-  assert.equal(await photos.count(), 15);
+  assert.equal(await photos.count(), Object.keys(scope.MACHINE_PHOTOS).length);
   for (const photo of await photos.all()) {
     await photo.scrollIntoViewIfNeeded(); await photo.evaluate(image => image.decode());
     const info = await photo.evaluate(image => ({width:image.naturalWidth,height:image.naturalHeight,fit:getComputedStyle(image).objectFit,box:image.getBoundingClientRect().toJSON(),src:image.getAttribute('src')}));
@@ -100,8 +101,15 @@ async function checkCards(page) {
   }
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   await page.locator('#machine-photo-credits').click();
-  assert.equal(await page.locator('.photo-credits li').count(), 15);
+  assert.equal(await page.locator('.photo-credits li').count(), Object.keys(scope.MACHINE_PHOTOS).length);
   await page.keyboard.press('Escape');
+  await page.locator('#machine-search').fill('Smith machine squat');
+  await page.locator('[data-machine-pick="smith_squat"]').click();
+  await page.locator('.sheet img.machine-example').evaluate(image=>image.decode());
+  assert.equal(await page.locator('.sheet img.machine-example').isVisible(),true);
+  assert.equal(await page.locator('.sheet .machine-art').isVisible(),false);
+  await page.keyboard.press('Escape');
+  await page.locator('#machine-search').fill('');
 }
 (async () => {
   await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
@@ -122,6 +130,9 @@ async function checkCards(page) {
       await waitVersion(page,oldVersion);
       await page.evaluate(async () => {for (const file of ['en.js','theme.css']) await fetch(file);});
       const before = await page.evaluate(() => JSON.parse(localStorage.getItem('train-today-v1')));
+      const priorScope={t:value=>value}, priorHtml=bytesFor('index.html').toString('utf8');
+      vm.runInNewContext(priorHtml.slice(priorHtml.indexOf('var BASE_EX = ['),priorHtml.indexOf('var EN_NAME = {')),priorScope);
+      const priorIds=Array.from(priorScope.BASE_EX,ex=>ex.id);
       revision = null;
       await page.evaluate(async () => {const reg=await navigator.serviceWorker.getRegistration();await reg.update();});
       await waitVersion(page,version);
@@ -136,7 +147,17 @@ async function checkCards(page) {
       await exactAssets(page,base);
       await checkCards(page);
       const after = await page.evaluate(() => JSON.parse(localStorage.getItem('train-today-v1')));
-      for (const field of ['log','custom','seen','off','food','weights','runs','prefs','shoe','draftTs']) assert.deepEqual(after[field],before[field],oldVersion+' preserves '+field);
+      for (const field of ['log','custom','seen','food','weights','runs','prefs','shoe','draftTs']) assert.deepEqual(after[field],before[field],oldVersion+' preserves '+field);
+      assert.deepEqual(after.off.filter(id=>priorIds.includes(id)),before.off.filter(id=>priorIds.includes(id)),oldVersion+' preserves enabled/disabled choices for the existing catalog');
+      const latestScope={t:value=>value}, latestHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
+      vm.runInNewContext(latestHtml.slice(latestHtml.indexOf('var BASE_EX = ['),latestHtml.indexOf('var EN_NAME = {')),latestScope);
+      const added=Array.from(latestScope.BASE_EX).filter(ex=>ex.optional&&!priorIds.includes(ex.id));
+      // Loading migrates in-memory defaults; localStorage is written on the next user save.
+      for(const ex of added){
+        const toggle=page.locator('#equip input[data-ex="'+ex.id+'"]');
+        if(ex.catalogOnly)assert.equal(await toggle.count(),0,ex.id+' stays outside strength planning');
+        else assert.equal(await toggle.isChecked(),false,ex.id+' stays disabled by default after upgrade');
+      }
       // cleanDraft has always made absent flags explicit on reload. Compare their
       // boolean meaning while checking every exercise/set/load/repetition exactly.
       const normalizedDraft = draft => Object.fromEntries(Object.entries(draft).map(([id,sets]) => [id,sets.map(set=>({...set,done:!!set.done,ed:!!set.ed}))]));
@@ -148,7 +169,7 @@ async function checkCards(page) {
       const cached = await page.evaluate(async files => Promise.all(files.filter(file=>file!=='sw.js').map(async file => [file,(await fetch(file)).ok])),appFiles);
       assert.ok(cached.every(entry=>entry[1]));
       assert.deepEqual(failures,[]);
-      console.log(`PASS ${oldVersion} -> ${version}: exact latest HTML/CSS/scripts/12 cutouts; 15 cards; offline reopen; preserved training/food/body/run/shoe/draft data`);
+      console.log(`PASS ${oldVersion} -> ${version}: exact latest HTML/CSS/scripts/all photo cutouts; ${Object.keys(scope.MACHINE_PHOTOS).length} photo cards; offline reopen; preserved training/food/body/run/shoe/draft data`);
       await context.close();
     }
     if (process.argv.includes('--live')) {

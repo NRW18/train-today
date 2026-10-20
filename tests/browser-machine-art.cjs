@@ -14,9 +14,9 @@ await context.addInitScript(({language,photo})=>{if(!localStorage.getItem('train
 // Simulate one missing app photo to prove SVG fallback instead of a stored scan.
 await context.route('**/machine-photos.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text())+';delete MACHINE_PHOTOS.leg_press;'});});
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:'+server.address().port+'/train-today/');await page.locator('#start-workout').waitFor();await page.locator('[data-tab="gym"]').click();
-await page.locator('#machine-grid button').first().waitFor();
+await page.locator('#machine-grid button').first().waitFor({state:'attached'});
 if(!before){assert.equal(await page.locator('#machine-grid [data-thumb-id],#equip [data-thumb-id]').count(),0);assert.equal(await page.locator('#machine-grid [data-machine-pick="leg_press"] use').getAttribute('href'),'assets/machines.svg#leg_press');assert.match(await page.locator('#machine-grid [data-machine-pick="chest_press"] img').getAttribute('src'),/^assets\/machines\/cutouts\//);
-await page.locator('[data-machine-pick="leg_press"]').click();assert.equal(await page.locator('.sheet [data-thumb-id]').count(),0);assert.equal(await page.locator('.sheet use').last().getAttribute('href'),'assets/machines.svg#leg_press');await page.keyboard.press('Escape');
+await page.locator('#machine-search').fill('leg press');await page.locator('[data-machine-pick="leg_press"]').click();assert.equal(await page.locator('.sheet [data-thumb-id]').count(),0);assert.equal(await page.locator('.sheet use').last().getAttribute('href'),'assets/machines.svg#leg_press');await page.keyboard.press('Escape');
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
 if(width===320&&theme==='light'&&language==='en'){
 await page.evaluate(()=>{window.KryvosMachines.create=()=>({recognizeMachine:async()=>[{id:'chest_press',label:'Chest press',confidence:0.99}]});});

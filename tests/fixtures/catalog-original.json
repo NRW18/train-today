@@ -1,0 +1,204 @@
+[
+  {
+    "id": "chest_press",
+    "name": "เชสต์เพรส (เครื่อง)",
+    "day": "push",
+    "m": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "j": [
+      "shoulder",
+      "elbow",
+      "wrist"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "shoulder_press",
+    "name": "ชอลเดอร์เพรส (เครื่อง)",
+    "day": "push",
+    "m": [
+      "shoulders",
+      "triceps"
+    ],
+    "j": [
+      "shoulder",
+      "elbow"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "pec_deck",
+    "name": "เพ็คเด็ค (เครื่องบีบอก)",
+    "day": "push",
+    "m": [
+      "chest",
+      "shoulders"
+    ],
+    "j": [
+      "shoulder"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "lateral_raise",
+    "name": "ยกดัมเบลด้านข้าง",
+    "day": "push",
+    "m": [
+      "shoulders"
+    ],
+    "j": [
+      "shoulder"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "triceps_pushdown",
+    "name": "ไตรเซ็ปส์พุชดาวน์ (เคเบิล)",
+    "day": "push",
+    "m": [
+      "triceps"
+    ],
+    "j": [
+      "elbow"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "pushup",
+    "name": "วิดพื้น (ทำที่บ้านได้)",
+    "day": "push",
+    "m": [
+      "chest",
+      "triceps",
+      "shoulders",
+      "core"
+    ],
+    "j": [
+      "shoulder",
+      "wrist"
+    ],
+    "t": "reps"
+  },
+  {
+    "id": "lat_pulldown",
+    "name": "แลตพูลดาวน์",
+    "day": "pull",
+    "m": [
+      "back",
+      "biceps"
+    ],
+    "j": [
+      "shoulder",
+      "elbow"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "seated_row",
+    "name": "ซีทเต็ดโรว์ (เครื่อง)",
+    "day": "pull",
+    "m": [
+      "back",
+      "biceps"
+    ],
+    "j": [
+      "shoulder",
+      "elbow",
+      "lowback"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "rear_delt",
+    "name": "รีเวิร์สเพ็คเด็ค (ไหล่หลัง)",
+    "day": "pull",
+    "m": [
+      "shoulders",
+      "back"
+    ],
+    "j": [
+      "shoulder"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "db_curl",
+    "name": "ดัมเบลเคิร์ล",
+    "day": "pull",
+    "m": [
+      "biceps"
+    ],
+    "j": [
+      "elbow",
+      "wrist"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "plank",
+    "name": "แพลงก์",
+    "day": "pull",
+    "m": [
+      "core"
+    ],
+    "j": [
+      "shoulder",
+      "lowback"
+    ],
+    "t": "sec"
+  },
+  {
+    "id": "leg_press",
+    "name": "เลกเพรส",
+    "day": "legs",
+    "m": [
+      "quads",
+      "glutes",
+      "hamstrings"
+    ],
+    "j": [
+      "knee",
+      "lowback"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "leg_extension",
+    "name": "เลกเอ็กซ์เทนชัน",
+    "day": "legs",
+    "m": [
+      "quads"
+    ],
+    "j": [
+      "knee"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "leg_curl",
+    "name": "ซีทเต็ดเลกเคิร์ล",
+    "day": "legs",
+    "m": [
+      "hamstrings"
+    ],
+    "j": [
+      "knee"
+    ],
+    "t": "kg"
+  },
+  {
+    "id": "calf_raise",
+    "name": "คาล์ฟเรส (เครื่อง)",
+    "day": "legs",
+    "m": [
+      "calves"
+    ],
+    "j": [
+      "ankle"
+    ],
+    "t": "kg"
+  }
+]

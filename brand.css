@@ -209,6 +209,12 @@ nav.tabs button[aria-current="page"] svg { background: none; color: var(--grad-t
 .home-week::after { left: -6%; right: -6%; top: 74px; height: 200px; border-top-width: 20px; border-radius: 50% 50% 0 0 / 70px 70px 0 0; -webkit-mask: linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%); mask: linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%); }
 
 /* ---------- other tabs: same language as Today ---------- */
+/* Set progress: equal card insets and evenly sized cells that wrap on phones. */
+#v-today .plan { padding-top: 24px; }
+#v-today .plan .meter { display: grid; grid-template-columns: repeat(auto-fit, minmax(32px, 1fr)); margin-top: 0; height: auto; gap: 8px; }
+#v-today .plan .meter .mg { display: contents; }
+#v-today .plan .meter i { height: 20px; }
+#v-today .plan .meter-t { margin-top: 12px; flex-wrap: wrap; gap: 6px 8px; }
 /* card titles get a short yellow brand bar */
 .card > h2, .card > header h2, .card > summary h2 { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; }
 .card > h2::before { content: ""; width: 6px; height: 1.1em; border-radius: 99px; background: var(--brand-yellow); flex: none; }
