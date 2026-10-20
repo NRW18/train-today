@@ -266,3 +266,12 @@ just functional browser checks while iterating; final validation used the full s
 - Node: 273/273 passed. Browser catalog: 16 combinations (320, 360, 375, 430px; TH/EN; light/dark) passed, including image decoding, SVG fallback, search, saved selection, no uploads and no horizontal overflow.
 - Focused browser checks: all five cardio photos decode, cardio credits include source changes, and cable references render in light/dark. Captures: docs/screenshots/real-photos/.
 - No worker, workout algorithm or personal data change. Worker redeploy is not required. No production deployment or migration was run.
+
+
+## One equipment item per image — v74, 2026-10-20
+
+- Visually reviewed 24 photographic cutouts on a white backing: exactly one selected piece of equipment, no people, surrounding machines removed. The cardio rower is a single RowPerfect machine, treadmill a single curved treadmill, free-weight bench a single foreground bench, and dumbbell one assembled dumbbell.
+- 42 canonical entries reference these files. Every file has alpha transparency and is <= 60,000 bytes. Sources, actual changes, licenses and single-equipment metadata are recorded. Wikimedia Commons and three Public Domain Mark releases by Ortus Fitness on Flickr are used. No images were copied from manufacturer/shop sites.
+- Node: 273/273 passed. Browser catalog: all 16 combinations of 320/360/375/430 px, light/dark, TH/EN passed. Search, guides, saved selections, no uploads, no sideways overflow and image decoding remain covered.
+- Bottom-navigation markup, styles and icons are unchanged; index.html changes only cache query versions. sw.js is v74; the 24 cutouts are lazy-loaded, not added to the shell precache. No worker, migration, workout algorithm or saved-data change.
+- Remaining gap: 12 SVG entries and four legacy AI examples. This check does not claim that the entire 58-entry catalog now has real photographs.

@@ -1,4 +1,4 @@
-// Equipment references: real photographs and explicitly labelled legacy AI-edited cutouts.
+// Equipment references: photographic cutouts and explicitly labelled legacy AI examples.
 // Source credits and derivative licenses: assets/machines/CREDITS.md.
 var MACHINE_PHOTOS = Object.freeze({
   "chest_press": {
@@ -22,54 +22,64 @@ var MACHINE_PHOTOS = Object.freeze({
     "presentation": "ai-edited-cutout"
   },
   "pec_deck": {
-    "src": "assets/machines/cutouts/pec-deck-real.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Chest_Fly_Machine.jpg",
-    "title": "Chest Fly Machine.jpg",
-    "author": "SAgbley",
+    "source": "https://commons.wikimedia.org/wiki/File:Pec_deck_Fly.jpg",
+    "title": "Pec deck Fly.jpg",
+    "author": "Aliva Sahoo",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/pec-deck-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "rear_delt": {
-    "src": "assets/machines/cutouts/pec-deck-real.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Chest_Fly_Machine.jpg",
-    "title": "Chest Fly Machine.jpg",
-    "author": "SAgbley",
+    "source": "https://commons.wikimedia.org/wiki/File:Pec_deck_Fly.jpg",
+    "title": "Pec deck Fly.jpg",
+    "author": "Aliva Sahoo",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/pec-deck-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "lateral_raise": {
-    "src": "assets/machines/cutouts/dumbbells-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Kurzhanteln_2_x_15_kg_1v2.jpg",
     "title": "Kurzhanteln 2 x 15 kg 1v2.jpg",
     "author": "Singlespeedfahrer",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dumbbell-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "triceps_pushdown": {
-    "src": "assets/machines/cutouts/cable-row-real.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Multifunctional_cable_and_row_machines_in_a_gym.jpg",
-    "title": "Multifunctional cable and row machines in a gym.jpg",
-    "author": "San Francisco Foghorn",
-    "license": "CC BY 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
+    "title": "Weight machine.webp",
+    "author": "Wikideas1",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "pushup": {
-    "src": "assets/machines/cutouts/exercise-mat-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Blue_exercise_mat_20160810.jpg",
     "title": "Blue exercise mat 20160810.jpg",
     "author": "Santeri Viinamäki",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/exercise-mat-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "lat_pulldown": {
     "src": "assets/machines/cutouts/lat-pulldown.webp",
@@ -82,54 +92,64 @@ var MACHINE_PHOTOS = Object.freeze({
     "presentation": "ai-edited-cutout"
   },
   "seated_row": {
-    "src": "assets/machines/cutouts/cable-row-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Multifunctional_cable_and_row_machines_in_a_gym.jpg",
     "title": "Multifunctional cable and row machines in a gym.jpg",
     "author": "San Francisco Foghorn",
     "license": "CC BY 2.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/cable-row-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "db_curl": {
-    "src": "assets/machines/cutouts/dumbbells-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Kurzhanteln_2_x_15_kg_1v2.jpg",
     "title": "Kurzhanteln 2 x 15 kg 1v2.jpg",
     "author": "Singlespeedfahrer",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dumbbell-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "plank": {
-    "src": "assets/machines/cutouts/exercise-mat-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Blue_exercise_mat_20160810.jpg",
     "title": "Blue exercise mat 20160810.jpg",
     "author": "Santeri Viinamäki",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/exercise-mat-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "leg_press": {
-    "src": "assets/machines/cutouts/leg-press-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Leg_press_machine.jpg",
     "title": "Leg press machine.jpg",
     "author": "Teemeah",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/leg-press-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "leg_extension": {
-    "src": "assets/machines/cutouts/leg-extension-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Leg_Extension.jpg",
     "title": "Leg Extension.jpg",
     "author": "Aliva Sahoo",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/leg-extension-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "leg_curl": {
     "src": "assets/machines/cutouts/seated-leg-curl.webp",
@@ -142,283 +162,387 @@ var MACHINE_PHOTOS = Object.freeze({
     "presentation": "ai-edited-cutout"
   },
   "calf_raise": {
-    "src": "assets/machines/cutouts/seated-calf-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Seated_calf_machine.jpg",
     "title": "Seated calf machine.jpg",
     "author": "Teemeah",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/seated-calf-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "treadmill": {
-    "src": "assets/machines/cutouts/treadmill-real.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Treadmill-gym.jpg",
-    "title": "Treadmill-gym.jpg",
-    "author": "GhoziSeptiandri",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "source": "https://www.flickr.com/photos/ortus_equipment/51145835320/",
+    "title": "Cinta-de-Correr-Curva-CAT07",
+    "author": "Ortus Fitness",
+    "license": "Public domain (PDM 1.0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "assets/machines/cutouts/treadmill-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "stationary_bike": {
-    "src": "assets/machines/cutouts/stationary-bike-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Fahrrad-Ergometer_01_KMJ.jpg",
     "title": "Fahrrad-Ergometer 01 KMJ.jpg",
     "author": "photo taken by KMJ",
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/stationary-bike-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "elliptical": {
-    "src": "assets/machines/cutouts/elliptical-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Elliptical_machine.jpg",
     "title": "Elliptical machine.jpg",
     "author": "No machine-readable author provided. Cpetro45 assumed (based on copyright claims).",
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/elliptical-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "stair_climber": {
-    "src": "assets/machines/cutouts/stair-climber-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Stair_machine.jpg",
     "title": "Stair machine.jpg",
     "author": "Teemeah",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/stair-climber-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "rower": {
-    "src": "assets/machines/cutouts/rower-real.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Concept_2_Indoor_Rowers.JPG",
-    "title": "Concept 2 Indoor Rowers.JPG",
-    "author": "Johnteslade~commonswiki",
+    "source": "https://commons.wikimedia.org/wiki/File:RowPerfect_Indoor_Rower.JPG",
+    "title": "RowPerfect Indoor Rower.JPG",
+    "author": "JohnteSlade~commonswiki",
     "license": "Public domain",
     "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-self",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/rower-single-clean-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "incline_chest_press": {
-    "src": "assets/machines/cutouts/incline-chest-press-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Chest_Incline.jpg",
     "title": "Chest Incline.jpg",
     "author": "Aliva Sahoo",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/incline-chest-press-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "smith_squat": {
-    "src": "assets/machines/cutouts/smith-machine-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Smith_machine.webp",
     "title": "Smith machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/smith-machine-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "smith_bench_press": {
-    "src": "assets/machines/cutouts/smith-machine-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Smith_machine.webp",
     "title": "Smith machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/smith-machine-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "kettlebell_goblet_squat": {
-    "src": "assets/machines/cutouts/kettlebell-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:8kg_kettlebell.jpg",
     "title": "8kg kettlebell.jpg",
     "author": "Marie-Lan Nguyen",
     "license": "CC BY 2.5",
     "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/kettlebell-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "hip_abduction": {
-    "src": "assets/machines/cutouts/hip-abduction-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Hip_abductor_machine.jpg",
     "title": "Hip abductor machine.jpg",
     "author": "Teemeah",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/hip-abduction-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "back_extension": {
-    "src": "assets/machines/cutouts/back-extension-real.webp",
-    "source": "https://commons.wikimedia.org/wiki/File:Hyper_bench.jpg",
-    "title": "Hyper bench.jpg",
-    "author": "Teemeah",
-    "license": "CC BY-SA 4.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "source": "https://commons.wikimedia.org/wiki/File:Back_extension_bench.webp",
+    "title": "Back extension bench.webp",
+    "author": "Wikideas1",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "src": "assets/machines/cutouts/back-extension-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "seated_calf_raise": {
-    "src": "assets/machines/cutouts/seated-calf-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Seated_calf_machine.jpg",
     "title": "Seated calf machine.jpg",
     "author": "Teemeah",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/seated-calf-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "barbell_bench_press": {
-    "src": "assets/machines/cutouts/bench-press-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Bench_press.webp",
     "title": "Bench press.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/bench-press-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "barbell_squat": {
-    "src": "assets/machines/cutouts/squat-rack-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Power_Rack.JPG",
     "title": "Power Rack.JPG",
     "author": "Wissembourg (talk)",
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/squat-rack-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "barbell_row": {
-    "src": "assets/machines/cutouts/squat-rack-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Power_Rack.JPG",
     "title": "Power Rack.JPG",
     "author": "Wissembourg (talk)",
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/squat-rack-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "romanian_deadlift": {
-    "src": "assets/machines/cutouts/squat-rack-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Power_Rack.JPG",
     "title": "Power Rack.JPG",
     "author": "Wissembourg (talk)",
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/squat-rack-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "incline_db_press": {
-    "src": "assets/machines/cutouts/adjustable-bench-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_benches.webp",
     "title": "Weight benches.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/adjustable-bench-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "db_bench_press": {
-    "src": "assets/machines/cutouts/adjustable-bench-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_benches.webp",
     "title": "Weight benches.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/adjustable-bench-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "db_shoulder_press": {
-    "src": "assets/machines/cutouts/adjustable-bench-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_benches.webp",
     "title": "Weight benches.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/adjustable-bench-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "one_arm_db_row": {
-    "src": "assets/machines/cutouts/adjustable-bench-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_benches.webp",
     "title": "Weight benches.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/adjustable-bench-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "cable_fly": {
-    "src": "assets/machines/cutouts/dual-cable-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
     "title": "Weight machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "cable_lateral_raise": {
-    "src": "assets/machines/cutouts/dual-cable-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
     "title": "Weight machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "cable_face_pull": {
-    "src": "assets/machines/cutouts/dual-cable-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
     "title": "Weight machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "cable_curl": {
-    "src": "assets/machines/cutouts/dual-cable-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
     "title": "Weight machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "overhead_triceps_extension": {
-    "src": "assets/machines/cutouts/dual-cable-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
     "title": "Weight machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "cable_crunch": {
-    "src": "assets/machines/cutouts/dual-cable-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Weight_machine.webp",
     "title": "Weight machine.webp",
     "author": "Wikideas1",
     "license": "CC0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/dual-cable-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   },
   "cable_row": {
-    "src": "assets/machines/cutouts/cable-row-real.webp",
     "source": "https://commons.wikimedia.org/wiki/File:Multifunctional_cable_and_row_machines_in_a_gym.jpg",
     "title": "Multifunctional cable and row machines in a gym.jpg",
     "author": "San Francisco Foghorn",
     "license": "CC BY 2.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-    "changes": "Original equipment photograph; resized and WebP-compressed. Original surroundings retained; no AI reconstruction. Equipment reference, not an exercise demonstration.",
-    "presentation": "photograph"
+    "src": "assets/machines/cutouts/cable-row-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "hack_squat": {
+    "source": "https://www.flickr.com/photos/ortus_equipment/51193206443/",
+    "title": "jaca-discos-ortus-fitness",
+    "author": "Ortus Fitness",
+    "license": "Public domain (PDM 1.0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "assets/machines/cutouts/hack-squat-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "assisted_dip": {
+    "source": "https://www.flickr.com/photos/ortus_equipment/51142771419/",
+    "title": "dominadas asistidas ortus fitness",
+    "author": "Ortus Fitness",
+    "license": "Public domain (PDM 1.0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "assets/machines/cutouts/assisted-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "assisted_pullup": {
+    "source": "https://www.flickr.com/photos/ortus_equipment/51142771419/",
+    "title": "dominadas asistidas ortus fitness",
+    "author": "Ortus Fitness",
+    "license": "Public domain (PDM 1.0)",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "src": "assets/machines/cutouts/assisted-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
+  },
+  "ez_bar_curl": {
+    "source": "https://commons.wikimedia.org/wiki/File:Curl-Hantel_-_SZ-Hantel.jpg",
+    "title": "Curl-Hantel - SZ-Hantel.jpg",
+    "author": "de:Benutzer:ch ivk",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "src": "assets/machines/cutouts/ez-bar-single-single-photo.webp",
+    "changes": "AI-assisted background extraction of one photographed piece of equipment; no AI reconstruction of equipment requested. Resized and compressed to transparent WebP. Shared equipment references do not demonstrate exercise technique.",
+    "presentation": "photograph",
+    "backgroundRemoved": true,
+    "singleEquipment": true
   }
 });

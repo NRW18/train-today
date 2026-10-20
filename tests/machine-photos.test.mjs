@@ -24,7 +24,7 @@ test("equipment references cover canonical IDs with licensed, compact local WebP
     assert.equal(bytes.toString("ascii", 0, 4), "RIFF");
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
     assert.match(photo.presentation,/^(photograph|ai-edited-cutout)$/);
-    assert.match(photo.source, /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+    assert.match(photo.source, /^https:\/\/(?:commons\.wikimedia\.org\/wiki\/File:|www\.flickr\.com\/photos\/ortus_equipment\/\d+\/)/);
     assert.ok(photo.author && photo.title && photo.license && photo.changes);
     assert.match(photo.licenseUrl, /^https:\/\/(creativecommons\.org|commons\.wikimedia\.org)\//);
     if(photo.presentation === "ai-edited-cutout") {
@@ -34,6 +34,10 @@ test("equipment references cover canonical IDs with licensed, compact local WebP
       assert.ok(sw.includes(JSON.stringify(photo.src)),photo.src+" remains in the offline shell");
     } else {
       assert.match(photo.changes,/no AI reconstruction/);
+      assert.equal(photo.backgroundRemoved,true, id+" has its surroundings removed");
+      assert.equal(photo.singleEquipment,true, id+" is one selected equipment item");
+      assert.equal(bytes.toString("ascii", 12, 16),"VP8X");
+      assert.ok(bytes[20] & 0x10,photo.src+" retains alpha transparency");
       assert.equal(sw.includes(JSON.stringify(photo.src)),false,photo.src+" loads on demand, not at install");
     }
   }
