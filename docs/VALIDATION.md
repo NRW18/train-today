@@ -255,3 +255,14 @@ just functional browser checks while iterating; final validation used the full s
 - Browser geometry checks passed all 16 combinations: 320/360/375/430px × TH/EN × light/dark, using an isolated 12-set workout. Verified top/gap/text spacing, wrapping, equal insets, 20px cell height, no horizontal overflow, and unchanged tick/progress/rest behavior.
 - Node suite: 273/273 passed. No application functions, translations, user data or Worker code changed. HTML asset tags and service-worker version bumped together to v72 for cache refresh.
 - Review crops: docs/screenshots/set-spacing. Local PR A preview remains on port 8026. No merge or deployment.
+
+
+## Real equipment photographs — 2026-10-20
+
+- 38 canonical entries use 21 verified Wikimedia Commons photographs, including all five cardio stations. Sources, authors, licenses and actual changes are recorded in machine-photos.js and assets/machines/CREDITS.md.
+- All new WebP files are below 60,000 bytes, loaded lazily and absent from the shell precache. Existing shell artwork is retained. v73 invalidates stale HTML and metadata.
+- 16 entries still use SVG because an exact person-free freely licensed photograph was not verified; four original AI-edited entries remain labelled as such. No unrelated machine is substituted to fill these gaps.
+- Shared cable/bench/rack pictures are references to the equipment, not demonstrations of each exercise.
+- Node: 273/273 passed. Browser catalog: 16 combinations (320, 360, 375, 430px; TH/EN; light/dark) passed, including image decoding, SVG fallback, search, saved selection, no uploads and no horizontal overflow.
+- Focused browser checks: all five cardio photos decode, cardio credits include source changes, and cable references render in light/dark. Captures: docs/screenshots/real-photos/.
+- No worker, workout algorithm or personal data change. Worker redeploy is not required. No production deployment or migration was run.

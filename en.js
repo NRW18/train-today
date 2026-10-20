@@ -2,6 +2,7 @@
 // To change a word: edit the value here. To add text: write it in Thai in index.html as t("…"), then add it here.
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
+  "รูปถ่ายจริงใช้เป็นตัวอย่างอุปกรณ์ ไม่ใช่ภาพสาธิตทุกท่า ภาพเดิมที่แต่งด้วย AI ระบุไว้ในเครดิต": "Real photos show equipment, not every exercise technique. Legacy AI-edited images are identified in the credits.",
   "ทั้งหมด": "All",
   "ช่วงบน": "Upper body",
   "ช่วงล่าง": "Lower body",

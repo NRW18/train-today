@@ -50,8 +50,15 @@ const server=http.createServer((req,res)=>{try{
           await search.fill(ex.name);const card=page.locator(`[data-machine-pick="${ex.id}"]`);
           await card.click();assert.equal(await page.locator('.sheet .guide ol li').count(),3);assert.equal(await page.locator('.sheet .guide ul li').count(),2);
           assert.equal(await page.locator('.sheet .machine-art use').first().getAttribute('href'),'assets/machines.svg#'+ex.id);
-          await page.waitForFunction(()=>document.querySelector('.sheet .machine-art use').getBBox().width>0);
-          assert.equal(await page.locator('.sheet .machine-art use').first().evaluate(el=>{const box=el.getBBox();return box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.x+box.width<=120&&box.y+box.height<=90;}),true,ex.id+' SVG renders inside its viewBox');
+          const photo=page.locator('.sheet > .machine-example');
+          if(await photo.count()) {
+            await photo.evaluate(el=>el.decode());
+            assert.equal(await photo.isVisible(),true,ex.id+' photograph is visible');
+            assert.equal(await photo.evaluate(el=>el.naturalWidth>0),true,ex.id+' photograph loads');
+          } else {
+            await page.waitForFunction(()=>document.querySelector('.sheet .machine-art use').getBBox().width>0);
+            assert.equal(await page.locator('.sheet .machine-art use').first().evaluate(el=>{const box=el.getBBox();return box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.x+box.width<=120&&box.y+box.height<=90;}),true,ex.id+' fallback renders inside its viewBox');
+          }
           await page.keyboard.press('Escape');
         }checkedAll=true;
       }

@@ -9,39 +9,44 @@ vm.runInNewContext(readFileSync(new URL("../machine-photos.js", import.meta.url)
 const photos = scope.MACHINE_PHOTOS;
 const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
 
-test("all original 15 canonical exercises retain their transparent cutouts, attribution and offline shell entries", () => {
+test("equipment references cover canonical IDs with licensed, compact local WebP files", () => {
   const base = html.slice(html.indexOf("var BASE_EX = ["), html.indexOf("var EN_NAME = {"));
   const data={t:value=>value};vm.runInNewContext(base,data);
-  const ids = Array.from(data.BASE_EX.filter(ex=>!ex.optional),ex=>ex.id);
-  assert.equal(ids.length,15);
-  assert.deepEqual(Object.keys(photos).sort(), ids.sort());
+  const ids = Array.from(data.BASE_EX,ex=>ex.id);
+  for (const id of data.BASE_EX.filter(ex=>!ex.optional).map(ex=>ex.id)) assert.ok(photos[id],id+" retains artwork");
   assert.ok(sw.includes('"machine-photos.js"'));
-  for (const photo of Object.values(photos)) {
+  for (const [id,photo] of Object.entries(photos)) {
+    assert.ok(ids.includes(id),id+" is a canonical machine");
     assert.match(photo.src, /^assets\/machines\/cutouts\/[a-z-]+\.webp$/);
     assert.ok(existsSync(new URL("../" + photo.src, import.meta.url)));
     const bytes = readFileSync(new URL("../" + photo.src, import.meta.url));
     assert.ok(bytes.length <= 60000, photo.src + " must be at most 60 KB");
     assert.equal(bytes.toString("ascii", 0, 4), "RIFF");
     assert.equal(bytes.toString("ascii", 8, 12), "WEBP");
-    assert.equal(bytes.toString("ascii", 12, 16), "VP8X");
-    assert.ok(bytes[20] & 0x10, photo.src + " must retain transparency");
-    assert.equal(photo.presentation, "ai-edited-cutout");
-    assert.match(photo.changes, /AI-/);
-    assert.ok(sw.includes(JSON.stringify(photo.src)), photo.src + " unavailable offline");
+    assert.match(photo.presentation,/^(photograph|ai-edited-cutout)$/);
     assert.match(photo.source, /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
     assert.ok(photo.author && photo.title && photo.license && photo.changes);
     assert.match(photo.licenseUrl, /^https:\/\/(creativecommons\.org|commons\.wikimedia\.org)\//);
+    if(photo.presentation === "ai-edited-cutout") {
+      assert.equal(bytes.toString("ascii", 12, 16), "VP8X");
+      assert.ok(bytes[20] & 0x10, photo.src + " retains its legacy transparency");
+      assert.match(photo.changes,/AI-/);
+      assert.ok(sw.includes(JSON.stringify(photo.src)),photo.src+" remains in the offline shell");
+    } else {
+      assert.match(photo.changes,/no AI reconstruction/);
+      assert.equal(sw.includes(JSON.stringify(photo.src)),false,photo.src+" loads on demand, not at install");
+    }
   }
 });
 
-test("shared equipment uses one file without changing the original exercise IDs", () => {
-  assert.equal(new Set(Object.values(photos).map(photo => photo.src)).size, 12);
-  assert.equal(photos.pec_deck.src, photos.rear_delt.src);
-  assert.equal(photos.lateral_raise.src, photos.db_curl.src);
-  assert.equal(photos.pushup.src, photos.plank.src);
-  assert.match(photos.pushup.src, /exercise-mat/);
-  assert.equal(photos.seated_row.source, photos.triceps_pushdown.source);
-  assert.match(photos.shoulder_press.changes, /upright overhead/);
+test("cardio has real photographs and shared equipment keeps source attribution", () => {
+  for(const id of ["treadmill","stationary_bike","elliptical","stair_climber","rower","incline_chest_press","smith_bench_press","cable_fly"])
+    assert.equal(photos[id].presentation,"photograph",id+" uses a photograph");
+  assert.equal(photos.pec_deck.src,photos.rear_delt.src);
+  assert.equal(photos.db_curl.src,photos.lateral_raise.src);
+  assert.equal(photos.pushup.src,photos.plank.src);
+  assert.equal(photos.smith_squat.src,photos.smith_bench_press.src);
+  assert.match(photos.shoulder_press.changes,/upright overhead/);
 });
 
 test("machineArt never reads personal photos, with or without app artwork", () => {
@@ -82,13 +87,15 @@ test("an unavailable photograph reveals its illustration without touching saved 
 test("photo credits are reachable and preserve source, author link and license with escaped text", () => {
   const sheet = {focus() {}}, creditButton = {};
   const a = load(["showMachinePhotoCredits"], {
-    sheet, $: () => creditButton, EX:[{id:"leg_press",name:"Leg press"}],
-    MACHINE_PHOTOS:{leg_press:{...photos.leg_press,author:'Author <script>',authorUrl:'https://example.test/author'}},
+    sheet, $: () => creditButton, BASE_EX:[{id:"leg_press",name:"Leg press"},{id:"treadmill",name:"Treadmill"}], EX:[],
+    MACHINE_PHOTOS:{leg_press:{...photos.leg_press,author:'Author <script>',authorUrl:'https://example.test/author'}, treadmill:photos.treadmill},
     esc:value => String(value).replaceAll("<", "&lt;"),
     sheetHead:value => value, openSheet() {}, closeSheet() {}
   });
   a.showMachinePhotoCredits();
   assert.match(sheet.innerHTML, /Leg press/);
+  assert.match(sheet.innerHTML, /Treadmill/);
+  assert.match(sheet.innerHTML, /no AI reconstruction/);
   assert.match(sheet.innerHTML, /Author &lt;script>/);
   assert.match(sheet.innerHTML, /https:\/\/example.test\/author/);
   assert.match(sheet.innerHTML, /creativecommons.org/);
