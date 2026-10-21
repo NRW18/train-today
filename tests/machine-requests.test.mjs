@@ -53,6 +53,20 @@ test('machine requests and /e share the existing 400 per-device daily budget wit
  await worker.fetch(request(undefined,{'X-Stats-Id':'anonymous-0003'}),{DB});
  assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM machine_request_limits WHERE day < ?').get(day(-29)).n,0);
 });
+test('machine requests have an app-wide daily cap that forged device IDs cannot get around',async()=>{
+ const DB=database();await worker.fetch(request(),{DB});
+ DB.raw.prepare('UPDATE machine_requests SET count = 1999').run();
+ DB.raw.prepare('INSERT INTO machine_requests(name,day,count) VALUES(?,?,?)').run('treadmill',day(-1),5000);
+ assert.equal((await worker.fetch(request({name:'rower'}),{DB})).status,204,'yesterday does not count against today');
+ for(const id of ['anonymous-0002','anonymous-0003','forged-device-4'])assert.equal((await worker.fetch(request({name:'new machine '+id.slice(-1)},{'X-Stats-Id':id}),{DB})).status,429,id);
+ assert.equal((await worker.fetch(request(),{DB})).status,429,'the original device is capped too');
+ assert.equal(DB.raw.prepare('SELECT SUM(count) AS n FROM machine_requests WHERE day = ?').get(day(0)).n,2000);
+ assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM machine_requests WHERE day = ?').get(day(0)).n,2,'rejected names are not stored');
+ assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM machine_request_limits WHERE anon <> ?').get(anon).n,0,'rejected devices leave no quota rows');
+ const e=new Request('https://proxy.example/e',{method:'POST',headers:{Origin:origin},body:JSON.stringify({a:'anonymous-0009',e:[['open',Date.now()]]})});
+ assert.equal((await worker.fetch(e,{DB})).status,204);assert.equal(DB.raw.prepare('SELECT COUNT(*) AS n FROM ev WHERE anon = ?').get('anonymous-0009').n,1,'/e is not affected by the photo-request cap');
+ assert.match(readFileSync(new URL('../proxy/worker.js',import.meta.url),'utf8'),/MACHINE_REQUESTS_DAILY = 2000/);
+});
 test('/stats protects machine requests with STATS_KEY and uses a fixed Bangkok 30-day window, top 30',async()=>{
  const DB=database(),env={DB,STATS_KEY:key};await worker.fetch(request(),env);
  DB.raw.prepare('INSERT INTO machine_requests VALUES(?,?,?)').run('old',day(-30),9000);

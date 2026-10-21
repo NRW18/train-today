@@ -314,6 +314,8 @@ just functional browser checks while iterating; final validation used the full s
 
 ## Machine photo requests (v80, rebased onto main v78)
 
+- Rebased onto main after PR #26/#29; release tags v80. Added an app-wide cap of 2,000 photo requests per day in the worker (`MACHINE_REQUESTS_DAILY`) with a test. Node 286/286. Browser suites and screenshots below are from before the rebase and were not rerun. Worker redeploy and D1 migration still required; not run.
+
 - Stacked on catalog PR #26 (`3c16c1f`, main base `faa6319`). New `POST /machine-request`, strict name-only JSON, existing anonymous ID in X-Stats-Id for shared /e 400/day budget. No images, personal text, cookies, referrer, IP persistence, Gemini calls or KV writes. No automatic requests; only a user tap with stats enabled. Deduplication persists locally, with explicit retries after errors and a bounded network timeout.
 - Node suite **282/282**, including real SQLite SQL/counters/atomic quota boundary, malformed/oversized/photo/extra-field rejection, CORS, STATS_KEY, 30-day/top-30 aggregation, migration repeatability, consent, storage failure, double tap and lock/consent races. All prior state/backup/overwrite/plan/load/credits tests pass.
 - Requests browser **16/16** sizes/themes/languages, plus controlled AI fresh-machine request. All network traffic is intercepted in synthetic contexts. Tests verify consent-off silence, exact English payload + existing ID only, keyboard focus/44px target, duplicates/reload, explicit retry after 503, 60-character stats wrapping and no overflow. Catalog browser **16/16** and original simple-flow **16/16** + full controlled flows pass on B.

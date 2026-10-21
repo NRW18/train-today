@@ -103,6 +103,7 @@ const EVENTS = [
 const EVENT_SET = new Set(EVENTS);
 const MAX_BATCH = 40;          // events per request
 const PER_DEVICE_DAILY = 400;  // events kept per device per day (free D1: 100,000 rows written/day)
+const MACHINE_REQUESTS_DAILY = 2000; // photo requests for the whole app per day, so forged device IDs cannot burn the D1 write quota
 const PLATFORMS = ["android", "ios", "desktop", "other"];
 
 const SCHEMA = [
@@ -201,10 +202,11 @@ async function handleMachineRequest(request, env, origin) {
     await ensureSchema(env.DB);
     const day = bkkDay(Date.now()), from = bkkDay(Date.now() - 29 * 864e5);
     // D1 batch is transactional. The aggregate increments only when the budget
-    // statement changed a row, including at the boundary under concurrent calls.
+    // statement changed a row (device budget and app-wide daily cap), including at the
+    // boundary under concurrent calls.
     const results = await env.DB.batch([
       env.DB.prepare("DELETE FROM machine_request_limits WHERE day < ?").bind(from),
-      env.DB.prepare("INSERT INTO machine_request_limits (anon, day, count) SELECT ?, ?, 1 WHERE (SELECT COUNT(*) FROM ev WHERE anon = ? AND day = ?) < ? ON CONFLICT(anon, day) DO UPDATE SET count = count + 1 WHERE count + (SELECT COUNT(*) FROM ev WHERE anon = ? AND day = ?) < ?").bind(anon, day, anon, day, PER_DEVICE_DAILY, anon, day, PER_DEVICE_DAILY),
+      env.DB.prepare("INSERT INTO machine_request_limits (anon, day, count) SELECT ?, ?, 1 WHERE (SELECT COUNT(*) FROM ev WHERE anon = ? AND day = ?) < ? AND (SELECT COALESCE(SUM(count), 0) FROM machine_requests WHERE day = ?) < ? ON CONFLICT(anon, day) DO UPDATE SET count = count + 1 WHERE count + (SELECT COUNT(*) FROM ev WHERE anon = ? AND day = ?) < ?").bind(anon, day, anon, day, PER_DEVICE_DAILY, day, MACHINE_REQUESTS_DAILY, anon, day, PER_DEVICE_DAILY),
       env.DB.prepare("INSERT INTO machine_requests (name, day, count) SELECT ?, ?, 1 WHERE changes() > 0 ON CONFLICT(name, day) DO UPDATE SET count = count + 1").bind(name, day)
     ]);
     if (!results[2] || !results[2].meta || results[2].meta.changes !== 1) return json({ error: "limit" }, 429, origin);
