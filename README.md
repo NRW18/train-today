@@ -115,6 +115,15 @@ Cloudflare Worker ที่เก็บ Gemini key เป็น secret ผู้
 
 **ทดสอบ:** `node --test "tests/*.test.mjs"` (ที่โฟลเดอร์หลักของ repo)
 
+## เข้าสู่ระบบด้วย Google และสำรองออนไลน์ (ไม่บังคับ)
+
+- ปิดอยู่จนกว่าจะใส่ OAuth client ID ใน `auth-config.js` และ `proxy/wrangler.toml` (`GOOGLE_CLIENT_ID`) ไม่มี client secret
+- แอปใช้ได้ครบโดยไม่ต้องเข้าสู่ระบบ ข้อมูลอยู่ในเครื่องเสมอ (`train-today-v1`)
+- เมื่อผู้ใช้ยอมรับเท่านั้น แอปจะส่งข้อมูลเดียวกับไฟล์ "สำรองข้อมูล" **ไม่รวมรูปถ่าย** ไปเก็บใน D1 ผูกกับรหัสบัญชี Google (`sub`) ไม่เก็บอีเมลหรือชื่อ
+- เซสชันเก็บเป็นค่า hash อายุ 30 วัน ลบข้อมูลและบัญชีได้เองที่แท็บ อื่นๆ
+- worker ตรวจ ID token ของ Google เอง (ลายเซ็น, aud, iss, exp, email_verified) และจำกัดจำนวนครั้งต่อวัน
+- ตั้งค่าครั้งแรก: สร้าง OAuth Client ID (Web) ใน Google Cloud Console ใส่ Authorized JavaScript origin `https://nrw18.github.io`, รัน `npx wrangler d1 migrations apply kryvos-stats --remote` แล้ว `npx wrangler deploy` ใน `proxy/`
+
 ## เทคโนโลยี
 HTML, CSS, JavaScript ล้วน (ไม่มี framework), Gemini API (รับรูปภาพ, ตอบเป็น JSON), Service Worker สำหรับใช้ออฟไลน์, Cloudflare Workers + KV (ตัวกลาง AI), GitHub Pages
 
