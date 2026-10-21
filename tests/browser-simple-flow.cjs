@@ -71,10 +71,10 @@ async function noOverflow(page, label) {
         await page.locator(`[data-tab="${tab}"]`).click();
         await noOverflow(page, `${width}/${colorScheme}/${language}/${tab}`);
         if (tab === 'gym') {
-          assert.equal(await page.locator('#machine-grid button').count(), catalogCount);
+          assert.equal(await page.locator('#machine-grid [data-machine-pick]').count(), catalogCount);
           assert.equal(await page.locator('#machine-camera').isVisible(), true);
           await page.locator('#machine-grid details > summary').first().click();
-          const first = page.locator('#machine-grid button').first();
+          const first = page.locator('#machine-grid [data-machine-pick]').first();
           await page.keyboard.press('Tab');
           await first.focus();
           const outline = await first.evaluate(el => getComputedStyle(el).outlineStyle);
@@ -131,7 +131,7 @@ async function noOverflow(page, label) {
     console.log('PASS all '+photoCount+' equipment cutout cards decoded and source/license credits remain accessible');
     await page.locator('#machine-input').setInputFiles(image);
     await page.locator('#machine-status').filter({ hasText:"Auto-recognition isn't ready yet" }).waitFor();
-    assert.equal(await page.locator('#machine-grid button').count(), catalogCount);
+    assert.equal(await page.locator('#machine-grid [data-machine-pick]').count(), catalogCount);
     assert.equal(uploads.length, 0, 'local missing model must never upload');
     await page.locator('#machine-settings > summary').click();
     await page.locator('#machine-prepare').click();
@@ -141,7 +141,7 @@ async function noOverflow(page, label) {
     await context.setOffline(true);
     await page.reload();
     await page.locator('[data-tab="gym"]').click();
-    assert.equal(await page.locator('#machine-grid button').count(), catalogCount);
+    assert.equal(await page.locator('#machine-grid [data-machine-pick]').count(), catalogCount);
     const offlinePhoto = page.locator('#machine-grid .machine-example').first();
     await offlinePhoto.scrollIntoViewIfNeeded();
     await offlinePhoto.evaluate(image => image.decode());
@@ -213,7 +213,7 @@ async function noOverflow(page, label) {
     remote.once('dialog', dialog => dialog.accept());
     await remote.locator('#machine-input').setInputFiles(image);
     await remote.locator('#machine-status').filter({hasText:"We can't check your photo right now"}).waitFor();
-    assert.equal(await remote.locator('#machine-grid button').count(), catalogCount);
+    assert.equal(await remote.locator('#machine-grid [data-machine-pick]').count(), catalogCount);
     // Load actual vendored libraries and verify their public API without a fake model.
     await remote.addScriptTag({url:base + 'vendor/tf-4.22.0.min.js'});
     await remote.addScriptTag({url:base + 'vendor/tm-image-0.8.5.min.js'});
