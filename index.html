@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=78">
+<link rel="stylesheet" href="theme.css?v=79">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=78">
-<link rel="stylesheet" href="brand.css?v=78">
+<link rel="stylesheet" href="simple-flow.css?v=79">
+<link rel="stylesheet" href="brand.css?v=79">
 </head>
 <body class="home">
 <div class="app">
@@ -1130,10 +1130,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=78"></script>
-<script src="machines-config.js?v=78"></script>
-<script src="machine-recognition.js?v=78"></script>
-<script src="machine-photos.js?v=78"></script>
+<script src="en.js?v=79"></script>
+<script src="machines-config.js?v=79"></script>
+<script src="machine-recognition.js?v=79"></script>
+<script src="machine-photos.js?v=79"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -2482,9 +2482,28 @@
     return machineAdapter;
   }
   function recognizeMachine(imageBlob) { return getMachineAdapter().recognizeMachine(imageBlob); }
+  // App artwork for exercises the app ships no picture for (for example AI-added machines), chosen by name.
+  // Only whole machine names match: bare "row", "curl", "fly", "step" or "extension" must not pick another machine's icon.
+  function machineSymbol(ex) {
+    var symbols = [
+      ["treadmill", /ลู่วิ่ง|\btreadmill\b/], ["elliptical", /วงรี|\belliptical\b|\bcross ?trainer\b/],
+      ["stationary_bike", /จักรยาน|\b(stationary|exercise|spin|spinning|upright|recumbent) bike\b|\bcycle machine\b/],
+      ["stair_climber", /บันได|\bstair ?(climber|master|mill)\b|\bstepper\b|\bstep ?mill\b/], ["rower", /เครื่องพาย|\browing machine\b|\brower\b/],
+      ["preacher_curl", /พรีเชอร์|พรีช|\bpreacher\b/], ["rider", /ขี่ม้า|\bhorse ?(back )?rid(er|ing)\b|\brider\b/],
+      ["leg_press", /เลกเพรส|\bleg press\b/], ["lat_pulldown", /พูลดาวน์|\bpull ?down\b/],
+      ["seated_row", /ซีท(เต็ด)?โรว์|นั่งโรว์|\bseated (cable )?row\b|\bcable row\b|\brow machine\b|\bmachine row\b/],
+      ["chest_press", /เชสต์เพรส|\bchest press\b/], ["shoulder_press", /ชอลเดอร์เพรส|\bshoulder press\b/],
+      ["leg_curl", /เลกเคิร์ล|\bleg curl\b/], ["leg_extension", /เลกเอ็กซ์เทนชัน|\bleg extension\b/],
+      ["calf_raise", /คาล์ฟ|\bcalf\b/], ["pec_deck", /เพ็คเด็ค|\bpec ?deck\b|\bbutterfly machine\b|\bchest fly machine\b/],
+      ["db_curl", /ดัมเบลเคิร์ล|\b(dumbbell|db) curl\b/]
+    ];
+    var name = ex ? (String(ex.name || "") + " " + String(ex.en || ex.nameEn || "")).toLowerCase() : "";
+    for (var i = 0; i < symbols.length; i++) if (symbols[i][1].test(name)) return symbols[i][0];
+    return "generic";
+  }
   function machineArt(id) {
     var photo = typeof MACHINE_PHOTOS !== "undefined" && MACHINE_PHOTOS[id];
-    var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : "generic";
+    var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : machineSymbol(typeof EXBY !== "undefined" ? EXBY[id] : null);
     var fallback = '<svg class="machine-art"' + (photo ? ' hidden' : '') + ' viewBox="0 0 120 90" role="img" aria-label="' + esc(t("ภาพประกอบเครื่องและท่า")) + '"><use href="assets/machines.svg#' + symbol + '"></use></svg>';
     return (photo ? '<img class="machine-example" src="' + esc(photo.src) + '" alt="' + esc(EXBY[id].name) + '" width="640" height="480" loading="lazy" decoding="async">' : '') + fallback;
   }
