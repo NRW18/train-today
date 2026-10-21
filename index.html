@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=80">
+<link rel="stylesheet" href="theme.css?v=81">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=80">
-<link rel="stylesheet" href="brand.css?v=80">
+<link rel="stylesheet" href="simple-flow.css?v=81">
+<link rel="stylesheet" href="brand.css?v=81">
 </head>
 <body class="home">
 <div class="app">
@@ -1131,10 +1131,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=80"></script>
-<script src="machines-config.js?v=80"></script>
-<script src="machine-recognition.js?v=80"></script>
-<script src="machine-photos.js?v=80"></script>
+<script src="en.js?v=81"></script>
+<script src="machines-config.js?v=81"></script>
+<script src="machine-recognition.js?v=81"></script>
+<script src="machine-photos.js?v=81"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1956,6 +1956,11 @@
     legs: '<path d="M9.5 3v8.5L7 18v3h8.5l-.5-2.5-2.8-1.3L14 11V3"/>',
     run: '<circle cx="15" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>'
   };
+  // Long weekday only for today and only when it fits between its neighbours ("พุธ", "Monday"); otherwise short.
+  function weekLabel(d, today) {
+    var long = d.toLocaleDateString(LOCALE, { weekday: "long" }).replace(/^วัน/, "");
+    return today && long.length <= 6 ? long : d.toLocaleDateString(LOCALE, { weekday: "short" }).replace(/^วัน/, "");
+  }
   function weekStripHtml(now) {
     return todayWeekActivity(now).map(function (a) {
       var d = new Date(a.ts), kind = a.lift || (a.run ? "run" : ""), inner = "", what = [];
@@ -1967,7 +1972,7 @@
       var label = d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "short" }) + ": " +
         (what.length ? what.join(", ") : a.today ? t("วันนี้ยังไม่ได้ซ้อม") : a.future ? t("ยังไม่ถึง") : t("ไม่มีกิจกรรม"));
       var mark = kind && kind !== "restday" ? '<span class="dot ' + kind + '" aria-hidden="true">' + inner + "</span>" : '<span class="dot ' + kind + '" aria-hidden="true"></span>';
-      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(d.toLocaleDateString(LOCALE, { weekday: a.today ? "long" : "short" }).replace(/^วัน/, "")) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
+      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(weekLabel(d, a.today)) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
     }).join("");
   }
 
@@ -2623,7 +2628,7 @@
   function renderMachineGrid() {
     var query = $("machine-search").value, groups = machineGroups();
     var labels = { chest: t("อก / ไหล่"), back: t("หลัง"), legs: t("ขา"), arms: t("แขน"), cardio: t("คาร์ดิโอ"), free: t("ฟรีเวท") };
-    var filters = { all: t("ทั้งหมด"), cardio: t("คาร์ดิโอ"), upper: t("ช่วงบน"), lower: t("ช่วงล่าง"), free: t("ฟรีเวท") };
+    var filters = { all: t("ทั้งหมด"), cardio: t("คาร์ดิโอ"), upper: t("ช่วงบน").replace(/^[a-z]/, function (c) { return c.toUpperCase(); }), lower: t("ช่วงล่าง"), free: t("ฟรีเวท") };
     $("machine-filters").innerHTML = Object.keys(filters).map(function (key) { return '<button type="button" class="mini" data-machine-filter="' + key + '" aria-pressed="' + (machineFilter === key) + '">' + esc(filters[key]) + '</button>'; }).join("");
     var h = Object.keys(labels).map(function (category) {
       var items = ALL_EX.filter(function (ex) { return !ex.hidden && machineCategory(ex) === category && (machineFilter === "all" || machineFilterCategory(ex) === machineFilter) && machineMatches(ex, query); });
