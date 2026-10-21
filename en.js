@@ -2,7 +2,23 @@
 // To change a word: edit the value here. To add text: write it in Thai in index.html as t("…"), then add it here.
 // EN_UI is for page text in the HTML that needs a different word from the same Thai used in code.
 var EN = {
+  "มื้อนี้กินอะไร?": "What did you eat?",
+  "ก่อนวิ่ง: หน้าจอและความเป็นส่วนตัว": "Before you run: screen and privacy",
   "ภาพถ่ายเครื่องที่ลบพื้นหลังใช้เป็นตัวอย่างอุปกรณ์ ไม่ใช่ภาพสาธิตทุกท่า ดูแหล่งที่มาและการปรับแต่งได้ในเครดิต": "Background-removed equipment photographs are references, not demonstrations of every exercise. Sources and edits are listed in the credits.",
+  "ขอรูปเครื่อง": "Request a machine photo",
+  "ขอรูปเครื่องนี้": "Request a photo",
+  "ส่งคำขอรูปแล้ว": "Photo requested",
+  "กำลังส่งคำขอรูป…": "Requesting photo…",
+  "เปิดสถิติแบบไม่ระบุตัวตนในตั้งค่าก่อนขอรูปเครื่อง": "Enable anonymous stats in Settings before requesting a photo.",
+  "ส่งคำขอรูปไม่ได้ ลองอีกครั้งเมื่อออนไลน์บนแอปจริง": "Try again while online in the live app.",
+  "จำคำขอในเครื่องไม่ได้ ยังไม่ส่งคำขอ": "Cannot remember requests on this device. Nothing was sent.",
+  "ส่งคำขอรูปไม่สำเร็จ ลองกดอีกครั้งภายหลัง": "Request failed. Tap again later.",
+  "ขอรูปได้เมื่อเปิดสถิติ ส่งเฉพาะชื่อเครื่องภาษาอังกฤษและรหัสสุ่มเดิมของสถิติ": "Photo requests need anonymous stats. Only the English machine name and existing anonymous stats ID are sent.",
+  "เครื่องที่ถูกขอรูป": "Requested machine photos",
+  "ย้อนหลัง 30 วัน": "Last 30 days",
+  "ยังไม่มีคำขอรูปเครื่อง": "No photo requests yet",
+  "จำนวนคำขอ": "Requests",
+  "ชื่อเครื่อง": "Machine name",
   "ทั้งหมด": "All",
   "ช่วงบน": "Upper body",
   "ช่วงล่าง": "Lower body",

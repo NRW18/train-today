@@ -229,3 +229,18 @@ nav.tabs button[aria-current="page"] svg { background: none; color: var(--grad-t
 .mini, .chip { font-family: var(--head); }
 /* disclosure rows read as tappable */
 .card > details > summary, details.card > summary { font-family: var(--head); font-weight: 700; }
+
+/* Food: the camera is one clear yellow button, like "ถ่ายรูปเครื่อง" */
+#food-label.food-shot { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: none; min-height: 60px; margin: 16px 0 4px; padding: 14px 18px; border-radius: 99px; background: var(--brand-yellow); color: var(--on-yellow); font-family: var(--head); font-weight: 700; font-size: 1.15rem; box-shadow: 0 6px 16px rgba(3,56,130,.18); }
+#food-label.food-shot .frame { display: none; }
+#food-label.food-shot .fcap { margin: 0; font-size: inherit; }
+#food-label.food-shot::before { content: ""; width: 26px; height: 26px; background: currentColor; flex: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 8h3l2-3h6l2 3h3v11H4z'/%3E%3Ccircle cx='12' cy='13' r='3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 8h3l2-3h6l2 3h3v11H4z'/%3E%3Ccircle cx='12' cy='13' r='3.5'/%3E%3C/svg%3E") center / contain no-repeat; }
+#food-label.food-shot:hover { background: var(--brand-yellow-press); }
+#food-label.food-shot:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+#food-label.food-shot.busy { opacity: .6; }
+/* Run: start button first; the explanation is folded underneath */
+.gps-card .gps-actions { margin-top: 10px; }
+.gps-info { margin-top: 6px; }
+.gps-info summary { font-size: .92rem; color: var(--soft); }

@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#017DFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#06204A" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.png">
+<link rel="apple-touch-icon" href="apple-touch-icon-v2.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="KRYVOS">
@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=76">
+<link rel="stylesheet" href="theme.css?v=80">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=76">
-<link rel="stylesheet" href="brand.css?v=76">
+<link rel="stylesheet" href="simple-flow.css?v=80">
+<link rel="stylesheet" href="brand.css?v=80">
 </head>
 <body class="home">
 <div class="app">
@@ -731,7 +731,7 @@
     </div>
     <div id="today-plan">
     <section class="card install-bar" id="install-bar" hidden>
-      <img src="icon-192.png" alt="" width="48" height="48">
+      <img src="icon-192-v2.png" alt="" width="48" height="48">
       <div class="ib-txt"><strong>ติดตั้งเป็นแอป</strong><span id="ib-sub">เปิดจากหน้าจอได้ทันที ใช้ได้แม้ไม่มีเน็ต</span></div>
       <button type="button" class="btn small-btn" id="ib-go">ติดตั้ง</button>
       <button type="button" class="x" id="ib-close" aria-label="ปิด">×</button>
@@ -757,8 +757,15 @@
   <main id="v-run" hidden>
     <section class="card gps-card" aria-labelledby="gps-h">
       <h2 id="gps-h">วิ่งด้วย GPS</h2>
-      <p class="hint">เปิดแอปและหน้าจอค้างไว้ การติดตามเบื้องหลังไม่รับประกัน แอปจะพักเมื่อซ่อนหน้าจอ</p>
-      <p class="hint">ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก</p>
+      <div class="gps-actions">
+        <button type="button" class="btn" id="gps-start">เริ่ม GPS</button>
+        <button type="button" class="btn line" id="gps-pause" hidden>พักการวิ่ง</button>
+        <button type="button" class="btn" id="gps-resume" hidden>วิ่งต่อ</button>
+        <button type="button" class="btn line" id="gps-finish" hidden>จบการวิ่ง</button>
+        <button type="button" class="btn" id="gps-save" hidden>บันทึกผล GPS</button>
+        <button type="button" class="btn line" id="gps-export" hidden>สำรองผลที่รอบันทึก</button>
+        <button type="button" class="btn line" id="gps-discard" hidden>ยกเลิกผล GPS</button>
+      </div>
       <div class="stats gps-metrics" aria-live="off">
         <div class="stat"><div class="v" id="gps-distance">0.00</div><div class="k">ระยะทาง (กม.)</div></div>
         <div class="stat"><div class="v" id="gps-time">00:00</div><div class="k">เวลาที่วิ่งจริง</div></div>
@@ -770,17 +777,12 @@
       <p id="gps-wake" class="hint"></p>
       <div id="gps-route"></div>
       <p id="gps-splits" class="hint" role="status"></p>
-      <div class="gps-actions">
-        <button type="button" class="btn" id="gps-start">เริ่ม GPS</button>
-        <button type="button" class="btn line" id="gps-pause" hidden>พักการวิ่ง</button>
-        <button type="button" class="btn" id="gps-resume" hidden>วิ่งต่อ</button>
-        <button type="button" class="btn line" id="gps-finish" hidden>จบการวิ่ง</button>
-        <button type="button" class="btn" id="gps-save" hidden>บันทึกผล GPS</button>
-        <button type="button" class="btn line" id="gps-export" hidden>สำรองผลที่รอบันทึก</button>
-        <button type="button" class="btn line" id="gps-discard" hidden>ยกเลิกผล GPS</button>
-      </div>
       <button type="button" class="linkbtn" id="gps-manual">บันทึกวิ่งด้วยตัวเอง</button>
       <p class="hint">ใช้ประเภทการวิ่งจากตัวเลือกด้านล่างก่อนเริ่ม GPS</p>
+      <details class="gps-info"><summary>ก่อนวิ่ง: หน้าจอและความเป็นส่วนตัว</summary>
+        <p class="hint">เปิดแอปและหน้าจอค้างไว้ การติดตามเบื้องหลังไม่รับประกัน แอปจะพักเมื่อซ่อนหน้าจอ</p>
+        <p class="hint">ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก</p>
+      </details>
     </section>
     <section class="card" aria-labelledby="run-h">
       <h2 id="run-h">บันทึกการวิ่ง</h2>
@@ -860,13 +862,13 @@
   <!-- FOOD + BODY WEIGHT -->
   <main id="v-food" hidden>
     <section class="card shoot" aria-labelledby="food-shoot-h">
-      <h2 id="food-shoot-h">ถ่ายรูปอาหาร</h2>
+      <h2 id="food-shoot-h">มื้อนี้กินอะไร?</h2>
       <p class="sub">อาหารของคุณน่ากินรึเปล่าเราขอเช็กแคลหน่อยสิ</p>
-      <label class="shot-btn" id="food-label" tabindex="0" role="button" aria-label="ถ่ายรูปอาหาร (เปิดกล้อง)">
-        <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">(เปิดกล้อง)</span>
+      <label class="shot-btn food-shot" id="food-label" tabindex="0" role="button" aria-label="ถ่ายรูปอาหาร (เปิดกล้อง)">
+        <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">ถ่ายรูปอาหาร</span>
         <input type="file" id="food-input" accept="image/*" capture="environment" hidden>
       </label>
-      <div class="photo-alternatives"><button type="button" class="linkbtn" id="food-gallery">เลือกรูปจากแกลเลอรี</button></div>
+      <div class="photo-alternatives"><button type="button" class="btn line small-btn" id="food-gallery">เลือกรูปจากแกลเลอรี</button></div>
       <input type="file" id="food-gallery-input" accept="image/*" hidden>
       <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
     </section>
@@ -956,6 +958,7 @@
         <p class="hint">ภาพวาดและภาพตัวอย่างอาจต่างจากเครื่องในยิม ดูวิธีเล่นก่อนเริ่ม</p>
         <label class="field txt"><input type="search" id="machine-search" placeholder="ค้นหาเครื่อง ไทย / English" aria-label="ค้นหาเครื่อง ไทย / English" autocomplete="off"></label>
         <div id="machine-filters" class="machine-filters" role="group" aria-label="ตัวกรองเครื่อง"></div>
+        <p class="hint" id="photo-request-help">ขอรูปได้เมื่อเปิดสถิติ ส่งเฉพาะชื่อเครื่องภาษาอังกฤษและรหัสสุ่มเดิมของสถิติ</p>
         <div id="machine-grid"></div>
       </details>
       <button type="button" class="linkbtn" id="machine-photo-credits">ที่มารูปภาพ</button>
@@ -1128,10 +1131,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=76"></script>
-<script src="machines-config.js?v=76"></script>
-<script src="machine-recognition.js?v=76"></script>
-<script src="machine-photos.js?v=76"></script>
+<script src="en.js?v=80"></script>
+<script src="machines-config.js?v=80"></script>
+<script src="machine-recognition.js?v=80"></script>
+<script src="machine-photos.js?v=80"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1964,8 +1967,7 @@
       var label = d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "short" }) + ": " +
         (what.length ? what.join(", ") : a.today ? t("วันนี้ยังไม่ได้ซ้อม") : a.future ? t("ยังไม่ถึง") : t("ไม่มีกิจกรรม"));
       var mark = kind && kind !== "restday" ? '<span class="dot ' + kind + '" aria-hidden="true">' + inner + "</span>" : '<span class="dot ' + kind + '" aria-hidden="true"></span>';
-      var center = Math.abs((a.ts - new Date(now).setHours(0, 0, 0, 0)) / 864e5) < 1.5;
-      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(d.toLocaleDateString(LOCALE, { weekday: center ? "long" : "short" }).replace(/^วัน/, "")) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
+      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(d.toLocaleDateString(LOCALE, { weekday: a.today ? "long" : "short" }).replace(/^วัน/, "")) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
     }).join("");
   }
 
@@ -2481,9 +2483,28 @@
     return machineAdapter;
   }
   function recognizeMachine(imageBlob) { return getMachineAdapter().recognizeMachine(imageBlob); }
+  // App artwork for exercises the app ships no picture for (for example AI-added machines), chosen by name.
+  // Only whole machine names match: bare "row", "curl", "fly", "step" or "extension" must not pick another machine's icon.
+  function machineSymbol(ex) {
+    var symbols = [
+      ["treadmill", /ลู่วิ่ง|\btreadmill\b/], ["elliptical", /วงรี|\belliptical\b|\bcross ?trainer\b/],
+      ["stationary_bike", /จักรยาน|\b(stationary|exercise|spin|spinning|upright|recumbent) bike\b|\bcycle machine\b/],
+      ["stair_climber", /บันได|\bstair ?(climber|master|mill)\b|\bstepper\b|\bstep ?mill\b/], ["rower", /เครื่องพาย|\browing machine\b|\brower\b/],
+      ["preacher_curl", /พรีเชอร์|พรีช|\bpreacher\b/], ["rider", /ขี่ม้า|\bhorse ?(back )?rid(er|ing)\b|\brider\b/],
+      ["leg_press", /เลกเพรส|\bleg press\b/], ["lat_pulldown", /พูลดาวน์|\bpull ?down\b/],
+      ["seated_row", /ซีท(เต็ด)?โรว์|นั่งโรว์|\bseated (cable )?row\b|\bcable row\b|\brow machine\b|\bmachine row\b/],
+      ["chest_press", /เชสต์เพรส|\bchest press\b/], ["shoulder_press", /ชอลเดอร์เพรส|\bshoulder press\b/],
+      ["leg_curl", /เลกเคิร์ล|\bleg curl\b/], ["leg_extension", /เลกเอ็กซ์เทนชัน|\bleg extension\b/],
+      ["calf_raise", /คาล์ฟ|\bcalf\b/], ["pec_deck", /เพ็คเด็ค|\bpec ?deck\b|\bbutterfly machine\b|\bchest fly machine\b/],
+      ["db_curl", /ดัมเบลเคิร์ล|\b(dumbbell|db) curl\b/]
+    ];
+    var name = ex ? (String(ex.name || "") + " " + String(ex.en || ex.nameEn || "")).toLowerCase() : "";
+    for (var i = 0; i < symbols.length; i++) if (symbols[i][1].test(name)) return symbols[i][0];
+    return "generic";
+  }
   function machineArt(id) {
     var photo = typeof MACHINE_PHOTOS !== "undefined" && MACHINE_PHOTOS[id];
-    var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : "generic";
+    var symbol = BASE_EX.some(function (ex) { return ex.id === id; }) ? id : machineSymbol(typeof EXBY !== "undefined" ? EXBY[id] : null);
     var fallback = '<svg class="machine-art"' + (photo ? ' hidden' : '') + ' viewBox="0 0 120 90" role="img" aria-label="' + esc(t("ภาพประกอบเครื่องและท่า")) + '"><use href="assets/machines.svg#' + symbol + '"></use></svg>';
     return (photo ? '<img class="machine-example" src="' + esc(photo.src) + '" alt="' + esc(EXBY[id].name) + '" width="640" height="480" loading="lazy" decoding="async">' : '') + fallback;
   }
@@ -2505,8 +2526,70 @@
   }
   function machineCard(row, action) {
     var ex = EXBY[row.id]; if (!ex || ex.hidden) return "";
-    return '<button type="button" class="machine-card" data-machine-' + action + '="' + esc(ex.id) + '">' + machineArt(ex.id) + '<span>' + esc(ex.name) + '</span></button>';
+    return '<div class="machine-option"><button type="button" class="machine-card" data-machine-' + action + '="' + esc(ex.id) + '">' + machineArt(ex.id) + '<span>' + esc(ex.name) + '</span></button>' + photoRequestHtml(ex, EN_NAME[ex.id] || (ex.ai ? ex.en : '')) + '</div>';
   }
+  /* A tap is required. Only the English equipment label is in the JSON body. */
+  var PHOTO_REQUEST_KEY = "kryvos-machine-photo-requests-v1", photoRequestPending = {};
+  function cleanPhotoRequestName(value) {
+    if (typeof value !== "string") return "";
+    var name = value.trim().toLowerCase();
+    return name.length <= 60 && /^[a-z0-9][a-z0-9 -]*$/.test(name) && /[a-z]/.test(name) ? name : "";
+  }
+  function photoRequestsSent() {
+    try { var saved = JSON.parse(localStorage.getItem(PHOTO_REQUEST_KEY) || "[]");
+      return Array.isArray(saved) ? saved.filter(function (name) { return cleanPhotoRequestName(name) === name; }) : [];
+    } catch (error) { return []; }
+  }
+  function photoRequestHtml(ex, english) {
+    if (typeof MACHINE_PHOTOS !== "undefined" && ex.id && Object.prototype.hasOwnProperty.call(MACHINE_PHOTOS, ex.id)) return "";
+    // Never fall back to ex.name: it may be a user's edited/typed label.
+    var name = cleanPhotoRequestName(english), sent = name && photoRequestsSent().indexOf(name) >= 0;
+    return '<button type="button" class="mini photo-request" data-photo-request="' + esc(name) + '"' + (!name || sent || photoRequestPending[name] ? ' disabled' : '') + '>' +
+      (sent ? t("ส่งคำขอรูปแล้ว") : t("ขอรูปเครื่องนี้")) + '</button>' + (!name ? '<p class="hint">' + t("ยังไม่มีชื่อภาษาอังกฤษที่ยืนยันแล้ว") + '</p>' : '');
+  }
+  function refreshPhotoRequests() {
+    document.querySelectorAll("[data-photo-request]").forEach(function (button) {
+      var name = button.dataset.photoRequest, sent = photoRequestsSent().indexOf(name) >= 0;
+      button.disabled = !name || sent || !!photoRequestPending[name];
+      button.textContent = sent ? t("ส่งคำขอรูปแล้ว") : photoRequestPending[name] ? t("กำลังส่งคำขอรูป…") : t("ขอรูปเครื่องนี้");
+    });
+  }
+  async function requestMachinePhoto(value) {
+    if (!statsOn()) { toast(t("เปิดสถิติแบบไม่ระบุตัวตนในตั้งค่าก่อนขอรูปเครื่อง")); return; }
+    var name = cleanPhotoRequestName(value);
+    if (!name || photoRequestPending[name] || photoRequestsSent().indexOf(name) >= 0) return;
+    if (!statsLive || !navigator.onLine) { toast(t("ส่งคำขอรูปไม่ได้ ลองอีกครั้งเมื่อออนไลน์บนแอปจริง")); return; }
+    var anon = anonId(); if (!anon) { toast(t("จำคำขอในเครื่องไม่ได้ ยังไม่ส่งคำขอ")); return; }
+    photoRequestPending[name] = true; refreshPhotoRequests();
+    async function send() {
+      // Recheck consent/deduplication after waiting for another tab's lock.
+      if (!statsOn() || photoRequestsSent().indexOf(name) >= 0) return;
+      var saved = photoRequestsSent();
+      try {
+        localStorage.setItem(PHOTO_REQUEST_KEY, JSON.stringify(saved.concat(name)));
+        if (photoRequestsSent().indexOf(name) < 0) throw new Error("storage");
+      }
+      catch (error) { toast(t("จำคำขอในเครื่องไม่ได้ ยังไม่ส่งคำขอ")); return; }
+      var timer;
+      try {
+        var controller = new AbortController(); timer = setTimeout(function () { controller.abort(); }, 10000);
+        var response = await fetch(PROXY_URL + "machine-request", { method: "POST", signal: controller.signal, credentials: "omit", referrerPolicy: "no-referrer", headers: { "Content-Type": "application/json", "X-Stats-Id": anon }, body: JSON.stringify({ name: name }) });
+        if (response.status !== 204) throw new Error("request");
+        track("machine_photo_request"); toast(t("ส่งคำขอรูปแล้ว"));
+      } catch (error) {
+        try { localStorage.setItem(PHOTO_REQUEST_KEY, JSON.stringify(photoRequestsSent().filter(function (item) { return item !== name; }))); } catch (ignored) {}
+        toast(t("ส่งคำขอรูปไม่สำเร็จ ลองกดอีกครั้งภายหลัง"));
+      }
+      finally { clearTimeout(timer); }
+    }
+    try { if (navigator.locks && navigator.locks.request) await navigator.locks.request("kryvos-photo-request-" + name, send); else await send(); }
+    catch (error) { toast(t("ส่งคำขอรูปไม่สำเร็จ ลองกดอีกครั้งภายหลัง")); }
+    finally { delete photoRequestPending[name]; refreshPhotoRequests(); }
+  }
+  document.addEventListener("click", function (ev) {
+    var button = ev.target.closest("[data-photo-request]"); if (button && !button.disabled) requestMachinePhoto(button.dataset.photoRequest);
+  });
+  window.addEventListener("storage", function (ev) { if (ev.key === PHOTO_REQUEST_KEY || ev.key === null) refreshPhotoRequests(); });
   var machineAliases = null;
   function machineMatches(ex, query) {
     query = String(query || "").normalize("NFKC").trim().toLowerCase();
@@ -2605,7 +2688,7 @@
     openSheet("", null, machineFocusReturn(origin, id));
     var related = (MACHINE_RELATIONS[id] || []).filter(function (key) { return EXBY[key] && !EXBY[key].hidden; });
     openGuides[id] = true;
-    sheet.innerHTML = sheetHead(esc(ex.name), false) + machineArt(id) +
+    sheet.innerHTML = sheetHead(esc(ex.name), false) + machineArt(id) + photoRequestHtml(ex, EN_NAME[id] || (ex.ai ? ex.en : "")) +
       '<p role="status">' + (saved ? t("จำเครื่องนี้ในยิมแล้ว เปิดแอปใหม่ก็ยังอยู่") : t("ดูวิธีเล่นก่อน แล้วค่อยเพิ่มในยิมได้")) + '</p>' +
       (isPainful(ex) ? '<p class="alert red">' + t("ท่านี้โดนส่วนที่เจ็บ วันนี้ให้ข้าม ถ้าเจ็บมากหรือไม่หายให้พบแพทย์") + '</p>' : '') +
       (ex.catalogOnly ? '<p class="hint">' + t("เครื่องคาร์ดิโอ: ดูวิธีใช้และจำไว้ในยิม ไม่เพิ่มในโปรแกรมเวทอัตโนมัติ") + '</p>' : "") + guideHtml(ex) + '<button type="button" class="btn" data-machine-rest="' + esc(id) + '">' + t("เริ่มจับเวลาพัก") + ' · ' + restText(S.prefs.rest) + '</button>' +
@@ -2730,7 +2813,7 @@
     return '<article class="sh-ex"><label class="sh-pick"><input type="checkbox" ' + pick + (checked ? " checked" : "") + (saved ? " disabled" : "") + '><span>' + esc(ex.name) + (en ? '<small lang="en">' + esc(en) + '</small>' : '<small>' + t("ยังไม่มีชื่อภาษาอังกฤษที่ยืนยันแล้ว") + '</small>') + (!checked ? '<small>' + t("AI ไม่แน่ใจ ตรวจดูก่อน") + '</small>' : '') + '</span></label>' +
       scanMuscles(ex) + '<p class="hint">' + esc(names(ex.m, MUSCLES)) + '</p><div class="scan-dose">' + (ex.catalogOnly ? '' : tf(t("{n} เซ็ต"), { n: sets }) + ' · ' + esc(sug.reps + (ex.t === "sec" ? t(" วิ") : t(" ครั้ง")))) + '<small class="hint" style="display:block">' + esc(sug.tip) + '</small></div>' +
       (guide && guide.how && guide.how.length >= 3 ? '<ol class="scan-steps">' + guide.how.slice(0, 4).map(function (step) { return '<li>' + esc(step) + '</li>'; }).join('') + '</ol>' : '<p class="hint">' + t("ยังไม่มีขั้นตอนที่ครบถ้วนสำหรับท่านี้ ดูวิดีโอหรือสอบถามผู้ฝึกสอนก่อนใช้เครื่อง") + '</p>') +
-      '<p class="hint">' + tf(t("พักระหว่างเซ็ต {t}"), { t: restText(S.prefs.rest) }) + '</p>' + exVideos(ex) + '</article>';
+      '<p class="hint">' + tf(t("พักระหว่างเซ็ต {t}"), { t: restText(S.prefs.rest) }) + '</p>' + exVideos(ex) + (typeof photoRequestHtml === "function" ? photoRequestHtml(ex, en) : '') + '</article>';
   }
 
   // One place that talks to Gemini; always asks for JSON back.

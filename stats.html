@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>KRYVOS Stats</title>
-<link rel="icon" href="icon-192.png">
+<link rel="icon" href="icon-192-v2.png">
+<link rel="apple-touch-icon" href="apple-touch-icon-v2.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -64,6 +65,7 @@
   table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
   th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
   th:first-child, td:first-child { text-align: left; }
+  #machine-requests td:first-child { overflow-wrap: anywhere; }
   th { color: var(--soft); font-weight: 500; }
   .link { border: 0; background: none; color: var(--blue); font: 500 .86rem var(--body); padding: 6px 0; cursor: pointer; }
 
@@ -123,6 +125,7 @@
       <p class="hint">จำนวนครั้งที่กดใช้ และจำนวนเครื่องที่ใช้ฟีเจอร์นั้น ในช่วงที่เลือก</p>
       <ul class="bars" id="features"></ul>
     </section>
+<section class="card"><h2 id="machine-requests-title"></h2><p class="hint" id="machine-requests-range"></p><div id="machine-requests"></div></section>
 
     <div class="grid2">
       <section class="card">
@@ -151,12 +154,14 @@
   </div>
 </div>
 
+<script src="en.js?v=80"></script>
 <script>
 (function () {
   "use strict";
   var API = "https://train-today-ai.nnrwachr.workers.dev/stats";
   var KEY_STORE = "kryvos-stats-key", RANGE_STORE = "kryvos-stats-days";
   var NAMES = {
+    machine_photo_request: t("ขอรูปเครื่อง"),
     today_mode_toggle: "สลับภาพรวมการฝึก/โภชนาการ", today_section_toggle: "สลับส่วนของวันนี้", today_day_open: "ดูกิจกรรมรายวัน", quick_add_open: "เปิดเพิ่มบันทึกเร็ว",
     gym_group_toggle: "พับ/กางกลุ่มเครื่องเล่น",
     open: "เปิดแอป", install: "ติดตั้งเป็นแอป",
@@ -235,6 +240,7 @@
     $("daily-tbl").innerHTML = "<table><thead><tr><th>วันที่</th><th>เครื่อง</th><th>เครื่องใหม่</th><th>เปิดแอป</th><th>กดทั้งหมด</th></tr></thead><tbody>" +
       series.slice().reverse().map(function (s) { return "<tr><td>" + dayLabel(s.day) + "</td><td>" + s.devices + "</td><td>" + s.fresh + "</td><td>" + s.opens + "</td><td>" + s.events + "</td></tr>"; }).join("") + "</tbody></table>";
 
+    renderMachineRequests(Array.isArray(d.machineRequests) ? d.machineRequests : []);
     var feats = d.features.filter(function (f) { return NAMES[f.ev] && f.ev !== "open"; });
     bars($("features"), feats.map(function (f) { return { name: NAMES[f.ev], code: f.ev, v: f.n, label: fmt(f.n) + " ครั้ง · " + f.devices + " เครื่อง" }; }), "ยังไม่มีใครใช้ฟีเจอร์ในช่วงนี้");
     var tabs = d.features.filter(function (f) { return TABS[f.ev]; });
@@ -242,6 +248,17 @@
     bars($("days"), (d.activeDays || []).map(function (r) { return { name: r.days === 1 ? "เปิด 1 วัน" : "เปิด " + r.days + " วัน", v: r.devices, label: r.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล", true);
     bars($("plat"), d.platforms.map(function (r) { return { name: PLAT[r.k] || "อื่นๆ", v: r.devices, label: r.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล");
     bars($("lang"), d.langs.map(function (r) { return { name: LANGS[r.k] || "ไม่ทราบ", v: r.devices, label: r.devices + " เครื่อง" }; }), "ยังไม่มีข้อมูล");
+  }
+
+  function t(value) {
+    var language = document.documentElement.lang;
+    try { language = localStorage.getItem("kryvos-lang") || language; } catch (error) {}
+    return language === "en" && typeof EN !== "undefined" ? EN[value] || value : value;
+  }
+  function renderMachineRequests(rows) {
+    $("machine-requests-title").textContent = t("เครื่องที่ถูกขอรูป");
+    $("machine-requests-range").textContent = t("ย้อนหลัง 30 วัน");
+    $("machine-requests").innerHTML = rows.length ? '<table><thead><tr><th>' + esc(t("ชื่อเครื่อง")) + '</th><th>' + esc(t("จำนวนคำขอ")) + '</th></tr></thead><tbody>' + rows.map(function (row) { return '<tr><td lang="en">' + esc(row.name) + '</td><td>' + esc(fmt(row.count)) + '</td></tr>'; }).join("") + '</tbody></table>' : '<p class="empty">' + esc(t("ยังไม่มีคำขอรูปเครื่อง")) + '</p>';
   }
 
   function tile(cls, lb, v, sub) { return '<div class="tile ' + cls + '"><div class="lb">' + esc(lb) + '</div><div class="v">' + esc(v) + '</div><div class="d">' + esc(sub) + "</div></div>"; }
@@ -304,7 +321,7 @@
       features: f.map(function (x) { return { ev: x[0], n: x[1], devices: x[2] }; }),
       platforms: [{ k: "android", devices: 9 }, { k: "ios", devices: 5 }], langs: [{ k: "th", devices: 12 }, { k: "en", devices: 2 }],
       devices: 14, installed: 8, activeDays: [{ days: 1, devices: 3 }, { days: 2, devices: 4 }, { days: 3, devices: 3 }, { days: 5, devices: 2 }, { days: 7, devices: 2 }],
-      allTime: { devices: 14, events: 1400, first: from } };
+      machineRequests: [{name:"treadmill",count:12},{name:"hack squat machine",count:7}], allTime: { devices: 14, events: 1400, first: from } };
   }
 
   $("gate-form").addEventListener("submit", function (ev) {

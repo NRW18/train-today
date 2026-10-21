@@ -139,6 +139,7 @@ test("manual grid always retains canonical exercise names and IDs; high/low scor
   const nodes = {};
   const r = runtime();
   const a = load(["machineCard", "drawMachineResults", "rejectMachine"], {
+    photoRequestHtml: () => "", EN_NAME: {},
     EXBY: Object.fromEntries(exercises.map(ex => [ex.id, ex])), esc: value => String(value).replaceAll("<", "&lt;"),
     machineArt: id => '<svg data-example="' + id + '"></svg>', machineConfig: () => config("local"),
     machineResults: [row("leg_press", .9), row("chest_press", .7)], machineRejected: [], machinePhoto: "blob:photo",
@@ -158,6 +159,7 @@ test("confirmation opens the original guide and the same exercise's rest timer",
   const ex = { id: "leg_press", name: "Leg Press", m: [], j: [] }, labels = {};
   const sheet = { focus() {} }; let started = false, guide;
   const a = load(["openMachineInfo", "machineFocusReturn"], { EXBY: { leg_press: ex }, MACHINE_RELATIONS: {}, machineSequence: 0, sheetBack: null,
+    photoRequestHtml: () => "", EN_NAME: {},
     S: { prefs: { rest: 90 } }, openGuides: {}, document: { activeElement: {} }, sheet,
     openSheet() {}, closeSheet() {}, sheetHead: name => name, esc: value => value,
     machineArt: () => "", isPainful: () => false, guideHtml: item => { guide = item; return "guide"; },

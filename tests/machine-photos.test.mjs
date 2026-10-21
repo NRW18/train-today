@@ -48,7 +48,7 @@ test("cardio has real photographs and shared equipment keeps source attribution"
 
 test("machineArt never reads personal photos, with or without app artwork", () => {
   const saved = {leg_press:"personal photograph",custom:"personal photograph"};
-  const a = load(["machineArt"], {
+  const a = load(["machineSymbol", "machineArt"], {
     thumbnailHtml: () => { throw Error("must never read user thumbnails"); },
     S: {scanThumbs:saved}, BASE_EX: [{id:"leg_press"}], EXBY: {leg_press:{name:"Leg press"}},
     MACHINE_PHOTOS: photos, esc: value => String(value)
@@ -97,4 +97,30 @@ test("photo credits are reachable and preserve source, author link and license w
   assert.match(sheet.innerHTML, /https:\/\/example.test\/author/);
   assert.match(sheet.innerHTML, /creativecommons.org/);
   assert.match(sheet.innerHTML, /commons.wikimedia.org/);
+});
+test("AI-added machines get matching app artwork by name, never a personal photo", () => {
+  const names = { c_1: "ปั่นจักรยาน (เครื่อง)", c_2: "Treadmill walk", c_3: "อะไรสักอย่าง", c_4: "Stair climber", c_5: "Preacher curl", c_6: "Elliptical trainer", c_7: "เครื่องขี่ม้า" };
+  const EXBY = {}; Object.keys(names).forEach(id => { EXBY[id] = { name: names[id] }; });
+  const a = load(["machineSymbol", "machineArt"], { BASE_EX: [], EXBY, MACHINE_PHOTOS: {}, S: { scanThumbs: { c_1: "data:image/webp;base64,AAAA" } }, esc: String, t: String });
+  const expect = { c_1: "stationary_bike", c_2: "treadmill", c_3: "generic", c_4: "stair_climber", c_5: "preacher_curl", c_6: "elliptical", c_7: "rider" };
+  for (const id of Object.keys(expect)) assert.match(a.machineArt(id), new RegExp("machines.svg#" + expect[id] + '"'), id);
+  assert.doesNotMatch(a.machineArt("c_1"), /<img/);
+});
+test("machineSymbol uses only icons that exist and never matches a bare row, curl, fly, step or extension", () => {
+  const svg = readFileSync(new URL("../assets/machines.svg", import.meta.url), "utf8");
+  const a = load(["machineSymbol"], {});
+  const cases = {
+    "Triceps extension": "generic", "Overhead triceps extension (cable)": "generic", "Leg extension machine": "leg_extension", "เลกเอ็กซ์เทนชัน": "leg_extension",
+    "Barbell row": "generic", "Upright row": "generic", "Seated cable row": "seated_row", "Cable row": "seated_row", "Rowing machine": "rower",
+    "Barbell curl": "generic", "Bicep curl": "generic", "Hammer curl": "generic", "Leg curl": "leg_curl", "Preacher curl": "preacher_curl", "Dumbbell curl": "db_curl",
+    "Cable fly": "generic", "Reverse fly": "generic", "Pec deck": "pec_deck", "Step-up": "generic", "Step up onto box": "generic", "Stair climber": "stair_climber", "Stepper": "stair_climber",
+    "Bicycle crunch": "generic", "Stationary bike": "stationary_bike", "Browser row": "generic", "Lat pulldown": "lat_pulldown", "Calf raise": "calf_raise"
+  };
+  for (const [name, symbol] of Object.entries(cases)) {
+    assert.equal(a.machineSymbol({ name }), symbol, name);
+    if (symbol !== "generic") assert.match(svg, new RegExp('<symbol id="' + symbol + '"'), symbol + " icon exists");
+  }
+  assert.equal(a.machineSymbol({ name: "Cable machine", en: "Treadmill" }), "treadmill", "English name is used too");
+  assert.equal(a.machineSymbol(null), "generic");
+  for (const dup of ["bike", "stair", "preacher"]) assert.doesNotMatch(svg, new RegExp('<symbol id="' + dup + '"'), dup + " must not duplicate an existing icon");
 });

@@ -54,3 +54,8 @@ nav.tabs .quick-plus { display: flex; flex-direction: column; justify-content: c
 .machine-filters { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
 .machine-filters button { min-height:44px; padding:8px 12px; border:1px solid var(--line); }
 .machine-filters button[aria-pressed="true"] { background:var(--blue-bg); color:var(--blue); border-color:var(--blue); }
+
+.machine-option { min-width:0; display:flex; flex-direction:column; gap:8px; }
+.machine-option > .machine-card { width:100%; flex:1; }
+.photo-request { min-height:44px; white-space:normal; overflow-wrap:anywhere; font-size:.8rem; }
+.photo-request:disabled { color:var(--soft); cursor:default; }
