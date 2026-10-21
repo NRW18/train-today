@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=77">
+<link rel="stylesheet" href="theme.css?v=78">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=77">
-<link rel="stylesheet" href="brand.css?v=77">
+<link rel="stylesheet" href="simple-flow.css?v=78">
+<link rel="stylesheet" href="brand.css?v=78">
 </head>
 <body class="home">
 <div class="app">
@@ -757,8 +757,15 @@
   <main id="v-run" hidden>
     <section class="card gps-card" aria-labelledby="gps-h">
       <h2 id="gps-h">วิ่งด้วย GPS</h2>
-      <p class="hint">เปิดแอปและหน้าจอค้างไว้ การติดตามเบื้องหลังไม่รับประกัน แอปจะพักเมื่อซ่อนหน้าจอ</p>
-      <p class="hint">ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก</p>
+      <div class="gps-actions">
+        <button type="button" class="btn" id="gps-start">เริ่ม GPS</button>
+        <button type="button" class="btn line" id="gps-pause" hidden>พักการวิ่ง</button>
+        <button type="button" class="btn" id="gps-resume" hidden>วิ่งต่อ</button>
+        <button type="button" class="btn line" id="gps-finish" hidden>จบการวิ่ง</button>
+        <button type="button" class="btn" id="gps-save" hidden>บันทึกผล GPS</button>
+        <button type="button" class="btn line" id="gps-export" hidden>สำรองผลที่รอบันทึก</button>
+        <button type="button" class="btn line" id="gps-discard" hidden>ยกเลิกผล GPS</button>
+      </div>
       <div class="stats gps-metrics" aria-live="off">
         <div class="stat"><div class="v" id="gps-distance">0.00</div><div class="k">ระยะทาง (กม.)</div></div>
         <div class="stat"><div class="v" id="gps-time">00:00</div><div class="k">เวลาที่วิ่งจริง</div></div>
@@ -770,17 +777,12 @@
       <p id="gps-wake" class="hint"></p>
       <div id="gps-route"></div>
       <p id="gps-splits" class="hint" role="status"></p>
-      <div class="gps-actions">
-        <button type="button" class="btn" id="gps-start">เริ่ม GPS</button>
-        <button type="button" class="btn line" id="gps-pause" hidden>พักการวิ่ง</button>
-        <button type="button" class="btn" id="gps-resume" hidden>วิ่งต่อ</button>
-        <button type="button" class="btn line" id="gps-finish" hidden>จบการวิ่ง</button>
-        <button type="button" class="btn" id="gps-save" hidden>บันทึกผล GPS</button>
-        <button type="button" class="btn line" id="gps-export" hidden>สำรองผลที่รอบันทึก</button>
-        <button type="button" class="btn line" id="gps-discard" hidden>ยกเลิกผล GPS</button>
-      </div>
       <button type="button" class="linkbtn" id="gps-manual">บันทึกวิ่งด้วยตัวเอง</button>
       <p class="hint">ใช้ประเภทการวิ่งจากตัวเลือกด้านล่างก่อนเริ่ม GPS</p>
+      <details class="gps-info"><summary>ก่อนวิ่ง: หน้าจอและความเป็นส่วนตัว</summary>
+        <p class="hint">เปิดแอปและหน้าจอค้างไว้ การติดตามเบื้องหลังไม่รับประกัน แอปจะพักเมื่อซ่อนหน้าจอ</p>
+        <p class="hint">ตำแหน่งอยู่ในเครื่องและไฟล์สำรองที่คุณส่งออกเท่านั้น ไม่ส่งให้ AI สถิติ หรือแผนที่ภายนอก</p>
+      </details>
     </section>
     <section class="card" aria-labelledby="run-h">
       <h2 id="run-h">บันทึกการวิ่ง</h2>
@@ -860,13 +862,13 @@
   <!-- FOOD + BODY WEIGHT -->
   <main id="v-food" hidden>
     <section class="card shoot" aria-labelledby="food-shoot-h">
-      <h2 id="food-shoot-h">ถ่ายรูปอาหาร</h2>
+      <h2 id="food-shoot-h">มื้อนี้กินอะไร?</h2>
       <p class="sub">อาหารของคุณน่ากินรึเปล่าเราขอเช็กแคลหน่อยสิ</p>
-      <label class="shot-btn" id="food-label" tabindex="0" role="button" aria-label="ถ่ายรูปอาหาร (เปิดกล้อง)">
-        <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">(เปิดกล้อง)</span>
+      <label class="shot-btn food-shot" id="food-label" tabindex="0" role="button" aria-label="ถ่ายรูปอาหาร (เปิดกล้อง)">
+        <span class="frame" aria-hidden="true"><i class="fc tl"></i><i class="fc tr"></i><i class="fc bl"></i><i class="fc br"></i><i class="fbar"></i></span><span class="fcap">ถ่ายรูปอาหาร</span>
         <input type="file" id="food-input" accept="image/*" capture="environment" hidden>
       </label>
-      <div class="photo-alternatives"><button type="button" class="linkbtn" id="food-gallery">เลือกรูปจากแกลเลอรี</button></div>
+      <div class="photo-alternatives"><button type="button" class="btn line small-btn" id="food-gallery">เลือกรูปจากแกลเลอรี</button></div>
       <input type="file" id="food-gallery-input" accept="image/*" hidden>
       <p class="hint" id="food-nokey" hidden>ถ่ายรูปอาหารต้องใส่ Gemini key ก่อน (แท็บ "เครื่อง") หรือกด "เพิ่มเอง"</p>
     </section>
@@ -1128,10 +1130,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=77"></script>
-<script src="machines-config.js?v=77"></script>
-<script src="machine-recognition.js?v=77"></script>
-<script src="machine-photos.js?v=77"></script>
+<script src="en.js?v=78"></script>
+<script src="machines-config.js?v=78"></script>
+<script src="machine-recognition.js?v=78"></script>
+<script src="machine-photos.js?v=78"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1964,8 +1966,7 @@
       var label = d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "short" }) + ": " +
         (what.length ? what.join(", ") : a.today ? t("วันนี้ยังไม่ได้ซ้อม") : a.future ? t("ยังไม่ถึง") : t("ไม่มีกิจกรรม"));
       var mark = kind && kind !== "restday" ? '<span class="dot ' + kind + '" aria-hidden="true">' + inner + "</span>" : '<span class="dot ' + kind + '" aria-hidden="true"></span>';
-      var center = Math.abs((a.ts - new Date(now).setHours(0, 0, 0, 0)) / 864e5) < 1.5;
-      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(d.toLocaleDateString(LOCALE, { weekday: center ? "long" : "short" }).replace(/^วัน/, "")) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
+      return '<li class="wd' + (a.today ? " now" : "") + '"><button type="button" data-history-day="' + a.ts + '" aria-label="' + esc(label) + '"' + (a.today ? ' aria-current="date"' : "") + (a.future ? " disabled" : "") + '><span class="wl" aria-hidden="true">' + esc(d.toLocaleDateString(LOCALE, { weekday: a.today ? "long" : "short" }).replace(/^วัน/, "")) + '</span><span class="wn" aria-hidden="true">' + d.getDate() + "</span>" + mark + "</button></li>";
     }).join("");
   }
 
