@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=80">
+<link rel="stylesheet" href="theme.css?v=81">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=80">
-<link rel="stylesheet" href="brand.css?v=80">
+<link rel="stylesheet" href="simple-flow.css?v=81">
+<link rel="stylesheet" href="brand.css?v=81">
 </head>
 <body class="home">
 <div class="app">
@@ -1036,6 +1036,10 @@
       <p class="hint" style="margin:0" id="install-text">เพิ่มลงหน้าจอโทรศัพท์ เปิดเต็มจอ และใช้ได้แม้ไม่มีเน็ต</p>
       <button class="btn" type="button" id="install" hidden>ติดตั้งแอป</button>
     </section>
+    <section class="card account-card" id="account-card" aria-labelledby="account-h" hidden>
+      <h2 id="account-h">บัญชีและสำรองออนไลน์</h2>
+      <div id="account-body"></div>
+    </section>
     <section class="card" aria-labelledby="lang-h">
       <h2 id="lang-h">Language / ภาษา</h2>
       <div class="seg" id="lang-seg" role="group" aria-label="Language / ภาษา">
@@ -1131,10 +1135,11 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=80"></script>
-<script src="machines-config.js?v=80"></script>
-<script src="machine-recognition.js?v=80"></script>
-<script src="machine-photos.js?v=80"></script>
+<script src="en.js?v=81"></script>
+<script src="machines-config.js?v=81"></script>
+<script src="machine-recognition.js?v=81"></script>
+<script src="machine-photos.js?v=81"></script>
+<script src="auth-config.js?v=81"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1676,6 +1681,7 @@
       o.draft = S.draft; o.draftTs = S.draftTs; // set only when the user types or ticks, so an old draft still expires
       localStorage.setItem(KEY, JSON.stringify(o));
       if (typeof draftSaveStatus === "function") draftSaveStatus("saved");
+      if (typeof markSyncDirty === "function") markSyncDirty();
       return true;
     } catch (e) {
       // Retry only a scan's new/replaced photos. Never remove previously saved photos.
@@ -4499,7 +4505,8 @@
   function draftTicked() {
     return Object.keys(S.draft).some(function (id) { return S.draft[id].some(function (s) { return s.done; }); });
   }
-  function importBackup(text) {
+  function importBackup(text, opts) {
+    opts = opts || {};
     var d;
     try { d = JSON.parse(text); } catch (e) { d = null; }
     if (!d || !Array.isArray(d.log)) { toast(t("ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป")); return; }
@@ -4511,7 +4518,7 @@
       var keys = ["log", "runs", "food", "weights", "custom"];
       var lost = dataList(S, keys);
       if (draftTicked()) lost.push(t("เซ็ตที่ติ๊กไว้แต่ยังไม่กดบันทึก"));
-      if (lost.length) {
+      if (lost.length && !opts.replace) {
         var got = dataList(inc, keys);
         if (!confirm(t("นำเข้าไฟล์นี้จะแทนที่ข้อมูลเดิมทั้งหมดในเครื่องนี้ รวมถึงรายการเครื่องในยิมที่เลือกไว้\n\nจะหาย: ") + lost.join(", ") +
           t("\n\nในไฟล์มี: ") + (got.length ? got.join(", ") : t("ไม่มีข้อมูล")) + t("\n\nถ้ายังไม่ได้กด \"สำรองข้อมูล\" ข้อมูลเดิมจะกู้คืนไม่ได้ นำเข้าไหม?"))) return;
@@ -4521,7 +4528,7 @@
       S.custom = custom; rebuildEx();
       S.seen = Array.isArray(d.seen) ? d.seen.filter(function (x) { return EXBY[x]; }) : [];
       S.scanned = S.scanned || S.seen.length > 0;
-      S.scanThumbs = thumbnails;
+      S.scanThumbs = opts.keepThumbs ? Object.assign({}, S.scanThumbs || {}, thumbnails) : thumbnails; // sync never carries photos
       S.off = Array.isArray(d.off) ? d.off.filter(function (x) { return EXBY[x]; }) : [];
       if (d.catalogVersion !== 2) S.off = S.off.concat(BASE_EX.filter(function (ex) { return ex.optional && (d.catalogVersion !== 1 || ex.catalogVersion === 2) && S.off.indexOf(ex.id) < 0; }).map(function (ex) { return ex.id; }));
       S.food = inc.food; S.weights = inc.weights; S.runs = inc.runs;
@@ -4536,7 +4543,8 @@
       S.draft = {};
       if (save() === false) { S = JSON.parse(before); rebuildEx(); renderAll(); return false; }
       if (settingUp) closeProfileSetup();
-      renderAll(); toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว")); track("import");
+      renderAll(); if (!opts.quiet) { toast(t("นำเข้า ") + S.log.length + t(" ครั้งแล้ว")); track("import"); }
+      return true;
     }
     if (Object.keys(candidates).length) return decodeScanThumbs(candidates, ids).then(finishImport);
     return finishImport({});
@@ -4993,7 +5001,246 @@
   renderAll();
   refreshCameraPermission();
   refreshLocationPermission();
-  if (!S.onboarded) { try { localStorage.setItem(STATS_OFF, "1"); } catch (e) {} showProfileSetup(); }
+  /* ---------- optional Google sign-in + backup sync (proxy/auth.js) ---------- */
+  // Off unless auth-config.js sets GOOGLE_CLIENT_ID. Local data stays the source of truth; nothing is uploaded
+  // before the user agrees, photos are never uploaded, and the session token never goes into backups or stats.
+  var AUTH_KEY = "kryvos-auth", AUTH_SKIP_KEY = "kryvos-auth-skip", SYNC_GAP = 5 * 60e3;
+  var auth = readAuth(), syncTimer = 0, syncBusy = false, applyingRemote = false, gisLoading = null;
+  function authOn() { return typeof GOOGLE_CLIENT_ID === "string" && /^[0-9A-Za-z._-]+\.apps\.googleusercontent\.com$/.test(GOOGLE_CLIENT_ID); }
+  function syncBase() { return String(PROXY_URL || "").replace(/\/+$/, ""); }
+  function readAuth() {
+    try { var a = JSON.parse(localStorage.getItem(AUTH_KEY) || "null");
+      return a && typeof a.token === "string" && /^[A-Za-z0-9_-]{43}$/.test(a.token) && a.expires > Date.now() ? a : null;
+    } catch (e) { return null; }
+  }
+  function writeAuth() { try { if (auth) localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); else localStorage.removeItem(AUTH_KEY); } catch (e) {} }
+  function stripImages(v) {
+    if (typeof v === "string") return /^data:image\//i.test(v) ? "" : v;
+    if (Array.isArray(v)) return v.map(stripImages);
+    if (v && typeof v === "object") { var o = {}; Object.keys(v).forEach(function (k) { o[k] = stripImages(v[k]); }); return o; }
+    return v;
+  }
+  // The same data as the backup file, without photos.
+  function syncPayload() { var o = stripImages(JSON.parse(JSON.stringify(snapshot()))); delete o.scanThumbs; o.onboarded = S.onboarded; return o; }
+  function syncHash(text) { var h = 5381; for (var i = 0; i < text.length; i++) h = (h * 33 + text.charCodeAt(i)) | 0; return String(h >>> 0) + ":" + text.length; }
+  function hasPersonalData(d) { return ["log", "runs", "food", "weights"].some(function (k) { return d && Array.isArray(d[k]) && d[k].length > 0; }); }
+  // Union of two backups: entries are kept once (same content), custom exercises by id (this phone wins).
+  function mergeSyncData(local, remote) {
+    function union(a, b) { var seen = {}, out = []; (a || []).concat(b || []).forEach(function (x) { var k = JSON.stringify(x); if (!seen[k]) { seen[k] = 1; out.push(x); } }); return out.sort(function (x, y) { return (x.ts || 0) - (y.ts || 0); }); }
+    var out = Object.assign({}, remote || {}, local || {});
+    ["log", "runs", "food", "weights"].forEach(function (k) { out[k] = union(local && local[k], remote && remote[k]); });
+    var ids = {}; out.custom = [];
+    ((local && local.custom) || []).concat((remote && remote.custom) || []).forEach(function (c) { if (c && c.id && !ids[c.id]) { ids[c.id] = 1; out.custom.push(c); } });
+    out.seen = union(local && local.seen, remote && remote.seen);
+    delete out.scanThumbs;
+    return out;
+  }
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = {};
+    if (auth && path !== "/auth/google") headers.Authorization = "Bearer " + auth.token;
+    if (opts.ifMatch != null) headers["If-Match"] = String(opts.ifMatch);
+    if (opts.body) headers["Content-Type"] = "application/json";
+    return fetch(syncBase() + path, { method: opts.method || "GET", headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined }).then(function (r) {
+      if (r.status === 401 && path !== "/auth/google" && auth) { auth = null; writeAuth(); renderAccount(); toast(t("ออกจากระบบแล้ว กรุณาเข้าสู่ระบบอีกครั้งเพื่อซิงค์")); }
+      return r;
+    });
+  }
+
+  /* Google button */
+  function loadGis() {
+    if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
+    if (gisLoading) return gisLoading;
+    gisLoading = new Promise(function (resolve, reject) {
+      var s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.async = true;
+      s.onload = resolve; s.onerror = function () { gisLoading = null; reject(new Error("gis")); };
+      document.head.appendChild(s);
+    });
+    return gisLoading;
+  }
+  function renderGoogleButton(el) {
+    if (!el) return;
+    el.innerHTML = '<p class="hint">' + esc(t("กำลังโหลดปุ่ม Google…")) + "</p>";
+    loadGis().then(function () {
+      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, ux_mode: "popup", auto_select: false, cancel_on_tap_outside: true });
+      el.innerHTML = "";
+      google.accounts.id.renderButton(el, { type: "standard", theme: "outline", size: "large", shape: "pill", text: "continue_with", logo_alignment: "left", width: Math.max(200, Math.min(360, el.clientWidth || 300)), locale: LANG === "en" ? "en" : "th" });
+    }).catch(function () { el.innerHTML = '<p class="hint">' + esc(t("โหลดปุ่ม Google ไม่สำเร็จ ลองใหม่เมื่อออนไลน์")) + "</p>"; });
+  }
+  function onGoogleCredential(resp) {
+    if (!resp || typeof resp.credential !== "string") return;
+    api("/auth/google", { method: "POST", body: { credential: resp.credential } }).then(function (r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (out) {
+      auth = { token: out.token, name: String(out.name || ""), email: String(out.email || ""), expires: +out.expires || Date.now() + 29 * 864e5, version: 0, consent: false, hash: "", syncedAt: 0 };
+      writeAuth(); closeAuthGate(); renderAccount();
+      toast(tf(t("เข้าสู่ระบบแล้ว: {who}"), { who: auth.email || auth.name }));
+      startSync(true);
+    }).catch(function (e) { toast(e && e.message === "429" ? t("ลองเข้าสู่ระบบบ่อยเกินไป ลองใหม่พรุ่งนี้") : t("เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง")); });
+  }
+
+  /* Opening screen (once, skippable) */
+  var authGate = null, authGateDone = null, authGateBg = [];
+  function shouldShowAuthGate() { var skipped = false; try { skipped = localStorage.getItem(AUTH_SKIP_KEY) === "1"; } catch (e) {} return authOn() && !auth && !skipped && !!syncBase(); }
+  function showAuthGate(done) {
+    authGateDone = done;
+    authGate = document.createElement("div"); authGate.className = "auth-gate";
+    authGate.setAttribute("role", "dialog"); authGate.setAttribute("aria-modal", "true"); authGate.setAttribute("aria-labelledby", "auth-gate-h");
+    authGate.innerHTML = '<div class="auth-gate-in"><span class="wordmark auth-wordmark" role="img" aria-label="KRYVOS"></span><p class="auth-tag" id="auth-gate-h">Better you every workout.</p><span class="auth-rule" aria-hidden="true"></span>' +
+      '<div class="auth-actions"><div class="gsi-slot" id="gsi-gate"></div><button type="button" class="auth-skip" id="auth-skip">' + esc(t("ใช้งานโดยไม่เข้าสู่ระบบ")) + '</button>' +
+      '<p class="auth-note">' + esc(t("ไม่บังคับ เข้าสู่ระบบเพื่อสำรองข้อมูลและใช้ได้หลายเครื่อง ข้อมูลยังอยู่ในเครื่องนี้เสมอ")) + "</p></div></div>";
+    authGateBg = Array.prototype.filter.call(document.body.children, function (el) { return ["SCRIPT", "STYLE"].indexOf(el.tagName) < 0; }).map(function (el) { var e = { el: el, inert: el.inert }; el.inert = true; return e; });
+    document.body.appendChild(authGate); document.body.classList.add("auth-open");
+    authGate.addEventListener("keydown", function (ev) { if (ev.key === "Escape") skipAuthGate(); });
+    $("auth-skip").addEventListener("click", skipAuthGate);
+    renderGoogleButton($("gsi-gate"));
+    $("auth-skip").focus();
+  }
+  function skipAuthGate() { try { localStorage.setItem(AUTH_SKIP_KEY, "1"); } catch (e) {} closeAuthGate(); }
+  function closeAuthGate() {
+    if (!authGate) return;
+    authGateBg.forEach(function (e) { e.el.inert = e.inert; }); authGateBg = [];
+    authGate.remove(); authGate = null; document.body.classList.remove("auth-open");
+    var done = authGateDone; authGateDone = null; if (done) done();
+  }
+
+  /* Account card in More */
+  function renderAccount() {
+    var card = $("account-card"); if (!card) return;
+    card.hidden = !authOn();
+    if (card.hidden) return;
+    var body = $("account-body");
+    if (!auth) {
+      body.innerHTML = '<p class="hint">' + esc(t("ไม่บังคับ เข้าสู่ระบบด้วย Google เพื่อสำรองข้อมูลการซ้อม และใช้ข้อมูลเดียวกันได้หลายเครื่อง ไม่อัปโหลดรูป")) + '</p><div class="gsi-slot" id="gsi-settings"></div>';
+      renderGoogleButton($("gsi-settings"));
+      return;
+    }
+    var status = !auth.consent ? t("ยังไม่ได้เปิดสำรองออนไลน์") : auth.syncedAt ? tf(t("ซิงค์ล่าสุด {when}"), { when: fmtDate(auth.syncedAt) + " " + fmtTime(auth.syncedAt) }) : t("ยังไม่ได้ซิงค์");
+    body.innerHTML = '<p class="account-who"><b>' + esc(auth.name || t("บัญชี Google")) + "</b><span>" + esc(auth.email) + '</span></p><p class="hint" role="status" id="sync-status">' + esc(status) + "</p>" +
+      (auth.consent ? '<button type="button" class="btn line" id="sync-now">' + esc(t("ซิงค์ตอนนี้")) + "</button>" : '<button type="button" class="btn" id="sync-enable">' + esc(t("เปิดสำรองออนไลน์")) + "</button>") +
+      '<button type="button" class="btn line" id="sign-out">' + esc(t("ออกจากระบบ")) + '</button><button type="button" class="btn danger" id="delete-account">' + esc(t("ลบข้อมูลบนเซิร์ฟเวอร์และบัญชี")) + "</button>" +
+      '<p class="hint">' + esc(t("ออกจากระบบหรือลบบัญชี ข้อมูลในเครื่องนี้ยังอยู่ครบ")) + "</p>";
+    var b;
+    if ((b = $("sync-now"))) b.addEventListener("click", function () { startSync(false, true); });
+    if ((b = $("sync-enable"))) b.addEventListener("click", function () { startSync(false, true); });
+    $("sign-out").addEventListener("click", signOut);
+    $("delete-account").addEventListener("click", deleteAccount);
+  }
+  function setSyncStatus(text) { var el = $("sync-status"); if (el) el.textContent = text; }
+  function signOut() {
+    var old = auth; auth = null; writeAuth(); renderAccount();
+    if (old) fetch(syncBase() + "/auth/logout", { method: "POST", headers: { Authorization: "Bearer " + old.token } }).catch(function () {});
+    try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) {}
+    toast(t("ออกจากระบบแล้ว ข้อมูลในเครื่องนี้ยังอยู่"));
+  }
+  function deleteAccount() {
+    if (!auth || !confirm(t("ลบข้อมูลสำรองบนเซิร์ฟเวอร์และบัญชีนี้ทั้งหมด? ข้อมูลในเครื่องนี้ยังอยู่"))) return;
+    api("/account", { method: "DELETE" }).then(function (r) {
+      if (r.status !== 204) throw new Error("x");
+      auth = null; writeAuth(); renderAccount(); toast(t("ลบข้อมูลบนเซิร์ฟเวอร์และบัญชีแล้ว"));
+    }).catch(function () { toast(t("ลบไม่สำเร็จ ลองใหม่เมื่อออนไลน์")); });
+  }
+
+  /* Consent and choices */
+  function showSyncConsent(onYes) {
+    openSheet("sync-sheet", null);
+    sheet.innerHTML = sheetHead(t("สำรองข้อมูลออนไลน์"), false) +
+      '<p>' + esc(t("ถ้ายอมรับ แอปจะส่งข้อมูลเดียวกับไฟล์ \"สำรองข้อมูล\" ไปเก็บที่เซิร์ฟเวอร์ของแอป (Cloudflare) ผูกกับบัญชี Google ของคุณ")) + "</p><ul class=\"sync-list\">" +
+      "<li>" + esc(t("ส่ง: การซ้อม วิ่ง อาหาร น้ำหนักตัว เป้าหมาย โปรไฟล์ร่างกาย และรองเท้า")) + "</li>" +
+      "<li>" + esc(t("ไม่ส่ง: รูปถ่ายทุกชนิด และไม่ใช้กับ AI สถิติ หรือโฆษณา")) + "</li>" +
+      "<li>" + esc(t("ลบได้ทุกเมื่อที่ อื่นๆ > ลบข้อมูลบนเซิร์ฟเวอร์และบัญชี")) + "</li></ul>" +
+      '<button type="button" class="btn" id="sync-yes">' + esc(t("ยอมรับและสำรอง")) + '</button><button type="button" class="btn line" id="sync-no">' + esc(t("ยังไม่สำรอง")) + "</button>";
+    $("sync-yes").addEventListener("click", function () { auth.consent = true; writeAuth(); closeSheet(); renderAccount(); onYes(); });
+    $("sync-no").addEventListener("click", function () { closeSheet(); renderAccount(); });
+    sheet.focus();
+  }
+  function countsText(d) { var list = dataList(d || {}, ["log", "runs", "food", "weights"]); return list.length ? list.join(", ") : t("ไม่มีข้อมูล"); }
+  function showSyncChoice(server) {
+    openSheet("sync-sheet", null);
+    sheet.innerHTML = sheetHead(t("มีข้อมูลทั้งในเครื่องนี้และในบัญชี"), false) +
+      '<p class="hint">' + esc(t("เลือกว่าจะใช้ข้อมูลชุดไหน ไม่มีอะไรถูกทับจนกว่าคุณจะเลือก")) + "</p>" +
+      '<div class="sync-compare"><div><b>' + esc(t("ในเครื่องนี้")) + "</b><span>" + esc(countsText(syncPayload())) + "</span></div><div><b>" + esc(t("ในบัญชี")) + "</b><span>" + esc(countsText(server.data)) + "</span></div></div>" +
+      '<button type="button" class="btn" id="sync-merge">' + esc(t("รวมทั้งสองชุด (แนะนำ)")) + '</button><button type="button" class="btn line" id="sync-remote">' + esc(t("ใช้ข้อมูลในบัญชี")) + '</button><button type="button" class="btn line" id="sync-local">' + esc(t("ใช้ข้อมูลในเครื่องนี้")) + "</button>";
+    $("sync-merge").addEventListener("click", function () { closeSheet(); applyRemote(mergeSyncData(syncPayload(), server.data), server.version, true); });
+    $("sync-remote").addEventListener("click", function () { closeSheet(); applyRemote(server.data, server.version, false); });
+    $("sync-local").addEventListener("click", function () { closeSheet(); withConsent(function () { upload(server.version, true); }); });
+    sheet.focus();
+  }
+  function withConsent(next) { if (auth.consent) next(); else showSyncConsent(next); }
+  // Replace this phone's data with `data` through the normal import checks, then (optionally) upload the result.
+  function applyRemote(data, version, uploadAfter) {
+    applyingRemote = true;
+    var done;
+    try { done = importBackup(JSON.stringify(data), { replace: true, quiet: true, keepThumbs: true }); } catch (e) { done = false; }
+    Promise.resolve(done).then(function (ok) {
+      applyingRemote = false;
+      if (ok === false || !auth) return;
+      auth.version = version; auth.hash = uploadAfter ? "" : syncHash(JSON.stringify(syncPayload())); auth.syncedAt = Date.now(); auth.dirty = false; writeAuth(); renderAccount();
+      toast(t("ซิงค์ข้อมูลจากบัญชีแล้ว"));
+      if (uploadAfter) withConsent(function () { upload(version, true); });
+    });
+  }
+
+  /* Sync */
+  function startSync(afterSignIn, manual) {
+    if (!auth || syncBusy || !navigator.onLine) { if (manual && !navigator.onLine) toast(t("ออฟไลน์อยู่ จะซิงค์เมื่อออนไลน์")); return; }
+    syncBusy = true; setSyncStatus(t("กำลังซิงค์…"));
+    api("/sync").then(function (r) {
+      if (r.status === 204) return null;
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (server) {
+      syncBusy = false;
+      if (!auth) return;
+      var localHas = hasPersonalData(syncPayload());
+      if (!server) { // nothing in the account yet
+        if (!localHas && !manual) { renderAccount(); return; }
+        if (auth.consent || manual || afterSignIn) withConsent(function () { upload(0, true); });
+        return;
+      }
+      var mine = syncHash(JSON.stringify(syncPayload())), changedHere = auth.hash !== mine;
+      if (server.version === auth.version) { if (changedHere && auth.consent) upload(server.version, true); else { auth.syncedAt = Date.now(); writeAuth(); renderAccount(); } return; }
+      if (!localHas) { applyRemote(server.data, server.version, false); return; }
+      if (afterSignIn || !auth.version || changedHere) { showSyncChoice(server); return; }
+      applyRemote(server.data, server.version, false); // only the account changed (another phone): take it
+    }).catch(function () { syncBusy = false; setSyncStatus(t("ซิงค์ไม่สำเร็จ จะลองใหม่ภายหลัง")); });
+  }
+  function upload(version, force) {
+    var latest = readAuth(); if (latest && auth && latest.token === auth.token) auth = Object.assign(auth, { version: Math.max(auth.version || 0, latest.version || 0) });
+    if (!auth || !auth.consent || syncBusy) return;
+    var data = syncPayload(), text = JSON.stringify(data), hash = syncHash(text);
+    if (!force && hash === auth.hash) { auth.dirty = false; return; }
+    syncBusy = true; setSyncStatus(t("กำลังซิงค์…"));
+    api("/sync", { method: "PUT", ifMatch: version == null ? auth.version || 0 : version, body: data }).then(function (r) {
+      syncBusy = false;
+      if (r.status === 409) { startSync(false); return; }
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json().then(function (out) {
+        if (!auth) return;
+        auth.version = out.version; auth.hash = hash; auth.syncedAt = Date.now(); auth.dirty = false; auth.lastUpload = Date.now(); writeAuth(); renderAccount();
+      });
+    }).catch(function () { syncBusy = false; if (auth) { auth.dirty = true; writeAuth(); } setSyncStatus(t("ซิงค์ไม่สำเร็จ จะลองใหม่ภายหลัง")); });
+  }
+  function markSyncDirty() {
+    if (applyingRemote || !auth || !auth.consent) return;
+    auth.dirty = true;
+    if (syncTimer) return;
+    var wait = Math.max(5000, (auth.lastUpload || 0) + SYNC_GAP - Date.now());
+    syncTimer = setTimeout(function () { syncTimer = 0; if (auth && auth.dirty) upload(null, false); }, wait);
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && auth && auth.dirty && Date.now() - (auth.lastUpload || 0) > 60e3) upload(null, false);
+  });
+  window.addEventListener("online", function () { if (auth && auth.dirty) upload(null, false); });
+  window.addEventListener("storage", function (ev) { if (ev.key === AUTH_KEY) { auth = readAuth(); renderAccount(); } });
+
+  function startAfterAuthGate() {
+    if (!S.onboarded) { try { localStorage.setItem(STATS_OFF, "1"); } catch (e) {} showProfileSetup(); }
+  }
+  renderAccount();
+  if (shouldShowAuthGate()) showAuthGate(startAfterAuthGate); else startAfterAuthGate();
+  if (auth && navigator.onLine) startSync(false);
   startOpeningSplash();
   track("open");
   setTimeout(flushStats, 4000); // send what is queued from last time, after the app has settled

@@ -244,3 +244,25 @@ nav.tabs button[aria-current="page"] svg { background: none; color: var(--grad-t
 .gps-card .gps-actions { margin-top: 10px; }
 .gps-info { margin-top: 6px; }
 .gps-info summary { font-size: .92rem; color: var(--soft); }
+
+/* ---------- optional Google sign-in: opening screen (from the Login mockup) + account card ---------- */
+body.auth-open { overflow: hidden; }
+.auth-gate { position: fixed; inset: 0; z-index: 900; overflow-y: auto; background: var(--page-grad); color: var(--page-ink); display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); }
+.auth-gate-in { width: min(100%, 400px); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.auth-gate .auth-wordmark { width: min(78vw, 300px); height: 70px; background: var(--brand-yellow); filter: drop-shadow(0 6px 10px rgba(3,56,130,.3)); }
+.auth-tag { margin: 0; font-size: 1.15rem; color: var(--page-ink); font-family: var(--body); }
+.auth-rule { width: 96px; height: 2px; border-radius: 2px; background: var(--page-soft); margin-bottom: 18vh; }
+.auth-actions { width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+.gsi-slot { min-height: 44px; display: flex; justify-content: center; }
+.auth-skip { min-height: 48px; border: 0; border-radius: 99px; background: #FFFFFF; color: #1F2A3A; font-family: var(--head); font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 16px rgba(3,56,130,.16); }
+.auth-skip:focus-visible { outline: 3px solid var(--brand-yellow); outline-offset: 3px; }
+.auth-note { margin: 4px 0 0; text-align: center; font-size: .85rem; line-height: 1.5; color: var(--page-soft); }
+.account-card .account-who { margin: 0 0 4px; display: flex; flex-direction: column; }
+.account-card .account-who span { color: var(--soft); font-size: .9rem; overflow-wrap: anywhere; }
+.account-card .gsi-slot { justify-content: flex-start; margin-top: 10px; }
+.sync-list { margin: 8px 0 4px; padding-left: 1.2em; line-height: 1.6; }
+.sync-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 4px; }
+.sync-compare div { background: var(--sunk); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.sync-compare span { color: var(--soft); font-size: .88rem; overflow-wrap: anywhere; }
+@media (max-width: 340px) { .sync-compare { grid-template-columns: 1fr; } }
+.auth-gate .hint { color: var(--page-soft); text-align: center; }

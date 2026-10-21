@@ -22,3 +22,8 @@ enabled = true
 binding = "DB"
 database_name = "kryvos-stats"
 database_id = "42f9249b-1181-4c6f-9514-4d474ca54efc"
+
+# Optional Google sign-in + backup sync (proxy/auth.js). The OAuth *client ID* is public, not a secret.
+# Leave it empty to keep sign-in switched off. No client secret is used anywhere.
+[vars]
+GOOGLE_CLIENT_ID = ""

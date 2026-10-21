@@ -13,7 +13,12 @@
 //   POST /e      the app sends anonymous feature counts: a random device id, app language, phone type
 //                and event names from EVENTS below. No IP, no names, no workout or food data is stored.
 //   GET  /stats  totals for the stats page (stats.html); needs the header X-Stats-Key = STATS_KEY.
+//
+// Optional Google sign-in + backup sync (see auth.js): /auth/google, /auth/logout, /sync, /account.
+// Off until GOOGLE_CLIENT_ID is set in wrangler.toml [vars].
 // Set the key once from this folder:  npx wrangler secret put STATS_KEY
+
+import { handleAuth, AUTH_PATHS } from "./auth.js";
 
 const ALLOWED_ORIGINS = ["https://nrw18.github.io"];
 const MODELS = ["gemini-3-flash-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
@@ -27,8 +32,8 @@ function cors(origin) {
   const ok = ALLOWED_ORIGINS.includes(origin);
   return {
     "Access-Control-Allow-Origin": ok ? origin : ALLOWED_ORIGINS[0],
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Stats-Key, X-Stats-Id",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Stats-Key, X-Stats-Id, Authorization, If-Match",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
@@ -264,6 +269,10 @@ export default {
     const origin = request.headers.get("Origin") || "";
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
     const path = new URL(request.url).pathname;
+    if (AUTH_PATHS.includes(path)) {
+      if (!ALLOWED_ORIGINS.includes(origin)) return json({ error: "origin" }, 403, origin);
+      return handleAuth(request, env, origin, path, json, cors);
+    }
     if (path === "/stats") {
       if (request.method !== "GET") return json({ error: "method" }, 405, origin);
       if (!ALLOWED_ORIGINS.includes(origin)) return json({ error: "origin" }, 403, origin);
