@@ -55,7 +55,7 @@ test("Today section switching hides only panels and keeps existing workout input
 
 test("week buttons show past rest/workout icons, centered today and future dates without using timer's rest class", () => {
   const now = new Date(2026, 9, 14, 12).getTime();
-  const a = load(["weekStripHtml", "todayWeekActivity", "sameDay", "dayKey"], {
+  const a = load(["weekLabel", "weekStripHtml", "todayWeekActivity", "sameDay", "dayKey"], {
     S: { log: [{ ts: now - 864e5, day: "push" }], runs: [{ ts: now - 864e5 }] },
     DAYS: { push: { name: "PUSH" } }, LOCALE: "en-GB", esc: value => value
   }, ["DAY_ICON"]);
@@ -72,7 +72,7 @@ test("week buttons show past rest/workout icons, centered today and future dates
 
 test("empty week has three past rest icons, today's date and three disabled future dates", () => {
   const now = new Date(2026, 9, 14, 12).getTime();
-  const a = load(["weekStripHtml", "todayWeekActivity", "sameDay", "dayKey"], {
+  const a = load(["weekLabel", "weekStripHtml", "todayWeekActivity", "sameDay", "dayKey"], {
     S: { log: [], runs: [] }, DAYS: {}, LOCALE: "en-GB", esc: value => value
   }, ["DAY_ICON"]);
   const markup = a.weekStripHtml(now);

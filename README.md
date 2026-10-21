@@ -1,5 +1,44 @@
 # KRYVOS
 
+**An AI daily training coach that answers one question every morning: _what should I train today, and what should I avoid if something is sore or hurts?_**
+
+**Open the app:** https://nrw18.github.io/train-today/ · Android test APK: [releases/android-test](https://github.com/NRW18/train-today/releases/tag/android-test)
+
+<p>
+<img src="docs/screens/today-en.webp" width="200" alt="Today: plan picked from muscle recovery">
+<img src="docs/screens/gym-en.webp" width="200" alt="Gym: photograph a machine or pick from real photos">
+<img src="docs/screens/food-en.webp" width="200" alt="Food: photograph a meal to count calories">
+<img src="docs/screens/run-en.webp" width="200" alt="Run: GPS and manual runs">
+</p>
+
+## Why
+I lead my school's track team and train in a gym. Every day I had the same problem: which muscles are recovered, what to skip when my knee or shoulder hurts, and how much weight to use. Existing apps either ask for a full plan up front or ignore pain. KRYVOS decides for you in one tap and explains why.
+
+## What it does
+- **Picks today's workout** (PUSH / PULL / LEGS / rest) from 48-hour muscle recovery, your energy and time, and **skips every exercise that loads a sore or painful muscle or joint**, with a clear "see a doctor" warning. Rules are deterministic, so every choice has a reason.
+- **Logs every set** with suggested weight (double progression), a rest timer, progress graphs and drafts that survive closing the app.
+- **Gym machines (AI):** photograph a machine and Gemini matches it to a 58-machine catalog (real, openly licensed photos), or proposes a new exercise that you confirm. Search and filters for the catalog.
+- **Calories (AI):** photograph a meal for an editable calorie and protein table; quick Thai dishes; goals for gain / maintain / lose using Mifflin-St Jeor with safety floors.
+- **Running:** GPS tracking with pace, manual runs, weekly load warnings, shoe finder and shoe mileage.
+- **Weekly AI summary** from your real numbers.
+- **Private by default:** all data lives on the phone; works offline as an installable PWA (and Android TWA). Thai and English.
+
+## How AI is used safely
+- Gemini runs behind our own **Cloudflare Worker**, so users need no API key and the key never reaches the browser. Per-user and per-app daily limits.
+- **Every AI answer is validated** before use (unknown IDs dropped, numbers clamped, JSON shape checked) and the user confirms before anything is saved.
+- The app **never diagnoses**: pain means skip and suggest a doctor.
+
+## Built with Codex
+Features are built as small pull requests with **OpenAI Codex**, each reviewed and merged only when a suite of ~290 Node tests passes (`node --test "tests/*.test.mjs"`) that run the real app code. See [AGENTS.md](AGENTS.md) for the rules every agent follows and the [closed pull requests](https://github.com/NRW18/train-today/pulls?q=is%3Apr+is%3Aclosed) for the history.
+
+**Stack:** plain HTML/CSS/JS (no framework, no build), Service Worker, Gemini API, Cloudflare Workers + KV + D1, GitHub Pages, Android TWA.
+
+Made by **Norrawat Nakphut & Krittanun Boonman**. Not medical advice.
+
+---
+
+## ภาษาไทย
+
 แอปโค้ชซ้อมรายวัน (ชื่อเดิม "วันนี้ฝึกอะไร") ตอบคำถามที่ผมต้องถามทุกวัน: **วันนี้ควรฝึกอะไร** และ **ถ้าเมื่อยหรือเจ็บตรงไหน ควรเลี่ยงท่าไหน** พร้อมบันทึกวิ่ง หารองเท้าวิ่ง และนับแคลอรี่ตามเป้าเพิ่มหรือลดน้ำหนัก
 
 **เปิดแอป:** https://nrw18.github.io/train-today/
@@ -7,11 +46,19 @@
 อยากช่วยพัฒนา: อ่าน [TEAM.md](TEAM.md)
 
 ## หน้าตาแอป
-- **หัวแอป:** โลโก้ KRYVOS Essential วันที่ และปุ่มโปรไฟล์วงกลม (ไปแท็บ "อื่นๆ" ที่มีตั้งค่าและสลับภาษา)
-- **แถบเมนูล่าง 6 แท็บ:** วันนี้ · เครื่อง · วิ่ง · นับแคล · ประวัติ · อื่นๆ แท็บที่เปิดอยู่เป็นการ์ดยกขึ้นขอบสีน้ำเงิน
-- **หน้าวันนี้:** "Your Activity" แถบ 7 วัน จันทร์–อาทิตย์ บอกว่าวันไหนเล่น PUSH / PULL / LEGS หรือวิ่ง ต่อด้วยการ์ดเช็กอิน "วันนี้ฝึกอะไรกันดี?" และโปรแกรมวันนี้
-- **ผลสแกนและผลถ่ายอาหาร** ขึ้นเป็นแผ่นเลื่อนจากด้านล่าง (bottom sheet) ปิดได้ด้วยปุ่ม × ปุ่ม Esc หรือแตะด้านนอก
-- รองรับจอ 360–430px โหมดมืด การใช้คีย์บอร์ด และการตั้งค่าลดการเคลื่อนไหว (prefers-reduced-motion)
+<p>
+<img src="docs/screens/today-th.webp" width="180" alt="หน้าวันนี้">
+<img src="docs/screens/gym-th.webp" width="180" alt="แท็บเครื่อง">
+<img src="docs/screens/food-th.webp" width="180" alt="แท็บนับแคล">
+<img src="docs/screens/run-th.webp" width="180" alt="แท็บวิ่ง">
+</p>
+
+- **แบรนด์:** พื้นฟ้าไล่เฉด ปุ่มหลักสีเหลือง โลโก้นักวิ่งและคำว่า Kryvos สีเหลือง มีโหมดมืดเป็นฟ้าเข้ม
+- **แถบเมนูล่าง 6 แท็บ:** วันนี้ · เครื่อง · วิ่ง · นับแคล · ประวัติ · อื่นๆ แท็บที่เปิดอยู่เป็นช่องเหลืองยกขึ้น และมีปุ่ม "เพิ่มด่วน"
+- **หน้าวันนี้:** คำทักทาย แถบวันแบบโค้ง จำนวนวันที่ออกกำลังกายในเดือนนี้ สลับ "การฝึก / แคล" ชื่อโปรแกรมวันนี้ การ์ดจำนวนท่า เวลา และเซ็ต และปุ่ม "เริ่มฝึก"
+- **ทุกแท็บ:** หน้าละหนึ่งปุ่มหลักสีเหลือง ตัวเลือกรองพับเก็บไว้ ไม่มีฟีเจอร์หาย
+- **สีบอกสถานะ:** เขียว = พร้อม, ส้ม = เมื่อย, แดง = เจ็บ, ม่วง = วิ่ง และมีคำกำกับเสมอ
+- รองรับจอ 320–430px ภาษาไทยและอังกฤษ การใช้คีย์บอร์ด และการตั้งค่าลดการเคลื่อนไหว
 
 ## ทำอะไรได้
 - **สแกนเครื่องในยิมด้วยกล้อง (AI):** ถ่ายรูปเครื่อง Google Gemini บอกว่าเป็นเครื่องอะไรและเล่นท่าไหนได้ ถ้าเป็นเครื่องที่แอปยังไม่รู้จัก AI จะเสนอเป็นท่าใหม่พร้อมกล้ามที่ใช้และข้อต่อที่โดน แอปตรวจคำตอบของ AI ก่อนใช้เสมอ และให้ผู้ใช้ยืนยันก่อนเพิ่ม ผลสแกนแสดงวิธีเล่น จำนวนเซ็ตและครั้งที่แนะนำ และแชร์ได้ ท่าที่ AI เพิ่มลบออกได้ โดยประวัติการซ้อมท่านั้นยังอยู่ครบ
