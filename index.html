@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="theme.css?v=81">
+<link rel="stylesheet" href="theme.css?v=82">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -672,8 +672,8 @@
   @media (max-height: 640px) { .setup-content { padding-top: 12px; } .setup-brand-image { max-height: 180px; margin-top: 12px; } .setup-logo { margin-bottom: 16px; } [data-step="welcome"] .setup-content { justify-content: flex-start; } }
   @media (prefers-reduced-motion: reduce) { .setup-content { animation: none; } }
 </style>
-<link rel="stylesheet" href="simple-flow.css?v=81">
-<link rel="stylesheet" href="brand.css?v=81">
+<link rel="stylesheet" href="simple-flow.css?v=82">
+<link rel="stylesheet" href="brand.css?v=82">
 </head>
 <body class="home">
 <div class="app">
@@ -1131,10 +1131,10 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="en.js?v=81"></script>
-<script src="machines-config.js?v=81"></script>
-<script src="machine-recognition.js?v=81"></script>
-<script src="machine-photos.js?v=81"></script>
+<script src="en.js?v=82"></script>
+<script src="machines-config.js?v=82"></script>
+<script src="machine-recognition.js?v=82"></script>
+<script src="machine-photos.js?v=82"></script>
 <script>
   /* ---------- language ----------
      Thai is written in the code. English comes from en.js (EN, keyed by the exact Thai text; EN_UI for page text
@@ -1316,7 +1316,7 @@
     incline_chest_press: { how: [t("ปรับเบาะให้ด้ามอยู่ระดับอกบน เท้าวางพื้น"), t("ดันตามแนวเครื่องโดยไม่ยักไหล่หรือล็อกศอก"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังจนลอยจากเบาะ"), t("ตั้งเบาะต่ำจนด้ามสูงเกินไหล่")] },
     lateral_raise_machine: { how: [t("ปรับเบาะให้ข้อไหล่ใกล้แกนหมุน แขนแตะแผ่นรอง"), t("ยกแขนออกด้านข้างถึงระดับที่สบาย ไม่เกินไหล่"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ยักไหล่ขึ้นหาหู"), t("เหวี่ยงตัวเพื่อยกน้ำหนัก")] },
     assisted_dip: { how: [t("เลือกแรงช่วยมากพอและขึ้นเครื่องตามจุดเหยียบ"), t("จับด้าม ลดตัวในช่วงที่ไม่เจ็บ แล้วดันขึ้นโดยไม่ล็อกศอก"), t("คุมแผ่นพยุงให้นิ่งและลงตามขั้นของเครื่อง")], miss: [t("ลดตัวลึกจนหัวไหล่ถูกดึง"), t("เลือกแรงช่วยน้อยจนคุมตัวไม่ได้")] },
-    assisted_pullup: { how: [t("ตั้งแรงช่วยและขึ้นเครื่องตามขั้น จับด้ามให้มั่น"), t("ดึงตัวขึ้นให้คางใกล้ด้าม โดยไม่เหวี่ยงหรือยื่นคอ"), t("ลดตัวช้า ๆ แล้วลงตามขั้นเมื่อแผ่นพยุงนิ่ง")], miss: [t("เหวี่ยงตัวเพื่อยกน้ำหนัก"), t("ดึงด้ามลงด้านหลังคอ")] },
+    assisted_pullup: { how: [t("ตั้งแรงช่วยและขึ้นเครื่องตามขั้น จับด้ามให้มั่น"), t("ดึงตัวขึ้นให้คางใกล้ด้าม โดยไม่เหวี่ยงหรือยื่นคอ"), t("ลดตัวช้า ๆ แล้วลงตามขั้นเมื่อแผ่นพยุงนิ่ง")], miss: [t("เหวี่ยงตัวเพื่อยกน้ำหนัก"), t("ปล่อยตัวลงเร็วแทนการคุมจังหวะลง")] },
     high_row: { how: [t("ปรับเบาะให้จับด้ามได้โดยอกยังแนบแผ่นรอง"), t("ดึงศอกลงข้างลำตัว ไม่ยกอกหนีแผ่นรอง"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("แอ่นหลังเพื่อดึงด้ามให้ไกล"), t("ยักไหล่ระหว่างดึง")] },
     chest_supported_row: { how: [t("ปรับแผ่นรองให้อกพิงได้และเอื้อมถึงด้าม"), t("ดึงศอกไปด้านหลังโดยอกไม่ยกจากแผ่นรอง"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("ยกอกหนีแผ่นรอง"), t("งอข้อมือเพื่อช่วยดึง")] },
     cable_row: { how: [t("วางเท้าบนแท่น งอเข่าเล็กน้อยและนั่งหลังเป็นกลาง"), t("ดึงด้ามเข้าท้องโดยไม่เอนตัวไปมา"), t("คุมกลับช้า ๆ ไม่ปล่อยน้ำหนักกระแทก")], miss: [t("โยกหลังเพื่อดึงน้ำหนัก"), t("ปล่อยหลังงอขณะเอื้อมด้าม")] },

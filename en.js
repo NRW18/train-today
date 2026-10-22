@@ -126,6 +126,7 @@ var EN = {
   "ดึงตัวขึ้นให้คางใกล้ด้าม โดยไม่เหวี่ยงหรือยื่นคอ": "Pull the chin toward the handles without swinging or craning the neck.",
   "ลดตัวช้า ๆ แล้วลงตามขั้นเมื่อแผ่นพยุงนิ่ง": "Lower slowly and dismount via the steps once the support is stable.",
   "ดึงด้ามลงด้านหลังคอ": "Pulling behind the neck.",
+  "ปล่อยตัวลงเร็วแทนการคุมจังหวะลง": "Dropping down instead of controlling the lowering phase.",
   "ปรับเบาะให้จับด้ามได้โดยอกยังแนบแผ่นรอง": "Adjust the seat to reach the handles with chest against the pad.",
   "ดึงศอกลงข้างลำตัว ไม่ยกอกหนีแผ่นรอง": "Pull elbows down beside the torso while keeping chest on the pad.",
   "แอ่นหลังเพื่อดึงด้ามให้ไกล": "Arching the back to pull farther.",
